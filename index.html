@@ -2,69 +2,230 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام إدارة العمليات المتكامل - V8.3 (أرشيف محسن)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>نظام إدارة العمليات - V8.4</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <style>
-        :root { 
-            --primary: #6366f1; 
-            --bg: #0f172a; 
-            --card: #1e293b; 
-            --text: #f8fafc; 
-            --success: #10b981; 
-            --danger: #ef4444; 
-            --warning: #f59e0b;
-            --info: #3b82f6;
-            --purple: #8b5cf6;
-            --edit: #f39c12;
+        * {
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+            margin: 0;
+            padding: 0;
         }
-        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
-        body { background-color: var(--bg); color: var(--text); padding: 15px; }
-        .wrapper { max-width: 1200px; margin: auto; }
         
-        /* التبويبات */
-        .tabs { display: flex; gap: 5px; margin: 15px 0; overflow-x: auto; }
-        .tab-btn { flex: 1; min-width: 100px; padding: 12px; background: #334155; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; }
-        .tab-btn.active { background: var(--primary); font-weight: bold; }
-        .view-content { display: none; }
-        .view-content.active { display: block; }
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            padding: 10px;
+        }
         
-        /* البطاقات */
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 15px 0; }
-        .stat-card { background: var(--card); padding: 15px; border-radius: 12px; text-align: center; }
-        .counter { display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 10px; }
-        .btn-c { width: 40px; height: 40px; border-radius: 8px; border: none; background: var(--primary); color: white; font-size: 20px; cursor: pointer; }
-        .btn-c.minus { background: var(--danger); }
+        .wrapper {
+            max-width: 1200px;
+            margin: auto;
+        }
         
-        /* عدادات الإلغاء */
-        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0; }
-        .counter-card { background: #334155; padding: 10px; border-radius: 8px; text-align: center; }
-        .ctrls { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 5px; }
-        .ctrls button { width: 35px; height: 35px; border: none; border-radius: 6px; background: var(--primary); color: white; font-size: 18px; cursor: pointer; }
-        .ctrls span { font-size: 18px; font-weight: bold; min-width: 30px; }
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin: 15px 0;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 5px;
+        }
         
-        /* الحقول */
-        .section { background: var(--card); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #444; }
-        h3 { color: var(--primary); margin-bottom: 15px; }
-        input, textarea, select { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #444; color: white; border-radius: 8px; margin: 5px 0; }
-        .main-btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin: 5px 0; font-size: 16px; }
-        .small-btn { background: var(--purple); color: white; border: none; border-radius: 6px; padding: 8px 15px; cursor: pointer; font-size: 14px; margin: 5px 0; }
+        .tab-btn {
+            flex: 1;
+            min-width: 100px;
+            padding: 12px 8px;
+            background: #334155;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            white-space: nowrap;
+        }
         
-        /* بطاقة العميل */
+        .tab-btn.active {
+            background: #6366f1;
+            font-weight: bold;
+        }
+        
+        .view-content {
+            display: none;
+        }
+        
+        .view-content.active {
+            display: block;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin: 15px 0;
+        }
+        
+        .stat-card {
+            background: #1e293b;
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .stat-card h3 {
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #6366f1;
+        }
+        
+        .counter {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 5px;
+        }
+        
+        .btn-c {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: none;
+            background: #6366f1;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-c.minus {
+            background: #ef4444;
+        }
+        
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin: 10px 0;
+        }
+        
+        .counter-card {
+            background: #334155;
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .counter-card span {
+            font-size: 13px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .ctrls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 5px;
+        }
+        
+        .ctrls button {
+            width: 35px;
+            height: 35px;
+            border: none;
+            border-radius: 6px;
+            background: #6366f1;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .ctrls span {
+            font-size: 16px;
+            font-weight: bold;
+            min-width: 30px;
+            text-align: center;
+        }
+        
+        .section {
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #444;
+            overflow: hidden;
+            width: 100%;
+        }
+        
+        h3 {
+            color: #6366f1;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            background: #0f172a;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 8px;
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        
+        .main-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px 0;
+            font-size: 16px;
+            background: #6366f1;
+            color: white;
+        }
+        
+        .small-btn {
+            background: #8b5cf6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px 0;
+            width: 100%;
+        }
+        
         .customer-card {
             background: #2d3748;
-            border: 2px dashed var(--primary);
+            border: 2px dashed #6366f1;
             border-radius: 12px;
             padding: 15px;
             margin-bottom: 20px;
             position: relative;
         }
+        
         .delete-customer {
             position: absolute;
             left: 10px;
             top: 10px;
-            background: var(--danger);
+            background: #ef4444;
             color: white;
             border: none;
             border-radius: 6px;
@@ -72,55 +233,91 @@
             cursor: pointer;
             font-size: 12px;
         }
+        
+        .customer-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
         .product-row {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             margin-bottom: 10px;
             align-items: center;
+            flex-wrap: wrap;
         }
+        
+        .product-row input {
+            flex: 1;
+            min-width: 120px;
+        }
+        
         .remove-product {
             background: none;
             border: none;
-            color: var(--danger);
+            color: #ef4444;
             font-size: 20px;
             cursor: pointer;
             width: 35px;
             height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
-        /* جدول النواقص */
-        .shortages-table {
+        .table-container {
             width: 100%;
-            border-collapse: collapse;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
             margin: 15px 0;
         }
-        .shortages-table th {
-            background: var(--primary);
-            padding: 12px;
+        
+        .shortages-table, .archive-table {
+            min-width: 600px;
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        
+        .shortages-table th, .archive-table th {
+            background: #6366f1;
+            padding: 10px;
             text-align: center;
+            font-size: 13px;
         }
-        .shortages-table td {
-            padding: 12px;
+        
+        .shortages-table td, .archive-table td {
+            padding: 10px;
             border: 1px solid #444;
-            background: var(--card);
+            background: #1e293b;
         }
+        
         .shortages-table tr.completed td {
             background: #064e3b;
             opacity: 0.7;
         }
+        
         .done-btn {
-            background: var(--success);
+            background: #10b981;
             color: white;
             border: none;
             border-radius: 6px;
-            padding: 5px 10px;
+            padding: 5px 8px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 11px;
             margin: 2px;
+            white-space: nowrap;
         }
-        .note-text { color: #94a3b8; font-size: 12px; display: block; margin-top: 5px; }
         
-        /* شريط التقدم */
+        .note-text {
+            color: #94a3b8;
+            font-size: 11px;
+            display: block;
+            margin-top: 3px;
+        }
+        
         .progress-bar {
             width: 100%;
             height: 8px;
@@ -129,100 +326,108 @@
             margin: 10px 0;
             overflow: hidden;
         }
+        
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, var(--primary), var(--success));
+            background: linear-gradient(90deg, #6366f1, #10b981);
             transition: width 1s linear;
         }
         
-        /* أزرار التصدير */
         .export-buttons {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 8px;
             margin: 15px 0;
         }
-        .export-btn { padding: 12px; border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; }
+        
+        .export-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        
         .orders-btn { background: #27ae60; }
         .shortages-btn { background: #e67e22; }
         .canceled-btn { background: #ef4444; }
         .summary-btn { background: #3498db; }
         
-        /* إحصائيات سريعة */
         .quick-stats {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
+            gap: 8px;
             margin: 15px 0;
         }
+        
         .stat-item {
-            background: var(--card);
-            padding: 15px;
+            background: #1e293b;
+            padding: 10px;
             border-radius: 10px;
             text-align: center;
-            border: 1px solid var(--primary);
-        }
-        .stat-number {
-            font-size: 28px;
-            font-weight: bold;
-            color: var(--primary);
+            border: 1px solid #6366f1;
         }
         
-        /* التايمر */
+        .stat-item div:first-child {
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        
+        .stat-number {
+            font-size: 20px;
+            font-weight: bold;
+            color: #6366f1;
+        }
+        
         #liveTime {
             text-align: center;
-            font-size: 18px;
+            font-size: 16px;
             padding: 10px;
             background: #1e293b;
             border-radius: 50px;
             margin: 10px 0;
         }
-        .timer-critical { animation: pulse 1s infinite; color: #ef4444; }
+        
+        .timer-critical {
+            animation: pulse 1s infinite;
+            color: #ef4444;
+        }
+        
         .timer-warning { color: #f59e0b; }
         .timer-normal { color: #10b981; }
+        
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
         
-        /* الأرشيف المحسن */
         .archive-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-            margin: 15px 0;
+            min-width: 700px;
         }
-        .archive-table th {
-            background: var(--primary);
-            padding: 12px;
-            text-align: center;
-        }
-        .archive-table td {
-            padding: 10px;
-            border: 1px solid #444;
-            background: var(--card);
-            text-align: center;
-        }
+        
         .action-btn {
             border: none;
             border-radius: 4px;
-            padding: 5px 10px;
+            padding: 5px 8px;
             cursor: pointer;
             margin: 0 2px;
             font-size: 12px;
+            white-space: nowrap;
         }
-        .edit-btn { background: var(--edit); color: #000; }
-        .delete-btn { background: var(--danger); color: white; }
         
-        /* إحصائيات الأرشيف */
+        .edit-btn { background: #f39c12; color: #000; }
+        .delete-btn { background: #ef4444; color: white; }
+        
         .archive-stats {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
+            gap: 8px;
             margin: 15px 0;
         }
         
-        /* زر إضافة عميل */
         .add-customer-btn {
             background: #4f46e5;
             color: white;
@@ -232,698 +437,654 @@
             font-weight: bold;
             cursor: pointer;
             margin: 10px 0;
-            font-size: 16px;
+            font-size: 14px;
+            width: 100%;
         }
         
-        /* حقل الفرع */
         .branch-entry {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             margin-bottom: 10px;
             align-items: center;
+            flex-wrap: wrap;
         }
         
-        /* ملاحظات التعديل */
+        .branch-entry input {
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .remove-field {
+            background: none;
+            border: none;
+            color: #ef4444;
+            font-size: 24px;
+            cursor: pointer;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
         .edit-notice {
-            background: var(--warning);
+            background: #f59e0b;
             color: #000;
             padding: 10px;
             border-radius: 8px;
             margin: 10px 0;
             display: none;
+            font-size: 14px;
+            text-align: center;
         }
+        
         .edit-notice.active {
             display: block;
         }
         
-        /* مؤشر التحميل */
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: var(--primary);
+        @media (max-width: 600px) {
+            body { padding: 8px; }
+            
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .grid-3 { grid-template-columns: repeat(2, 1fr) !important; }
+            .quick-stats { grid-template-columns: repeat(2, 1fr); }
+            .archive-stats { grid-template-columns: repeat(2, 1fr); }
+            .export-buttons { grid-template-columns: repeat(2, 1fr); }
+            
+            .customer-header { grid-template-columns: 1fr; }
+            .product-row { flex-direction: column; align-items: stretch; }
+            .product-row input { width: 100%; }
+            .remove-product { align-self: flex-end; }
+            .branch-entry { flex-direction: column; align-items: stretch; }
+            .branch-entry input { width: 100%; }
+            
+            .shortages-table, .archive-table { min-width: 500px; }
+            
+            h1 { font-size: 20px; }
+            h2 { font-size: 18px; }
+            h3 { font-size: 15px; }
+            
+            .tab-btn {
+                padding: 10px 5px;
+                font-size: 12px;
+                min-width: 80px;
+            }
+            
+            #liveTime { font-size: 14px; }
+            #liveTime .timer-critical,
+            #liveTime .timer-warning,
+            #liveTime .timer-normal { font-size: 18px !important; }
+            
+            .main-btn { padding: 12px; font-size: 14px; }
+            .stat-number { font-size: 18px; }
+        }
+        
+        @media (max-width: 380px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .quick-stats, .archive-stats, .export-buttons { grid-template-columns: 1fr; }
+            .grid-3 { grid-template-columns: 1fr !important; }
+            .counter { flex-wrap: wrap; }
         }
     </style>
 </head>
 <body>
-
-<div class="wrapper">
-    <header style="text-align: center; margin-bottom: 20px;">
-        <h1 style="color: var(--primary);">📊 نظام إدارة العمليات V8.3</h1>
-        <div id="liveTime"></div>
-        <div class="progress-bar">
-            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
-        </div>
-    </header>
-
-    <!-- إشعار التعديل -->
-    <div id="editNotice" class="edit-notice">
-        ⚠️ وضع التعديل: تم تحميل بيانات سجل قديم. بعد التعديل اضغط "حفظ في الأرشيف" لتحديث البيانات.
-    </div>
-
-    <div class="tabs">
-        <button class="tab-btn active" onclick="showTab('entry')">🏠 لوحة التحكم</button>
-        <button class="tab-btn" onclick="showTab('shortages')">🔔 متابعة النواقص</button>
-        <button class="tab-btn" onclick="showTab('archive')">📊 الأرشيف</button>
-    </div>
-
-    <!-- ================ تبويب لوحة التحكم ================ -->
-    <div id="entry" class="view-content active">
-        <!-- إحصائيات سريعة -->
-        <div class="quick-stats">
-            <div class="stat-item">
-                <div>⏳ نواقص</div>
-                <div class="stat-number" id="pendingCount">0</div>
+    <div class="wrapper">
+        <header style="text-align: center; margin-bottom: 20px;">
+            <h1 style="color: #6366f1;">📊 نظام إدارة العمليات V8.4</h1>
+            <div id="liveTime"></div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
             </div>
-            <div class="stat-item">
-                <div>✅ تم اليوم</div>
-                <div class="stat-number" id="completedTodayCount">0</div>
-            </div>
-            <div class="stat-item">
-                <div>📦 إجمالي</div>
-                <div class="stat-number" id="todayTotal">0</div>
-            </div>
-            <div class="stat-item">
-                <div>🚫 ملغيات</div>
-                <div class="stat-number" id="cancelTotal">0</div>
-            </div>
+        </header>
+
+        <div id="editNotice" class="edit-notice">
+            ⚠️ وضع التعديل: تم تحميل بيانات سجل قديم. بعد التعديل اضغط "حفظ في الأرشيف" لتحديث البيانات.
         </div>
 
-        <!-- عدادات الأوردرات الأساسية -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>📍 فرع</h3>
-                <div class="counter">
-                    <button onclick="updateCount('branch', -1)" class="btn-c minus">-</button>
-                    <span id="branch" style="font-size: 24px; font-weight: bold;">0</span>
-                    <button onclick="updateCount('branch', 1)" class="btn-c">+</button>
-                </div>
-            </div>
-            <div class="stat-card">
-                <h3>📱 برنامج طلبات</h3>
-                <div class="counter">
-                    <button onclick="updateCount('talabat', -1)" class="btn-c minus">-</button>
-                    <span id="talabat" style="font-size: 24px; font-weight: bold;">0</span>
-                    <button onclick="updateCount('talabat', 1)" class="btn-c">+</button>
-                </div>
-            </div>
-            <div class="stat-card">
-                <h3>🌐 انستا</h3>
-                <div class="counter">
-                    <button onclick="updateCount('insta', -1)" class="btn-c minus">-</button>
-                    <span id="insta" style="font-size: 24px; font-weight: bold;">0</span>
-                    <button onclick="updateCount('insta', 1)" class="btn-c">+</button>
-                </div>
-            </div>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('entry')">🏠 لوحة التحكم</button>
+            <button class="tab-btn" onclick="showTab('shortages')">🔔 متابعة النواقص</button>
+            <button class="tab-btn" onclick="showTab('archive')">📊 الأرشيف</button>
         </div>
 
-        <!-- قسم الأوردرات الملغية -->
-        <div class="section">
-            <h3>🚫 الأوردرات الملغية</h3>
-            <div class="grid-3">
-                <div class="counter-card">
-                    <span>📍 فرع</span>
-                    <div class="ctrls">
-                        <button onclick="updateCancel('branch', 1)">+</button>
-                        <span id="canBranch">0</span>
-                        <button onclick="updateCancel('branch', -1)">-</button>
+        <div id="entry" class="view-content active">
+            <div class="quick-stats">
+                <div class="stat-item"><div>⏳ نواقص</div><div class="stat-number" id="pendingCount">0</div></div>
+                <div class="stat-item"><div>✅ تم اليوم</div><div class="stat-number" id="completedTodayCount">0</div></div>
+                <div class="stat-item"><div>📦 إجمالي</div><div class="stat-number" id="todayTotal">0</div></div>
+                <div class="stat-item"><div>🚫 ملغيات</div><div class="stat-number" id="cancelTotal">0</div></div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>📍 فرع</h3>
+                    <div class="counter">
+                        <button onclick="updateCount('branch', -1)" class="btn-c minus">-</button>
+                        <span id="branch" style="font-size: 24px; font-weight: bold;">0</span>
+                        <button onclick="updateCount('branch', 1)" class="btn-c">+</button>
                     </div>
                 </div>
-                <div class="counter-card">
-                    <span>📱 برنامج طلبات</span>
-                    <div class="ctrls">
-                        <button onclick="updateCancel('talabat', 1)">+</button>
-                        <span id="canTalabat">0</span>
-                        <button onclick="updateCancel('talabat', -1)">-</button>
+                <div class="stat-card">
+                    <h3>📱 برنامج طلبات</h3>
+                    <div class="counter">
+                        <button onclick="updateCount('talabat', -1)" class="btn-c minus">-</button>
+                        <span id="talabat" style="font-size: 24px; font-weight: bold;">0</span>
+                        <button onclick="updateCount('talabat', 1)" class="btn-c">+</button>
                     </div>
                 </div>
-                <div class="counter-card">
-                    <span>🌐 انستا</span>
-                    <div class="ctrls">
-                        <button onclick="updateCancel('insta', 1)">+</button>
-                        <span id="canInsta">0</span>
-                        <button onclick="updateCancel('insta', -1)">-</button>
+                <div class="stat-card">
+                    <h3>🌐 انستا</h3>
+                    <div class="counter">
+                        <button onclick="updateCount('insta', -1)" class="btn-c minus">-</button>
+                        <span id="insta" style="font-size: 24px; font-weight: bold;">0</span>
+                        <button onclick="updateCount('insta', 1)" class="btn-c">+</button>
                     </div>
                 </div>
             </div>
-            <textarea id="cancelReason" rows="3" placeholder="📝 أسباب الإلغاء والملاحظات..."></textarea>
-            <button class="main-btn" style="background: var(--danger);" onclick="saveCancellations()">💾 حفظ الإلغاءات</button>
-        </div>
 
-        <!-- نواقص الفرع -->
-        <div class="section">
-            <h3>🏢 نواقص الفرع</h3>
-            <div id="branchProductsContainer">
-                <div class="branch-entry">
-                    <input type="text" class="b-name" placeholder="اسم المنتج الناقص" style="flex:2;">
-                    <input type="text" class="b-company" placeholder="الشركة" style="flex:1;">
-                    <button class="remove-field" onclick="this.parentElement.remove()" style="background:none; border:none; color:red; font-size:24px;">✖</button>
-                </div>
-            </div>
-            <button onclick="addBranchField()" class="small-btn">+ إضافة منتج للفرع</button>
-            <button class="main-btn" style="background: var(--info); margin-top:15px;" onclick="saveBranchShortages()">💾 حفظ نواقص الفرع</button>
-        </div>
-
-        <!-- ========== قسم إدخال العملاء المتعدد ========== -->
-        <div class="section" id="customerSection">
-            <h3>👤 إضافة طلبات العملاء</h3>
-            
-            <!-- حاوية العملاء -->
-            <div id="customersContainer">
-                <!-- أول عميل يظهر تلقائياً -->
-                <div class="customer-card">
-                    <button class="delete-customer" onclick="this.closest('.customer-card').remove()">🗑️ حذف العميل</button>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-                        <input type="text" class="c-name" placeholder="اسم العميل">
-                        <input type="text" class="c-phone" placeholder="رقم الهاتف">
-                    </div>
-                    
-                    <div class="products-list">
-                        <div class="product-row">
-                            <input type="text" class="p-name" placeholder="المنتج المطلوب" style="flex:2;">
-                            <input type="text" class="p-company" placeholder="الشركة" style="flex:1;">
-                            <button class="remove-product" onclick="this.closest('.product-row').remove()">✖</button>
+            <div class="section">
+                <h3>🚫 الأوردرات الملغية</h3>
+                <div class="grid-3">
+                    <div class="counter-card">
+                        <span>📍 فرع</span>
+                        <div class="ctrls">
+                            <button onclick="updateCancel('branch', 1)">+</button>
+                            <span id="canBranch">0</span>
+                            <button onclick="updateCancel('branch', -1)">-</button>
                         </div>
                     </div>
-                    
-                    <button class="small-btn" onclick="addProductRow(this)">+ إضافة منتج لهذا العميل</button>
+                    <div class="counter-card">
+                        <span>📱 برنامج طلبات</span>
+                        <div class="ctrls">
+                            <button onclick="updateCancel('talabat', 1)">+</button>
+                            <span id="canTalabat">0</span>
+                            <button onclick="updateCancel('talabat', -1)">-</button>
+                        </div>
+                    </div>
+                    <div class="counter-card">
+                        <span>🌐 انستا</span>
+                        <div class="ctrls">
+                            <button onclick="updateCancel('insta', 1)">+</button>
+                            <span id="canInsta">0</span>
+                            <button onclick="updateCancel('insta', -1)">-</button>
+                        </div>
+                    </div>
+                </div>
+                <textarea id="cancelReason" rows="3" placeholder="📝 أسباب الإلغاء والملاحظات..."></textarea>
+                <button class="main-btn" style="background: #ef4444;" onclick="saveCancellations()">💾 حفظ الإلغاءات</button>
+            </div>
+
+            <div class="section">
+                <h3>🏢 نواقص الفرع</h3>
+                <div id="branchProductsContainer">
+                    <div class="branch-entry">
+                        <input type="text" class="b-name" placeholder="اسم المنتج الناقص">
+                        <input type="text" class="b-company" placeholder="الشركة">
+                        <button class="remove-field" onclick="this.parentElement.remove()">✖</button>
+                    </div>
+                </div>
+                <button onclick="addBranchField()" class="small-btn">+ إضافة منتج للفرع</button>
+                <button class="main-btn" style="background: #3b82f6; margin-top:15px;" onclick="saveBranchShortages()">💾 حفظ نواقص الفرع</button>
+            </div>
+
+            <div class="section" id="customerSection">
+                <h3>👤 إضافة طلبات العملاء</h3>
+                
+                <div id="customersContainer">
+                    <div class="customer-card">
+                        <button class="delete-customer" onclick="this.closest('.customer-card').remove()">🗑️ حذف</button>
+                        <div class="customer-header">
+                            <input type="text" class="c-name" placeholder="اسم العميل">
+                            <input type="text" class="c-phone" placeholder="رقم الهاتف">
+                        </div>
+                        <div class="products-list">
+                            <div class="product-row">
+                                <input type="text" class="p-name" placeholder="المنتج المطلوب">
+                                <input type="text" class="p-company" placeholder="الشركة">
+                                <button class="remove-product" onclick="this.closest('.product-row').remove()">✖</button>
+                            </div>
+                        </div>
+                        <button class="small-btn" onclick="addProductRow(this)">+ إضافة منتج لهذا العميل</button>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="add-customer-btn" onclick="addNewCustomer()">➕ إضافة عميل آخر</button>
+                    <button class="main-btn" style="background: #6366f1;" onclick="saveAllCustomers()">💾 حفظ جميع الطلبات</button>
                 </div>
             </div>
+
+            <div class="section">
+                <h3>📞 متابعة العملاء</h3>
+                <textarea id="customerFollowup" rows="3" placeholder="ملاحظات المتابعة..."></textarea>
+            </div>
+
+            <button class="main-btn" style="background: #10b981;" onclick="generateWhatsAppReport()">📤 نسخ التقرير للواتساب</button>
+            <button class="main-btn" style="background: #334155;" onclick="saveShiftToArchive()">💾 حفظ الوردية في الأرشيف</button>
+        </div>
+
+        <div id="shortages" class="view-content">
+            <h2 style="margin-bottom: 20px;">🔔 جدول متابعة النواقص</h2>
             
-            <!-- أزرار التحكم -->
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button class="add-customer-btn" onclick="addNewCustomer()">➕ إضافة عميل آخر</button>
-                <button class="main-btn" style="background: var(--primary);" onclick="saveAllCustomers()">💾 حفظ جميع الطلبات</button>
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                <select id="statusFilter" style="flex:1; min-width: 150px;" onchange="renderShortagesTable()">
+                    <option value="all">جميع النواقص</option>
+                    <option value="pending">في الانتظار فقط</option>
+                    <option value="done">المنتهية فقط</option>
+                </select>
+                <button onclick="renderShortagesTable()" class="main-btn" style="margin:0; width:auto; padding:12px 25px;">🔄 تحديث</button>
+            </div>
+            
+            <div class="table-container">
+                <table class="shortages-table">
+                    <thead>
+                        <tr>
+                            <th>العميل</th>
+                            <th>رقم الهاتف</th>
+                            <th>المنتجات الناقصة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="shortagesBody"></tbody>
+                </table>
             </div>
         </div>
 
-        <!-- متابعة العملاء -->
-        <div class="section">
-            <h3>📞 متابعة العملاء</h3>
-            <textarea id="customerFollowup" rows="3" placeholder="ملاحظات المتابعة..."></textarea>
-        </div>
-
-        <!-- أزرار التقارير والأرشيف -->
-        <button class="main-btn" style="background: var(--success);" onclick="generateWhatsAppReport()">📤 نسخ التقرير للواتساب</button>
-        <button class="main-btn" style="background: #334155;" onclick="saveShiftToArchive()">💾 حفظ الوردية في الأرشيف</button>
-    </div>
-
-    <!-- ================ تبويب متابعة النواقص ================ -->
-    <div id="shortages" class="view-content">
-        <h2 style="margin-bottom: 20px;">🔔 جدول متابعة النواقص</h2>
-        
-        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-            <select id="statusFilter" style="flex:1;" onchange="renderShortagesTable()">
-                <option value="all">جميع النواقص</option>
-                <option value="pending">في الانتظار فقط</option>
-                <option value="done">المنتهية فقط</option>
-            </select>
-            <button onclick="renderShortagesTable()" class="main-btn" style="margin:0; width:auto; padding:12px 25px;">🔄 تحديث</button>
-        </div>
-        
-        <div style="overflow-x: auto;">
-            <table class="shortages-table">
-                <thead>
-                    <tr>
-                        <th>العميل</th>
-                        <th>رقم الهاتف</th>
-                        <th>المنتجات الناقصة</th>
-                        <th>الإجراءات</th>
-                    </tr>
-                </thead>
-                <tbody id="shortagesBody"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- ================ تبويب الأرشيف المحسن ================ -->
-    <div id="archive" class="view-content">
-        <h2 style="margin-bottom: 20px;">📋 سجل التقارير اليومية</h2>
-        
-        <!-- إحصائيات الأرشيف -->
-        <div class="archive-stats" id="archiveStats"></div>
-        
-        <!-- أزرار التصدير -->
-        <div class="export-buttons">
-            <button onclick="exportProfessionalExcel()" class="export-btn orders-btn">📊 تقرير احترافي (ملون)</button>
-            <button onclick="exportOrdersExcel()" class="export-btn orders-btn">📊 تقرير الأوردرات</button>
-            <button onclick="exportShortagesExcel()" class="export-btn shortages-btn">⚠️ تقرير النواقص</button>
-            <button onclick="exportCanceledExcel()" class="export-btn canceled-btn">🚫 تقرير الملغيات</button>
-            <button onclick="exportSummaryExcel()" class="export-btn summary-btn">📈 ملخص شامل</button>
-        </div>
-        
-        <!-- جدول الأرشيف -->
-        <div style="overflow-x: auto;">
-            <table class="archive-table">
-                <thead>
-                    <tr>
-                        <th>التاريخ</th>
-                        <th>الوردية</th>
-                        <th>فرع</th>
-                        <th>برنامج طلبات</th>
-                        <th>انستا</th>
-                        <th>الإجمالي</th>
-                        <th>ملغيات</th>
-                        <th>السبب</th>
-                        <th>الإجراءات</th>
-                    </tr>
-                </thead>
-                <tbody id="archiveBody"></tbody>
-            </table>
-        </div>
-        
-        <!-- أزرار إضافية -->
-        <div style="display: flex; gap: 10px; margin-top: 20px;">
-            <button class="main-btn" style="background: var(--primary);" onclick="exportArchiveBackup()">💾 تصدير نسخة احتياطية</button>
-            <button class="main-btn" style="background: var(--danger);" onclick="clearAllArchive()">🗑️ مسح الأرشيف بالكامل</button>
-        </div>
-    </div>
-</div>
-
-<script>
-    // ================ هيكل البيانات ================
-    let ordersCount = JSON.parse(localStorage.getItem('ordersCount')) || { branch: 0, talabat: 0, insta: 0 };
-    let cancelCounts = JSON.parse(localStorage.getItem('cancelCounts')) || { branch: 0, talabat: 0, insta: 0 };
-    let dailyShortages = JSON.parse(localStorage.getItem('dailyShortages')) || [];
-    let branchShortages = JSON.parse(localStorage.getItem('branchShortages')) || [];
-    let monthlyArchive = JSON.parse(localStorage.getItem('monthlyArchive')) || [];
-    let canceledOrders = JSON.parse(localStorage.getItem('canceledOrders')) || [];
-
-    // متغير لتتبع حالة التعديل
-    let editingIndex = -1;
-
-    // ================ التهيئة ================
-    window.onload = function() {
-        console.log("✅ تم تحميل الصفحة");
-        loadDataFromStorage();
-        checkShiftChange();
-        updateUI();
-        renderShortagesTable();
-        renderArchiveTable(); // عرض الأرشيف فور تحميل الصفحة
-        updateArchiveStats();
-        setInterval(updateTimer, 1000);
-    };
-
-    // ================ تحميل البيانات من التخزين المحلي ================
-    function loadDataFromStorage() {
-        ordersCount = JSON.parse(localStorage.getItem('ordersCount')) || { branch: 0, talabat: 0, insta: 0 };
-        cancelCounts = JSON.parse(localStorage.getItem('cancelCounts')) || { branch: 0, talabat: 0, insta: 0 };
-        dailyShortages = JSON.parse(localStorage.getItem('dailyShortages')) || [];
-        branchShortages = JSON.parse(localStorage.getItem('branchShortages')) || [];
-        monthlyArchive = JSON.parse(localStorage.getItem('monthlyArchive')) || [];
-        canceledOrders = JSON.parse(localStorage.getItem('canceledOrders')) || [];
-        
-        console.log("📦 تم تحميل البيانات:", { monthlyArchive });
-    }
-
-    // ================ دوال الشيفت ================
-    function getShiftName() {
-        const h = new Date().getHours();
-        if (h >= 9 && h < 16) return "صباحي";
-        if (h >= 16 && h < 24) return "ليلي";
-        return "أوفر نايت";
-    }
-
-    function getShiftTimeRange() {
-        const h = new Date().getHours();
-        if (h >= 9 && h < 16) return "من (09:00 ص) إلى (04:00 م)";
-        if (h >= 16 && h < 24) return "من (04:00 م) إلى (12:00 ص)";
-        return "من (12:00 ص) إلى (09:00 ص)";
-    }
-
-    function checkShiftChange() {
-        const currentShift = getShiftName();
-        const savedShift = localStorage.getItem('activeShift');
-        
-        if (savedShift && savedShift !== currentShift) {
-            if (confirm("تم اكتشاف تغيير في الوردية. هل تريد ترحيل البيانات؟")) {
-                // لا نرمل تلقائياً، نترك للمستخدم حرية الحفظ في الأرشيف
-                alert("الرجاء حفظ تقرير الوردية السابقة في الأرشيف قبل البدء بالوردية الجديدة");
-            }
-        }
-        localStorage.setItem('activeShift', currentShift);
-    }
-
-    // ================ تحديث الواجهة ================
-    function updateUI() {
-        document.getElementById('branch').innerText = ordersCount.branch;
-        document.getElementById('talabat').innerText = ordersCount.talabat;
-        document.getElementById('insta').innerText = ordersCount.insta;
-        
-        document.getElementById('canBranch').innerText = cancelCounts.branch;
-        document.getElementById('canTalabat').innerText = cancelCounts.talabat;
-        document.getElementById('canInsta').innerText = cancelCounts.insta;
-        
-        updateTimer();
-        updateSummaryStats();
-    }
-
-    function updateSummaryStats() {
-        const pendingCount = dailyShortages.filter(s => s.status === 'waiting').length;
-        const completedToday = dailyShortages.filter(s => s.status === 'done').length;
-        const todayTotal = ordersCount.branch + ordersCount.talabat + ordersCount.insta;
-        const todayCanceled = cancelCounts.branch + cancelCounts.talabat + cancelCounts.insta;
-        
-        document.getElementById('pendingCount').innerText = pendingCount;
-        document.getElementById('completedTodayCount').innerText = completedToday;
-        document.getElementById('todayTotal').innerText = todayTotal;
-        document.getElementById('cancelTotal').innerText = todayCanceled;
-    }
-
-    // ================ تحديث العدادات ================
-    function updateCount(type, delta) {
-        ordersCount[type] = Math.max(0, ordersCount[type] + delta);
-        localStorage.setItem('ordersCount', JSON.stringify(ordersCount));
-        updateUI();
-    }
-
-    function updateCancel(type, delta) {
-        cancelCounts[type] = Math.max(0, cancelCounts[type] + delta);
-        localStorage.setItem('cancelCounts', JSON.stringify(cancelCounts));
-        updateUI();
-    }
-
-    // ================ حفظ الإلغاءات ================
-    function saveCancellations() {
-        const reason = document.getElementById('cancelReason').value;
-        const total = cancelCounts.branch + cancelCounts.talabat + cancelCounts.insta;
-        
-        if (total === 0) {
-            return alert("❌ لم يتم إضافة أي إلغاءات");
-        }
-        
-        canceledOrders.push({
-            date: new Date().toLocaleDateString('ar-EG'),
-            shift: getShiftName(),
-            branch: cancelCounts.branch,
-            talabat: cancelCounts.talabat,
-            insta: cancelCounts.insta,
-            total: total,
-            reason: reason || '-',
-            time: new Date().toLocaleTimeString()
-        });
-        
-        localStorage.setItem('canceledOrders', JSON.stringify(canceledOrders));
-        
-        cancelCounts = { branch: 0, talabat: 0, insta: 0 };
-        document.getElementById('cancelReason').value = '';
-        localStorage.setItem('cancelCounts', JSON.stringify(cancelCounts));
-        
-        updateUI();
-        alert("✅ تم حفظ الإلغاءات بنجاح");
-    }
-
-    // ================ دوال إضافة العملاء المتعددين ================
-    function addNewCustomer() {
-        const container = document.getElementById('customersContainer');
-        const newCard = document.createElement('div');
-        newCard.className = 'customer-card';
-        newCard.innerHTML = `
-            <button class="delete-customer" onclick="this.closest('.customer-card').remove()">🗑️ حذف العميل</button>
+        <div id="archive" class="view-content">
+            <h2 style="margin-bottom: 20px;">📋 سجل التقارير اليومية</h2>
             
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-                <input type="text" class="c-name" placeholder="اسم العميل">
-                <input type="text" class="c-phone" placeholder="رقم الهاتف">
+            <div class="archive-stats" id="archiveStats"></div>
+            
+            <div class="export-buttons">
+                <button onclick="exportProfessionalExcel()" class="export-btn orders-btn">📊 تقرير احترافي</button>
+                <button onclick="exportOrdersExcel()" class="export-btn orders-btn">📊 تقرير الأوردرات</button>
+                <button onclick="exportShortagesExcel()" class="export-btn shortages-btn">⚠️ تقرير النواقص</button>
+                <button onclick="exportCanceledExcel()" class="export-btn canceled-btn">🚫 تقرير الملغيات</button>
+                <button onclick="exportSummaryExcel()" class="export-btn summary-btn">📈 ملخص شامل</button>
             </div>
             
-            <div class="products-list">
-                <div class="product-row">
-                    <input type="text" class="p-name" placeholder="المنتج المطلوب" style="flex:2;">
-                    <input type="text" class="p-company" placeholder="الشركة" style="flex:1;">
-                    <button class="remove-product" onclick="this.closest('.product-row').remove()">✖</button>
-                </div>
+            <div class="table-container">
+                <table class="archive-table">
+                    <thead>
+                        <tr>
+                            <th>التاريخ</th>
+                            <th>الوردية</th>
+                            <th>فرع</th>
+                            <th>برنامج طلبات</th>
+                            <th>انستا</th>
+                            <th>الإجمالي</th>
+                            <th>ملغيات</th>
+                            <th>السبب</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="archiveBody"></tbody>
+                </table>
             </div>
             
-            <button class="small-btn" onclick="addProductRow(this)">+ إضافة منتج لهذا العميل</button>
-        `;
-        container.appendChild(newCard);
-    }
+            <div style="display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;">
+                <button class="main-btn" style="background: #6366f1; flex:1;" onclick="exportArchiveBackup()">💾 تصدير نسخة احتياطية</button>
+                <button class="main-btn" style="background: #ef4444; flex:1;" onclick="clearAllArchive()">🗑️ مسح الأرشيف بالكامل</button>
+            </div>
+        </div>
+    </div>
 
-    function addProductRow(btn) {
-        const list = btn.closest('.customer-card').querySelector('.products-list');
-        const row = document.createElement('div');
-        row.className = 'product-row';
-        row.innerHTML = `
-            <input type="text" class="p-name" placeholder="المنتج المطلوب" style="flex:2;">
-            <input type="text" class="p-company" placeholder="الشركة" style="flex:1;">
-            <button class="remove-product" onclick="this.closest('.product-row').remove()">✖</button>
-        `;
-        list.appendChild(row);
-    }
+    <script>
+        let ordersCount = JSON.parse(localStorage.getItem('ordersCount')) || { branch: 0, talabat: 0, insta: 0 };
+        let cancelCounts = JSON.parse(localStorage.getItem('cancelCounts')) || { branch: 0, talabat: 0, insta: 0 };
+        let dailyShortages = JSON.parse(localStorage.getItem('dailyShortages')) || [];
+        let branchShortages = JSON.parse(localStorage.getItem('branchShortages')) || [];
+        let monthlyArchive = JSON.parse(localStorage.getItem('monthlyArchive')) || [];
+        let canceledOrders = JSON.parse(localStorage.getItem('canceledOrders')) || [];
+        let editingIndex = -1;
 
-    function addBranchField() {
-        const container = document.getElementById('branchProductsContainer');
-        const newField = `
-            <div class="branch-entry">
-                <input type="text" class="b-name" placeholder="اسم المنتج الناقص" style="flex:2;">
-                <input type="text" class="b-company" placeholder="الشركة" style="flex:1;">
-                <button class="remove-field" onclick="this.parentElement.remove()" style="background:none; border:none; color:red; font-size:24px;">✖</button>
-            </div>`;
-        container.insertAdjacentHTML('beforeend', newField);
-    }
-
-    // ================ حفظ جميع العملاء ================
-    function saveAllCustomers() {
-        const customerCards = document.querySelectorAll('.customer-card');
-        let addedCount = 0;
-        
-        customerCards.forEach(card => {
-            const name = card.querySelector('.c-name').value.trim();
-            const phone = card.querySelector('.c-phone').value.trim();
-            const productRows = card.querySelectorAll('.product-row');
-            
-            if (!name || !phone) {
-                return;
-            }
-            
-            productRows.forEach(row => {
-                const pName = row.querySelector('.p-name').value.trim();
-                const pComp = row.querySelector('.p-company').value.trim();
-                
-                if (pName) {
-                    dailyShortages.push({
-                        id: Date.now() + Math.random() + addedCount,
-                        name: name,
-                        phone: phone,
-                        product: pName,
-                        company: pComp || '-',
-                        status: 'waiting',
-                        note: '',
-                        date: new Date().toLocaleDateString('ar-EG'),
-                        time: new Date().toLocaleTimeString()
-                    });
-                    addedCount++;
-                }
-            });
-        });
-        
-        if (addedCount === 0) {
-            return alert("❌ لم يتم إضافة أي منتجات");
-        }
-        
-        localStorage.setItem('dailyShortages', JSON.stringify(dailyShortages));
-        
-        document.getElementById('customersContainer').innerHTML = '';
-        addNewCustomer();
-        
-        updateSummaryStats();
-        renderShortagesTable();
-        alert(`✅ تم إضافة ${addedCount} منتج/منتجات للجدول`);
-    }
-
-    // ================ حفظ نواقص الفرع ================
-    function saveBranchShortages() {
-        let items = [];
-        document.querySelectorAll('.branch-entry').forEach(div => {
-            const name = div.querySelector('.b-name').value.trim();
-            const comp = div.querySelector('.b-company').value.trim();
-            if (name) {
-                items.push(comp ? `${name} (${comp})` : name);
-            }
-        });
-        
-        if (items.length === 0) {
-            return alert("❌ أدخل منتج واحد على الأقل");
-        }
-        
-        branchShortages.push({
-            date: new Date().toLocaleDateString('ar-EG'),
-            shift: getShiftName(),
-            items: items.join(" + "),
-            time: new Date().toLocaleTimeString()
-        });
-        
-        localStorage.setItem('branchShortages', JSON.stringify(branchShortages));
-        
-        document.getElementById('branchProductsContainer').innerHTML = `
-            <div class="branch-entry">
-                <input type="text" class="b-name" placeholder="اسم المنتج الناقص" style="flex:2;">
-                <input type="text" class="b-company" placeholder="الشركة" style="flex:1;">
-                <button class="remove-field" onclick="this.parentElement.remove()" style="background:none; border:none; color:red; font-size:24px;">✖</button>
-            </div>`;
-        
-        alert("✅ تم حفظ نواقص الفرع");
-    }
-
-    // ================ عرض جدول النواقص ================
-    function renderShortagesTable() {
-        const filter = document.getElementById('statusFilter').value;
-        let filtered = dailyShortages;
-        
-        if (filter === 'pending') {
-            filtered = dailyShortages.filter(s => s.status === 'waiting');
-        } else if (filter === 'done') {
-            filtered = dailyShortages.filter(s => s.status === 'done');
-        }
-        
-        const grouped = {};
-        filtered.forEach(item => {
-            const key = `${item.name}_${item.phone}`;
-            if (!grouped[key]) {
-                grouped[key] = {
-                    name: item.name,
-                    phone: item.phone,
-                    products: [],
-                    allDone: true
-                };
-            }
-            grouped[key].products.push(item);
-            if (item.status !== 'done') grouped[key].allDone = false;
-        });
-        
-        const tbody = document.getElementById('shortagesBody');
-        tbody.innerHTML = '';
-        
-        Object.values(grouped).forEach(customer => {
-            const row = document.createElement('tr');
-            if (customer.allDone) row.className = 'completed';
-            
-            let productsHtml = '';
-            let actionsHtml = '';
-            
-            customer.products.forEach((p, idx) => {
-                const itemIndex = dailyShortages.findIndex(s => s.id === p.id);
-                productsHtml += `<div style="margin: 5px 0; padding: 5px; background: #2d3748; border-radius: 4px;">
-                    <strong>${p.product}</strong> ${p.company !== '-' ? `(${p.company})` : ''}
-                    ${p.status === 'done' ? '<br><small class="note-text">✅ ' + p.note + '</small>' : ''}
-                </div>`;
-                
-                if (p.status === 'waiting') {
-                    actionsHtml += `<button class="done-btn" onclick="markProductAsDone(${itemIndex})">✔ ${p.product}</button> `;
-                }
-            });
-            
-            row.innerHTML = `
-                <td>${customer.name}</td>
-                <td>${customer.phone}</td>
-                <td>${productsHtml}</td>
-                <td>${actionsHtml || '✅ تم الكل'}</td>
-            `;
-            
-            tbody.appendChild(row);
-        });
-        
-        if (tbody.children.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:30px;">لا توجد نواقص</td></tr>';
-        }
-    }
-
-    function markProductAsDone(index) {
-        const note = prompt("📝 أضف ملاحظة التأكيد (متى سيتوفر/ماذا قال العميل):");
-        if (note !== null) {
-            dailyShortages[index].status = 'done';
-            dailyShortages[index].note = note;
-            localStorage.setItem('dailyShortages', JSON.stringify(dailyShortages));
+        window.onload = function() {
+            loadDataFromStorage();
+            checkShiftChange();
+            updateUI();
             renderShortagesTable();
+            renderArchiveTable();
+            updateArchiveStats();
+            setInterval(updateTimer, 1000);
+        };
+
+        function loadDataFromStorage() {
+            ordersCount = JSON.parse(localStorage.getItem('ordersCount')) || { branch: 0, talabat: 0, insta: 0 };
+            cancelCounts = JSON.parse(localStorage.getItem('cancelCounts')) || { branch: 0, talabat: 0, insta: 0 };
+            dailyShortages = JSON.parse(localStorage.getItem('dailyShortages')) || [];
+            branchShortages = JSON.parse(localStorage.getItem('branchShortages')) || [];
+            monthlyArchive = JSON.parse(localStorage.getItem('monthlyArchive')) || [];
+            canceledOrders = JSON.parse(localStorage.getItem('canceledOrders')) || [];
+        }
+
+        function getShiftName() {
+            const h = new Date().getHours();
+            if (h >= 9 && h < 16) return "صباحي";
+            if (h >= 16 && h < 24) return "ليلي";
+            return "أوفر نايت";
+        }
+
+        function getShiftTimeRange() {
+            const h = new Date().getHours();
+            if (h >= 9 && h < 16) return "من (09:00 ص) إلى (04:00 م)";
+            if (h >= 16 && h < 24) return "من (04:00 م) إلى (12:00 ص)";
+            return "من (12:00 ص) إلى (09:00 ص)";
+        }
+
+        function checkShiftChange() {
+            const currentShift = getShiftName();
+            const savedShift = localStorage.getItem('activeShift');
+            if (savedShift && savedShift !== currentShift) {
+                alert("تم تغيير الوردية. الرجاء حفظ التقرير السابق في الأرشيف.");
+            }
+            localStorage.setItem('activeShift', currentShift);
+        }
+
+        function updateUI() {
+            document.getElementById('branch').innerText = ordersCount.branch;
+            document.getElementById('talabat').innerText = ordersCount.talabat;
+            document.getElementById('insta').innerText = ordersCount.insta;
+            document.getElementById('canBranch').innerText = cancelCounts.branch;
+            document.getElementById('canTalabat').innerText = cancelCounts.talabat;
+            document.getElementById('canInsta').innerText = cancelCounts.insta;
+            updateTimer();
             updateSummaryStats();
         }
-    }
 
-    // ================ تايمر الوردية ================
-    function updateTimer() {
-        const now = new Date();
-        const h = now.getHours();
-        
-        let endHour = 16;
-        let startHour = 9;
-        
-        if (h >= 16 && h < 24) {
-            startHour = 16;
-            endHour = 24;
-        } else if (h < 9 || h >= 24) {
-            startHour = 0;
-            endHour = 9;
+        function updateSummaryStats() {
+            const pendingCount = dailyShortages.filter(s => s.status === 'waiting').length;
+            const completedToday = dailyShortages.filter(s => s.status === 'done').length;
+            const todayTotal = ordersCount.branch + ordersCount.talabat + ordersCount.insta;
+            const todayCanceled = cancelCounts.branch + cancelCounts.talabat + cancelCounts.insta;
+            document.getElementById('pendingCount').innerText = pendingCount;
+            document.getElementById('completedTodayCount').innerText = completedToday;
+            document.getElementById('todayTotal').innerText = todayTotal;
+            document.getElementById('cancelTotal').innerText = todayCanceled;
         }
-        
-        let target = new Date();
-        target.setHours(endHour, 0, 0, 0);
-        
-        if (endHour === 9 && h >= 0 && h < 9) {
-            target.setDate(target.getDate());
-        } else if (endHour <= startHour) {
-            target.setDate(target.getDate() + 1);
-        }
-        
-        let diff = target - now;
-        if (diff < 0) diff = 0;
-        
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-        
-        const format = num => num < 10 ? '0' + num : num;
-        
-        const totalShiftHours = endHour - startHour;
-        const elapsedHours = (now - new Date().setHours(startHour, 0, 0, 0)) / (1000 * 60 * 60);
-        const progress = Math.min(100, Math.max(0, (elapsedHours / totalShiftHours) * 100));
-        
-        document.getElementById('progressFill').style.width = progress + '%';
-        
-        let timerClass = 'timer-normal';
-        if (hours < 1) timerClass = 'timer-critical';
-        else if (hours < 2) timerClass = 'timer-warning';
-        
-        document.getElementById('liveTime').innerHTML = `
-            <div style="font-size: 14px; color: #94a3b8;">${getShiftTimeRange()}</div>
-            <div class="${timerClass}" style="font-size: 24px;">⏳ ${format(hours)}:${format(minutes)}:${format(seconds)}</div>
-        `;
-    }
 
-    // ================ تقرير الواتساب ================
-    function generateWhatsAppReport() {
-        const shiftTime = getShiftTimeRange();
-        const waitingItems = dailyShortages.filter(s => s.status === 'waiting');
-        const doneItems = dailyShortages.filter(s => s.status === 'done');
-        const lastBranchShortage = branchShortages.length > 0 ? branchShortages[branchShortages.length-1].items : 'لا يوجد';
-        const followup = document.getElementById('customerFollowup').value || 'لا يوجد';
-        
-        let shortagesText = '';
-        if (waitingItems.length > 0) {
-            const grouped = {};
-            waitingItems.forEach(item => {
-                const key = `${item.name} - ${item.phone}`;
-                if (!grouped[key]) grouped[key] = [];
-                grouped[key].push(item.product);
+        function updateCount(type, delta) {
+            ordersCount[type] = Math.max(0, ordersCount[type] + delta);
+            localStorage.setItem('ordersCount', JSON.stringify(ordersCount));
+            updateUI();
+        }
+
+        function updateCancel(type, delta) {
+            cancelCounts[type] = Math.max(0, cancelCounts[type] + delta);
+            localStorage.setItem('cancelCounts', JSON.stringify(cancelCounts));
+            updateUI();
+        }
+
+        function saveCancellations() {
+            const reason = document.getElementById('cancelReason').value;
+            const total = cancelCounts.branch + cancelCounts.talabat + cancelCounts.insta;
+            if (total === 0) return alert("❌ لم يتم إضافة أي إلغاءات");
+            
+            canceledOrders.push({
+                date: new Date().toLocaleDateString('ar-EG'),
+                shift: getShiftName(),
+                branch: cancelCounts.branch,
+                talabat: cancelCounts.talabat,
+                insta: cancelCounts.insta,
+                total: total,
+                reason: reason || '-',
+                time: new Date().toLocaleTimeString()
             });
             
-            shortagesText = '⚠️ *نواقص العملاء:*\n';
-            for (let customer in grouped) {
-                shortagesText += `👤 ${customer}\n`;
-                grouped[customer].forEach(p => shortagesText += `  - ${p}\n`);
-            }
-        } else {
-            shortagesText = '⚠️ *نواقص العملاء:* لا توجد\n';
+            localStorage.setItem('canceledOrders', JSON.stringify(canceledOrders));
+            cancelCounts = { branch: 0, talabat: 0, insta: 0 };
+            document.getElementById('cancelReason').value = '';
+            localStorage.setItem('cancelCounts', JSON.stringify(cancelCounts));
+            updateUI();
+            alert("✅ تم حفظ الإلغاءات بنجاح");
         }
-        
-        let doneText = '';
-        if (doneItems.length > 0) {
-            doneText = '\n✅ *عمليات تمت اليوم:*\n';
-            doneItems.forEach(o => {
-                doneText += `▪️ ${o.name}: ${o.product} (${o.note})\n`;
+
+        function addNewCustomer() {
+            const container = document.getElementById('customersContainer');
+            const newCard = document.createElement('div');
+            newCard.className = 'customer-card';
+            newCard.innerHTML = `
+                <button class="delete-customer" onclick="this.closest('.customer-card').remove()">🗑️ حذف</button>
+                <div class="customer-header">
+                    <input type="text" class="c-name" placeholder="اسم العميل">
+                    <input type="text" class="c-phone" placeholder="رقم الهاتف">
+                </div>
+                <div class="products-list">
+                    <div class="product-row">
+                        <input type="text" class="p-name" placeholder="المنتج المطلوب">
+                        <input type="text" class="p-company" placeholder="الشركة">
+                        <button class="remove-product" onclick="this.closest('.product-row').remove()">✖</button>
+                    </div>
+                </div>
+                <button class="small-btn" onclick="addProductRow(this)">+ إضافة منتج لهذا العميل</button>
+            `;
+            container.appendChild(newCard);
+        }
+
+        function addProductRow(btn) {
+            const list = btn.closest('.customer-card').querySelector('.products-list');
+            const row = document.createElement('div');
+            row.className = 'product-row';
+            row.innerHTML = `
+                <input type="text" class="p-name" placeholder="المنتج المطلوب">
+                <input type="text" class="p-company" placeholder="الشركة">
+                <button class="remove-product" onclick="this.closest('.product-row').remove()">✖</button>
+            `;
+            list.appendChild(row);
+        }
+
+        function addBranchField() {
+            const container = document.getElementById('branchProductsContainer');
+            const newField = document.createElement('div');
+            newField.className = 'branch-entry';
+            newField.innerHTML = `
+                <input type="text" class="b-name" placeholder="اسم المنتج الناقص">
+                <input type="text" class="b-company" placeholder="الشركة">
+                <button class="remove-field" onclick="this.parentElement.remove()">✖</button>
+            `;
+            container.appendChild(newField);
+        }
+
+        function saveAllCustomers() {
+            const customerCards = document.querySelectorAll('.customer-card');
+            let addedCount = 0;
+            
+            customerCards.forEach(card => {
+                const name = card.querySelector('.c-name').value.trim();
+                const phone = card.querySelector('.c-phone').value.trim();
+                const productRows = card.querySelectorAll('.product-row');
+                
+                if (!name || !phone) return;
+                
+                productRows.forEach(row => {
+                    const pName = row.querySelector('.p-name').value.trim();
+                    const pComp = row.querySelector('.p-company').value.trim();
+                    if (pName) {
+                        dailyShortages.push({
+                            id: Date.now() + Math.random() + addedCount,
+                            name: name,
+                            phone: phone,
+                            product: pName,
+                            company: pComp || '-',
+                            status: 'waiting',
+                            note: '',
+                            date: new Date().toLocaleDateString('ar-EG'),
+                            time: new Date().toLocaleTimeString()
+                        });
+                        addedCount++;
+                    }
+                });
             });
+            
+            if (addedCount === 0) return alert("❌ لم يتم إضافة أي منتجات");
+            
+            localStorage.setItem('dailyShortages', JSON.stringify(dailyShortages));
+            document.getElementById('customersContainer').innerHTML = '';
+            addNewCustomer();
+            updateSummaryStats();
+            renderShortagesTable();
+            alert(`✅ تم إضافة ${addedCount} منتج/منتجات للجدول`);
         }
-        
-        const report = `⏱️ *الشيفت:* ${shiftTime}
+
+        function saveBranchShortages() {
+            let items = [];
+            document.querySelectorAll('.branch-entry').forEach(div => {
+                const name = div.querySelector('.b-name').value.trim();
+                const comp = div.querySelector('.b-company').value.trim();
+                if (name) items.push(comp ? `${name} (${comp})` : name);
+            });
+            
+            if (items.length === 0) return alert("❌ أدخل منتج واحد على الأقل");
+            
+            branchShortages.push({
+                date: new Date().toLocaleDateString('ar-EG'),
+                shift: getShiftName(),
+                items: items.join(" + "),
+                time: new Date().toLocaleTimeString()
+            });
+            
+            localStorage.setItem('branchShortages', JSON.stringify(branchShortages));
+            document.getElementById('branchProductsContainer').innerHTML = `
+                <div class="branch-entry">
+                    <input type="text" class="b-name" placeholder="اسم المنتج الناقص">
+                    <input type="text" class="b-company" placeholder="الشركة">
+                    <button class="remove-field" onclick="this.parentElement.remove()">✖</button>
+                </div>`;
+            alert("✅ تم حفظ نواقص الفرع");
+        }
+
+        function renderShortagesTable() {
+            const filter = document.getElementById('statusFilter').value;
+            let filtered = dailyShortages;
+            if (filter === 'pending') filtered = dailyShortages.filter(s => s.status === 'waiting');
+            else if (filter === 'done') filtered = dailyShortages.filter(s => s.status === 'done');
+            
+            const grouped = {};
+            filtered.forEach(item => {
+                const key = `${item.name}_${item.phone}`;
+                if (!grouped[key]) {
+                    grouped[key] = { name: item.name, phone: item.phone, products: [], allDone: true };
+                }
+                grouped[key].products.push(item);
+                if (item.status !== 'done') grouped[key].allDone = false;
+            });
+            
+            const tbody = document.getElementById('shortagesBody');
+            tbody.innerHTML = '';
+            
+            Object.values(grouped).forEach(customer => {
+                const row = document.createElement('tr');
+                if (customer.allDone) row.className = 'completed';
+                
+                let productsHtml = '';
+                let actionsHtml = '';
+                
+                customer.products.forEach(p => {
+                    const itemIndex = dailyShortages.findIndex(s => s.id === p.id);
+                    productsHtml += `<div style="margin: 5px 0; padding: 5px; background: #2d3748; border-radius: 4px;">
+                        <strong>${p.product}</strong> ${p.company !== '-' ? `(${p.company})` : ''}
+                        ${p.status === 'done' ? '<br><small class="note-text">✅ ' + p.note + '</small>' : ''}
+                    </div>`;
+                    
+                    if (p.status === 'waiting') {
+                        actionsHtml += `<button class="done-btn" onclick="markProductAsDone(${itemIndex})">✔ ${p.product}</button> `;
+                    }
+                });
+                
+                row.innerHTML = `
+                    <td>${customer.name}</td>
+                    <td>${customer.phone}</td>
+                    <td>${productsHtml}</td>
+                    <td>${actionsHtml || '✅ تم الكل'}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            if (tbody.children.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:30px;">لا توجد نواقص</td></tr>';
+            }
+        }
+
+        function markProductAsDone(index) {
+            const note = prompt("📝 أضف ملاحظة التأكيد:");
+            if (note !== null) {
+                dailyShortages[index].status = 'done';
+                dailyShortages[index].note = note;
+                localStorage.setItem('dailyShortages', JSON.stringify(dailyShortages));
+                renderShortagesTable();
+                updateSummaryStats();
+            }
+        }
+
+        function updateTimer() {
+            const now = new Date();
+            const h = now.getHours();
+            let endHour = 16, startHour = 9;
+            
+            if (h >= 16 && h < 24) { startHour = 16; endHour = 24; }
+            else if (h < 9 || h >= 24) { startHour = 0; endHour = 9; }
+            
+            let target = new Date();
+            target.setHours(endHour, 0, 0, 0);
+            if (endHour === 9 && h >= 0 && h < 9) target.setDate(target.getDate());
+            else if (endHour <= startHour) target.setDate(target.getDate() + 1);
+            
+            let diff = target - now;
+            if (diff < 0) diff = 0;
+            
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            const format = num => num < 10 ? '0' + num : num;
+            const totalShiftHours = endHour - startHour;
+            const elapsedHours = (now - new Date().setHours(startHour, 0, 0, 0)) / (1000 * 60 * 60);
+            const progress = Math.min(100, Math.max(0, (elapsedHours / totalShiftHours) * 100));
+            
+            document.getElementById('progressFill').style.width = progress + '%';
+            
+            let timerClass = 'timer-normal';
+            if (hours < 1) timerClass = 'timer-critical';
+            else if (hours < 2) timerClass = 'timer-warning';
+            
+            document.getElementById('liveTime').innerHTML = `
+                <div style="font-size: 14px; color: #94a3b8;">${getShiftTimeRange()}</div>
+                <div class="${timerClass}" style="font-size: 24px;">⏳ ${format(hours)}:${format(minutes)}:${format(seconds)}</div>
+            `;
+        }
+
+        function generateWhatsAppReport() {
+            const shiftTime = getShiftTimeRange();
+            const waitingItems = dailyShortages.filter(s => s.status === 'waiting');
+            const doneItems = dailyShortages.filter(s => s.status === 'done');
+            const lastBranchShortage = branchShortages.length > 0 ? branchShortages[branchShortages.length-1].items : 'لا يوجد';
+            const followup = document.getElementById('customerFollowup').value || 'لا يوجد';
+            
+            let shortagesText = '';
+            if (waitingItems.length > 0) {
+                const grouped = {};
+                waitingItems.forEach(item => {
+                    const key = `${item.name} - ${item.phone}`;
+                    if (!grouped[key]) grouped[key] = [];
+                    grouped[key].push(item.product);
+                });
+                shortagesText = '⚠️ *نواقص العملاء:*\n';
+                for (let customer in grouped) {
+                    shortagesText += `👤 ${customer}\n`;
+                    grouped[customer].forEach(p => shortagesText += `  - ${p}\n`);
+                }
+            } else {
+                shortagesText = '⚠️ *نواقص العملاء:* لا توجد\n';
+            }
+            
+            let doneText = '';
+            if (doneItems.length > 0) {
+                doneText = '\n✅ *عمليات تمت اليوم:*\n';
+                doneItems.forEach(o => {
+                    doneText += `▪️ ${o.name}: ${o.product} (${o.note})\n`;
+                });
+            }
+            
+            const report = `⏱️ *الشيفت:* ${shiftTime}
 
 📦 *إحصائيات الأوردرات:*
 ▪️ فرع: ${ordersCount.branch}
@@ -946,383 +1107,263 @@ ${followup}
 
 📅 ${new Date().toLocaleString('ar-EG')}`;
 
-        navigator.clipboard.writeText(report);
-        alert("✅ تم نسخ التقرير العمودي بنجاح!");
-    }
+            navigator.clipboard.writeText(report);
+            alert("✅ تم نسخ التقرير بنجاح!");
+        }
 
-    // ================ دالة حفظ الوردية في الأرشيف (المحسنة) ================
-    function saveShiftToArchive() {
-        // 1. التحقق من وجود بيانات
-        const totalOrders = ordersCount.branch + ordersCount.talabat + ordersCount.insta;
-        const totalCancels = cancelCounts.branch + cancelCounts.talabat + cancelCounts.insta;
-        
-        if (totalOrders === 0 && totalCancels === 0) {
-            if (!confirm("⚠️ لا توجد أوردرات أو إلغاءات. هل تريد حفظ سجل فارغ؟")) {
-                return;
+        function saveShiftToArchive() {
+            const totalOrders = ordersCount.branch + ordersCount.talabat + ordersCount.insta;
+            const totalCancels = cancelCounts.branch + cancelCounts.talabat + cancelCounts.insta;
+            
+            const shiftData = {
+                id: Date.now(),
+                date: new Date().toLocaleDateString('ar-EG'),
+                shift: getShiftName(),
+                branch: ordersCount.branch,
+                talabat: ordersCount.talabat,
+                insta: ordersCount.insta,
+                total: totalOrders,
+                canBranch: cancelCounts.branch,
+                canTalabat: cancelCounts.talabat,
+                canInsta: cancelCounts.insta,
+                cancelTotal: totalCancels,
+                cancelReason: document.getElementById('cancelReason').value || '-',
+                branchShortage: branchShortages.length > 0 ? branchShortages[branchShortages.length-1]?.items : '-',
+                followup: document.getElementById('customerFollowup').value || '-',
+                timestamp: new Date().toISOString()
+            };
+
+            let archive = JSON.parse(localStorage.getItem('monthlyArchive')) || [];
+            
+            if (editingIndex !== -1) {
+                archive[editingIndex] = shiftData;
+                editingIndex = -1;
+                document.getElementById('editNotice').classList.remove('active');
+                alert("✅ تم تحديث السجل بنجاح!");
+            } else {
+                archive.push(shiftData);
+                alert("✅ تم حفظ الوردية في الأرشيف بنجاح!");
             }
-        }
-        
-        // 2. تجميع بيانات الوردية الحالية
-        const shiftData = {
-            id: Date.now(),
-            date: new Date().toLocaleDateString('ar-EG'),
-            shift: getShiftName(),
-            branch: ordersCount.branch,
-            talabat: ordersCount.talabat,
-            insta: ordersCount.insta,
-            total: totalOrders,
-            canBranch: cancelCounts.branch,
-            canTalabat: cancelCounts.talabat,
-            canInsta: cancelCounts.insta,
-            cancelTotal: totalCancels,
-            cancelReason: document.getElementById('cancelReason').value || '-',
-            branchShortage: branchShortages.length > 0 ? branchShortages[branchShortages.length-1]?.items : '-',
-            followup: document.getElementById('customerFollowup').value || '-',
-            timestamp: new Date().toISOString()
-        };
-
-        console.log("💾 حفظ البيانات:", shiftData);
-
-        // 3. جلب الأرشيف القديم أو إنشاء مصفوفة جديدة
-        let archive = JSON.parse(localStorage.getItem('monthlyArchive')) || [];
-        
-        if (editingIndex !== -1) {
-            // إذا كنا في وضع التعديل، نستبدل السجل القديم
-            archive[editingIndex] = shiftData;
-            editingIndex = -1;
-            document.getElementById('editNotice').classList.remove('active');
-            alert("✅ تم تحديث السجل بنجاح!");
-        } else {
-            // إضافة سجل جديد
-            archive.push(shiftData);
-            alert("✅ تم حفظ الوردية في الأرشيف بنجاح!");
-        }
-        
-        // 4. الحفظ النهائي في ذاكرة المتصفح
-        localStorage.setItem('monthlyArchive', JSON.stringify(archive));
-        
-        // 5. تحديث المتغير العام
-        monthlyArchive = archive;
-        
-        // 6. تحديث عرض السجل أمامك
-        renderArchiveTable();
-        updateArchiveStats();
-        
-        // 7. تصفير الحقول (اختياري - يمكن إلغاء التعليق إذا أردت)
-        if (confirm("هل تريد تصفير عدادات اليوم للبدء من جديد؟")) {
-            ordersCount = { branch: 0, talabat: 0, insta: 0 };
-            cancelCounts = { branch: 0, talabat: 0, insta: 0 };
-            document.getElementById('cancelReason').value = '';
-            document.getElementById('customerFollowup').value = '';
             
-            localStorage.setItem('ordersCount', JSON.stringify(ordersCount));
-            localStorage.setItem('cancelCounts', JSON.stringify(cancelCounts));
-            
-            updateUI();
-        }
-        
-        console.log("📊 الأرشيف بعد الحفظ:", archive);
-    }
-
-    // ================ دالة عرض جدول الأرشيف ================
-    function renderArchiveTable() {
-        let archive = JSON.parse(localStorage.getItem('monthlyArchive')) || [];
-        const tbody = document.getElementById('archiveBody');
-        
-        console.log("📋 عرض الأرشيف:", archive);
-        
-        if (archive.length === 0) {
-            tbody.innerHTML = "<tr><td colspan='9' style='text-align:center; padding:30px;'>📭 لا توجد سجلات محفوظة في الأرشيف</td></tr>";
-            return;
-        }
-
-        // ترتيب تنازلي حسب التاريخ (الأحدث أولاً)
-        archive.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-        tbody.innerHTML = archive.map((entry, index) => {
-            // البحث عن الفهرس الحقيقي في المصفوفة الأصلية
-            const originalIndex = monthlyArchive.findIndex(item => item.id === entry.id);
-            
-            return `
-            <tr>
-                <td>${entry.date}</td>
-                <td>${entry.shift}</td>
-                <td>${entry.branch || 0}</td>
-                <td>${entry.talabat || 0}</td>
-                <td>${entry.insta || 0}</td>
-                <td><strong>${entry.total || 0}</strong></td>
-                <td>${entry.cancelTotal || 0}</td>
-                <td><small title="${entry.cancelReason}">${(entry.cancelReason || '-').substring(0,15)}${(entry.cancelReason || '').length > 15 ? '...' : ''}</small></td>
-                <td>
-                    <button class="action-btn edit-btn" onclick="editArchiveEntry(${originalIndex})" title="تعديل">✏️</button>
-                    <button class="action-btn delete-btn" onclick="deleteArchiveEntry(${originalIndex})" title="حذف">🗑️</button>
-                </td>
-            </tr>
-        `}).join('');
-    }
-
-    // ================ حذف سجل من الأرشيف ================
-    function deleteArchiveEntry(index) {
-        if (confirm("⚠️ هل أنت متأكد من حذف هذا السجل نهائياً؟")) {
-            monthlyArchive.splice(index, 1);
-            localStorage.setItem('monthlyArchive', JSON.stringify(monthlyArchive));
+            localStorage.setItem('monthlyArchive', JSON.stringify(archive));
+            monthlyArchive = archive;
             renderArchiveTable();
             updateArchiveStats();
-            alert("✅ تم حذف السجل");
         }
-    }
 
-    // ================ تعديل سجل (إعادة البيانات للعدادات) ================
-    function editArchiveEntry(index) {
-        const entry = monthlyArchive[index];
-        
-        if (confirm("📝 هل تريد تحميل بيانات هذا السجل للتعديل؟ (سيتم استبدال السجل القديم عند الحفظ)")) {
-            // تحميل البيانات للعدادات
-            ordersCount = {
-                branch: entry.branch || 0,
-                talabat: entry.talabat || 0,
-                insta: entry.insta || 0
+        function renderArchiveTable() {
+            let archive = JSON.parse(localStorage.getItem('monthlyArchive')) || [];
+            const tbody = document.getElementById('archiveBody');
+            
+            if (archive.length === 0) {
+                tbody.innerHTML = "<tr><td colspan='9' style='text-align:center; padding:30px;'>📭 لا توجد سجلات محفوظة في الأرشيف</td></tr>";
+                return;
+            }
+
+            archive.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            tbody.innerHTML = archive.map((entry, index) => {
+                const originalIndex = monthlyArchive.findIndex(item => item.id === entry.id);
+                return `
+                <tr>
+                    <td>${entry.date}</td>
+                    <td>${entry.shift}</td>
+                    <td>${entry.branch || 0}</td>
+                    <td>${entry.talabat || 0}</td>
+                    <td>${entry.insta || 0}</td>
+                    <td><strong>${entry.total || 0}</strong></td>
+                    <td>${entry.cancelTotal || 0}</td>
+                    <td><small>${(entry.cancelReason || '-').substring(0,15)}${(entry.cancelReason || '').length > 15 ? '...' : ''}</small></td>
+                    <td>
+                        <button class="action-btn edit-btn" onclick="editArchiveEntry(${originalIndex})">✏️</button>
+                        <button class="action-btn delete-btn" onclick="deleteArchiveEntry(${originalIndex})">🗑️</button>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+
+        function deleteArchiveEntry(index) {
+            if (confirm("⚠️ هل أنت متأكد من حذف هذا السجل نهائياً؟")) {
+                monthlyArchive.splice(index, 1);
+                localStorage.setItem('monthlyArchive', JSON.stringify(monthlyArchive));
+                renderArchiveTable();
+                updateArchiveStats();
+                alert("✅ تم حذف السجل");
+            }
+        }
+
+        function editArchiveEntry(index) {
+            const entry = monthlyArchive[index];
+            
+            if (confirm("📝 هل تريد تحميل بيانات هذا السجل للتعديل؟")) {
+                ordersCount = { branch: entry.branch || 0, talabat: entry.talabat || 0, insta: entry.insta || 0 };
+                cancelCounts = { branch: entry.canBranch || 0, talabat: entry.canTalabat || 0, insta: entry.canInsta || 0 };
+                document.getElementById('cancelReason').value = entry.cancelReason || '';
+                document.getElementById('customerFollowup').value = entry.followup || '';
+                
+                localStorage.setItem('ordersCount', JSON.stringify(ordersCount));
+                localStorage.setItem('cancelCounts', JSON.stringify(cancelCounts));
+                
+                editingIndex = index;
+                document.getElementById('editNotice').classList.add('active');
+                showTab('entry');
+                updateUI();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function updateArchiveStats() {
+            let archive = JSON.parse(localStorage.getItem('monthlyArchive')) || [];
+            if (archive.length === 0) {
+                document.getElementById('archiveStats').innerHTML = '';
+                return;
+            }
+            
+            const totalOrders = archive.reduce((sum, item) => sum + (item.total || 0), 0);
+            const totalCanceled = archive.reduce((sum, item) => sum + (item.cancelTotal || 0), 0);
+            const avgOrders = Math.round(totalOrders / archive.length);
+            
+            document.getElementById('archiveStats').innerHTML = `
+                <div class="stat-item"><div>📊 عدد الأيام</div><div class="stat-number">${archive.length}</div></div>
+                <div class="stat-item"><div>📦 إجمالي الأوردرات</div><div class="stat-number">${totalOrders}</div></div>
+                <div class="stat-item"><div>🚫 إجمالي الملغيات</div><div class="stat-number">${totalCanceled}</div></div>
+                <div class="stat-item"><div>📈 متوسط اليوم</div><div class="stat-number">${avgOrders}</div></div>
+            `;
+        }
+
+        function exportProfessionalExcel() {
+            let archive = JSON.parse(localStorage.getItem('monthlyArchive')) || [];
+            if (archive.length === 0) return alert("📭 لا توجد بيانات في الأرشيف");
+            
+            const totalBranch = archive.reduce((sum, item) => sum + (item.branch || 0), 0);
+            const totalTalabat = archive.reduce((sum, item) => sum + (item.talabat || 0), 0);
+            const totalInsta = archive.reduce((sum, item) => sum + (item.insta || 0), 0);
+            const totalOrders = totalBranch + totalTalabat + totalInsta;
+            const totalCanceled = archive.reduce((sum, item) => sum + (item.cancelTotal || 0), 0);
+            const daysCount = archive.length;
+            
+            const worksheetData = [
+                ["📊 الملخص الشامل للفترة"],
+                [`من: ${archive[0]?.date || "-"}`, `إلى: ${archive[archive.length-1]?.date || "-"}`, `عدد الأيام: ${daysCount}`],
+                [],
+                ["📈 إحصائيات عامة:"],
+                ["البيان", "الإجمالي", "المتوسط اليومي", "النسبة من الإجمالي"],
+                ["أوردرات فرع", totalBranch, (totalBranch / daysCount).toFixed(1), ((totalBranch / totalOrders) * 100).toFixed(1) + '%'],
+                ["أوردرات طلبات", totalTalabat, (totalTalabat / daysCount).toFixed(1), ((totalTalabat / totalOrders) * 100).toFixed(1) + '%'],
+                ["أوردرات انستا", totalInsta, (totalInsta / daysCount).toFixed(1), ((totalInsta / totalOrders) * 100).toFixed(1) + '%'],
+                ["الإجمالي", totalOrders, (totalOrders / daysCount).toFixed(1), "100%"],
+                ["الملغيات", totalCanceled, (totalCanceled / daysCount).toFixed(1), ((totalCanceled / totalOrders) * 100).toFixed(1) + '%'],
+                [],
+                ["📋 تفاصيل يومية:"],
+                ["التاريخ", "الوردية", "فرع", "طلبات", "انستا", "الإجمالي", "ملغيات", "ملاحظات"]
+            ];
+
+            archive.forEach(item => {
+                worksheetData.push([
+                    item.date, item.shift, item.branch || 0, item.talabat || 0,
+                    item.insta || 0, item.total || 0, item.cancelTotal || 0, item.cancelReason || '-'
+                ]);
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+            ws['!cols'] = [{ wch: 15 }, { wch: 12 }, { wch: 8 }, { wch: 8 }, { wch: 8 }, { wch: 10 }, { wch: 8 }, { wch: 30 }];
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "التقرير النهائي");
+            XLSX.writeFile(wb, `تقرير_احترافي_${new Date().toLocaleDateString().replace(/\//g, '-')}.xlsx`);
+        }
+
+        function exportOrdersExcel() {
+            let archive = JSON.parse(localStorage.getItem('monthlyArchive')) || [];
+            if (archive.length === 0) return alert("لا توجد بيانات");
+            
+            const data = archive.map(item => ({
+                "التاريخ": item.date, "الوردية": item.shift, "فرع": item.branch || 0,
+                "برنامج طلبات": item.talabat || 0, "انستا": item.insta || 0, "الإجمالي": item.total || 0
+            }));
+            
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "الأوردرات");
+            XLSX.writeFile(wb, `تقرير_الأوردرات_${new Date().toLocaleDateString().replace(/\//g, '-')}.xlsx`);
+        }
+
+        function exportShortagesExcel() {
+            const data = dailyShortages.map(s => ({
+                "التاريخ": s.date || '-', "العميل": s.name, "الهاتف": s.phone,
+                "المنتج": s.product, "الشركة": s.company,
+                "الحالة": s.status === 'done' ? 'تم' : 'في الانتظار', "ملاحظة": s.note || '-'
+            }));
+            
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "النواقص");
+            XLSX.writeFile(wb, `تقرير_النواقص_${new Date().toLocaleDateString().replace(/\//g, '-')}.xlsx`);
+        }
+
+        function exportCanceledExcel() {
+            if (canceledOrders.length === 0) return alert("لا توجد بيانات");
+            
+            const data = canceledOrders.map(c => ({
+                "التاريخ": c.date, "الشيفت": c.shift, "فرع": c.branch,
+                "برنامج طلبات": c.talabat, "انستا": c.insta, "الإجمالي": c.total, "السبب": c.reason
+            }));
+            
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "الملغيات");
+            XLSX.writeFile(wb, `تقرير_الملغيات_${new Date().toLocaleDateString().replace(/\//g, '-')}.xlsx`);
+        }
+
+        function exportSummaryExcel() {
+            let archive = JSON.parse(localStorage.getItem('monthlyArchive')) || [];
+            if (archive.length === 0) return alert("لا توجد بيانات");
+            
+            const totalOrders = archive.reduce((sum, i) => sum + (i.total || 0), 0);
+            const totalCanceled = archive.reduce((sum, i) => sum + (i.cancelTotal || 0), 0);
+            const avgOrders = Math.round(totalOrders / archive.length);
+            const cancellationRate = totalOrders > 0 ? ((totalCanceled / totalOrders) * 100).toFixed(1) : 0;
+            
+            const summary = [
+                ["📈 الملخص الشامل"],
+                [`تاريخ التقرير: ${new Date().toLocaleDateString('ar-EG')}`],
+                [`الفترة: ${archive[0]?.date || "-"} إلى ${archive[archive.length-1]?.date || "-"}`],
+                [], ["البيان", "القيمة"],
+                ["عدد أيام العمل", archive.length],
+                ["إجمالي الأوردرات", totalOrders],
+                ["إجمالي الملغيات", totalCanceled],
+                ["نسبة الإلغاء", `${cancellationRate}%`],
+                ["متوسط الأوردرات اليومي", avgOrders],
+                ["إجمالي النواقص", dailyShortages.length],
+                ["نواقص منتظرة", dailyShortages.filter(s => s.status === 'waiting').length],
+                ["نواقص منتهية", dailyShortages.filter(s => s.status === 'done').length]
+            ];
+            
+            const ws = XLSX.utils.aoa_to_sheet(summary);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "ملخص");
+            XLSX.writeFile(wb, `ملخص_شامل_${new Date().toLocaleDateString().replace(/\//g, '-')}.xlsx`);
+        }
+
+        function exportArchiveBackup() {
+            const backup = {
+                date: new Date().toLocaleString('ar-EG'),
+                archive: monthlyArchive,
+                shortages: dailyShortages,
+                branchShortages: branchShortages,
+                canceledOrders: canceledOrders
             };
             
-            cancelCounts = {
-                branch: entry.canBranch || 0,
-                talabat: entry.canTalabat || 0,
-                insta: entry.canInsta || 0
-            };
-            
-            document.getElementById('cancelReason').value = entry.cancelReason || '';
-            document.getElementById('customerFollowup').value = entry.followup || '';
-            
-            // حفظ التغييرات في localStorage
-            localStorage.setItem('ordersCount', JSON.stringify(ordersCount));
-            localStorage.setItem('cancelCounts', JSON.stringify(cancelCounts));
-            
-            // تفعيل وضع التعديل
-            editingIndex = index;
-            document.getElementById('editNotice').classList.add('active');
-            
-            // التبديل لتبويب لوحة التحكم
-            showTab('entry');
-            
-            // تحديث الواجهة
-            updateUI();
-            
-            // التمرير للأعلى
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            const dataStr = JSON.stringify(backup, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `نسخة_احتياطية_${new Date().toLocaleDateString().replace(/\//g, '-')}.json`;
+            a.click();
         }
-    }
 
-    // ================ تحديث إحصائيات الأرشيف ================
-    function updateArchiveStats() {
-        let archive = JSON.parse(localStorage.getItem('monthlyArchive')) || [];
-        
-        if (archive.length === 0) {
-            document.getElementById('archiveStats').innerHTML = '';
-            return;
-        }
-        
-        const totalOrders = archive.reduce((sum, item) => sum + (item.total || 0), 0);
-        const totalCanceled = archive.reduce((sum, item) => sum + (item.cancelTotal || 0), 0);
-        const avgOrders = Math.round(totalOrders / archive.length);
-        const cancellationRate = totalOrders > 0 ? ((totalCanceled / totalOrders) * 100).toFixed(1) : 0;
-        
-        document.getElementById('archiveStats').innerHTML = `
-            <div class="stat-item">
-                <div>📊 عدد الأيام</div>
-                <div class="stat-number">${archive.length}</div>
-            </div>
-            <div class="stat-item">
-                <div>📦 إجمالي الأوردرات</div>
-                <div class="stat-number">${totalOrders}</div>
-            </div>
-            <div class="stat-item">
-                <div>🚫 إجمالي الملغيات</div>
-                <div class="stat-number">${totalCanceled}</div>
-            </div>
-            <div class="stat-item">
-                <div>📈 متوسط اليوم</div>
-                <div class="stat-number">${avgOrders}</div>
-            </div>
-        `;
-    }
-
-    // ================ تقرير Excel احترافي ================
-    function exportProfessionalExcel() {
-        let archive = JSON.parse(localStorage.getItem('monthlyArchive')) || [];
-        
-        if (archive.length === 0) {
-            return alert("📭 لا توجد بيانات في الأرشيف");
-        }
-        
-        // حساب الإحصائيات
-        const totalBranch = archive.reduce((sum, item) => sum + (item.branch || 0), 0);
-        const totalTalabat = archive.reduce((sum, item) => sum + (item.talabat || 0), 0);
-        const totalInsta = archive.reduce((sum, item) => sum + (item.insta || 0), 0);
-        const totalOrders = totalBranch + totalTalabat + totalInsta;
-        const totalCanceled = archive.reduce((sum, item) => sum + (item.cancelTotal || 0), 0);
-        const daysCount = archive.length;
-        
-        // تحويل البيانات لشكل أعمدة مرتبة
-        const worksheetData = [
-            ["📊 الملخص الشامل للفترة"],
-            [`من: ${archive[0]?.date || "-"}`, `إلى: ${archive[archive.length-1]?.date || "-"}`, `عدد الأيام: ${daysCount}`],
-            [], // سطر فارغ
-            ["📈 إحصائيات عامة:"],
-            ["البيان", "الإجمالي", "المتوسط اليومي", "النسبة من الإجمالي"],
-            ["أوردرات فرع", totalBranch, (totalBranch / daysCount).toFixed(1), ((totalBranch / totalOrders) * 100).toFixed(1) + '%'],
-            ["أوردرات طلبات", totalTalabat, (totalTalabat / daysCount).toFixed(1), ((totalTalabat / totalOrders) * 100).toFixed(1) + '%'],
-            ["أوردرات انستا", totalInsta, (totalInsta / daysCount).toFixed(1), ((totalInsta / totalOrders) * 100).toFixed(1) + '%'],
-            ["الإجمالي", totalOrders, (totalOrders / daysCount).toFixed(1), "100%"],
-            ["الملغيات", totalCanceled, (totalCanceled / daysCount).toFixed(1), ((totalCanceled / totalOrders) * 100).toFixed(1) + '%'],
-            [], // سطر فارغ
-            ["📋 تفاصيل يومية:"],
-            ["التاريخ", "الوردية", "فرع", "طلبات", "انستا", "الإجمالي", "ملغيات", "ملاحظات"]
-        ];
-
-        // إضافة التفاصيل اليومية
-        archive.forEach(item => {
-            worksheetData.push([
-                item.date,
-                item.shift,
-                item.branch || 0,
-                item.talabat || 0,
-                item.insta || 0,
-                item.total || 0,
-                item.cancelTotal || 0,
-                item.cancelReason || '-'
-            ]);
-        });
-
-        // إنشاء ورقة العمل
-        const ws = XLSX.utils.aoa_to_sheet(worksheetData);
-        
-        // تنسيق عرض الأعمدة
-        ws['!cols'] = [
-            { wch: 15 }, // التاريخ
-            { wch: 12 }, // الوردية
-            { wch: 8 },  // فرع
-            { wch: 8 },  // طلبات
-            { wch: 8 },  // انستا
-            { wch: 10 }, // الإجمالي
-            { wch: 8 },  // ملغيات
-            { wch: 30 }  // ملاحظات
-        ];
-
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "التقرير النهائي");
-        XLSX.writeFile(wb, `تقرير_احترافي_${new Date().toLocaleDateString().replace(/\//g, '-')}.xlsx`);
-    }
-
-    // ================ دوال تصدير Excel الأخرى ================
-    function exportOrdersExcel() {
-        let archive = JSON.parse(localStorage.getItem('monthlyArchive')) || [];
-        if (archive.length === 0) return alert("لا توجد بيانات");
-        
-        const data = archive.map(item => ({
-            "التاريخ": item.date,
-            "الوردية": item.shift,
-            "فرع": item.branch || 0,
-            "برنامج طلبات": item.talabat || 0,
-            "انستا": item.insta || 0,
-            "الإجمالي": item.total || 0
-        }));
-        
-        const ws = XLSX.utils.json_to_sheet(data);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "الأوردرات");
-        XLSX.writeFile(wb, `تقرير_الأوردرات_${new Date().toLocaleDateString().replace(/\//g, '-')}.xlsx`);
-    }
-
-    function exportShortagesExcel() {
-        const data = dailyShortages.map(s => ({
-            "التاريخ": s.date || '-',
-            "العميل": s.name,
-            "الهاتف": s.phone,
-            "المنتج": s.product,
-            "الشركة": s.company,
-            "الحالة": s.status === 'done' ? 'تم' : 'في الانتظار',
-            "ملاحظة": s.note || '-'
-        }));
-        
-        const ws = XLSX.utils.json_to_sheet(data);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "النواقص");
-        XLSX.writeFile(wb, `تقرير_النواقص_${new Date().toLocaleDateString().replace(/\//g, '-')}.xlsx`);
-    }
-
-    function exportCanceledExcel() {
-        if (canceledOrders.length === 0) return alert("لا توجد بيانات");
-        
-        const data = canceledOrders.map(c => ({
-            "التاريخ": c.date,
-            "الشيفت": c.shift,
-            "فرع": c.branch,
-            "برنامج طلبات": c.talabat,
-            "انستا": c.insta,
-            "الإجمالي": c.total,
-            "السبب": c.reason
-        }));
-        
-        const ws = XLSX.utils.json_to_sheet(data);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "الملغيات");
-        XLSX.writeFile(wb, `تقرير_الملغيات_${new Date().toLocaleDateString().replace(/\//g, '-')}.xlsx`);
-    }
-
-    function exportSummaryExcel() {
-        let archive = JSON.parse(localStorage.getItem('monthlyArchive')) || [];
-        if (archive.length === 0) return alert("لا توجد بيانات");
-        
-        const totalOrders = archive.reduce((sum, i) => sum + (i.total || 0), 0);
-        const totalCanceled = archive.reduce((sum, i) => sum + (i.cancelTotal || 0), 0);
-        const avgOrders = Math.round(totalOrders / archive.length);
-        const cancellationRate = totalOrders > 0 ? ((totalCanceled / totalOrders) * 100).toFixed(1) : 0;
-        
-        const summary = [
-            ["📈 الملخص الشامل"],
-            [`تاريخ التقرير: ${new Date().toLocaleDateString('ar-EG')}`],
-            [`الفترة: ${archive[0]?.date || "-"} إلى ${archive[archive.length-1]?.date || "-"}`],
-            [],
-            ["البيان", "القيمة"],
-            ["عدد أيام العمل", archive.length],
-            ["إجمالي الأوردرات", totalOrders],
-            ["إجمالي الملغيات", totalCanceled],
-            ["نسبة الإلغاء", `${cancellationRate}%`],
-            ["متوسط الأوردرات اليومي", avgOrders],
-            ["إجمالي النواقص", dailyShortages.length],
-            ["نواقص منتظرة", dailyShortages.filter(s => s.status === 'waiting').length],
-            ["نواقص منتهية", dailyShortages.filter(s => s.status === 'done').length]
-        ];
-        
-        const ws = XLSX.utils.aoa_to_sheet(summary);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "ملخص");
-        XLSX.writeFile(wb, `ملخص_شامل_${new Date().toLocaleDateString().replace(/\//g, '-')}.xlsx`);
-    }
-
-    // ================ تصدير نسخة احتياطية ================
-    function exportArchiveBackup() {
-        const backup = {
-            date: new Date().toLocaleString('ar-EG'),
-            archive: monthlyArchive,
-            shortages: dailyShortages,
-            branchShortages: branchShortages,
-            canceledOrders: canceledOrders
-        };
-        
-        const dataStr = JSON.stringify(backup, null, 2);
-        const blob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `نسخة_احتياطية_${new Date().toLocaleDateString().replace(/\//g, '-')}.json`;
-        a.click();
-    }
-
-    // ================ مسح الأرشيف بالكامل ================
-    function clearAllArchive() {
-        if (confirm("⚠️ تحذير شديد! هل أنت متأكد من مسح الأرشيف بالكامل؟ لا يمكن التراجع عن هذا الإجراء!")) {
-            if (confirm("❗ للتأكيد النهائي: اكتب 'نعم' في المربع التالي")) {
+        function clearAllArchive() {
+            if (confirm("⚠️ تحذير شديد! هل أنت متأكد من مسح الأرشيف بالكامل؟")) {
                 const confirmText = prompt("اكتب 'نعم' للمتابعة:");
                 if (confirmText === 'نعم') {
                     monthlyArchive = [];
@@ -1333,21 +1374,26 @@ ${followup}
                 }
             }
         }
-    }
 
-    // ================ وظائف التبويبات ================
-    function showTab(tabId) {
-        document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
-        event.target.classList.add('active');
-        
-        if (tabId === 'shortages') renderShortagesTable();
-        if (tabId === 'archive') {
-            renderArchiveTable();
-            updateArchiveStats();
+        function showTab(tabId) {
+            document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => {
+                if (btn.textContent.includes(tabId === 'entry' ? 'لوحة التحكم' : 
+                                            tabId === 'shortages' ? 'متابعة النواقص' : 'الأرشيف')) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            if (tabId === 'shortages') renderShortagesTable();
+            if (tabId === 'archive') {
+                renderArchiveTable();
+                updateArchiveStats();
+            }
         }
-    }
-</script>
+    </script>
 </body>
 </html>
