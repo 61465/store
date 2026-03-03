@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>نظام إدارة العمليات - V8.4</title>
+    <title>نظام إدارة العمليات - V8.6 (مع بحث ذكي)</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <style>
@@ -241,17 +241,19 @@
             margin-bottom: 15px;
         }
         
-        .product-row {
+        .product-entry {
             display: flex;
             gap: 8px;
-            margin-bottom: 10px;
             align-items: center;
-            flex-wrap: wrap;
+            margin-bottom: 8px;
         }
         
-        .product-row input {
+        .product-entry input:first-child {
+            flex: 2;
+        }
+        
+        .product-entry input:nth-child(2) {
             flex: 1;
-            min-width: 120px;
         }
         
         .remove-product {
@@ -265,6 +267,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            font-weight: bold;
         }
         
         .table-container {
@@ -299,8 +302,8 @@
             opacity: 0.7;
         }
         
-        .done-btn {
-            background: #10b981;
+        .report-btn {
+            background: #f59e0b;
             color: white;
             border: none;
             border-radius: 6px;
@@ -482,6 +485,85 @@
             display: block;
         }
         
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .action-buttons .main-btn {
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        /* تنسيق شريط البحث */
+        .search-container {
+            margin-bottom: 15px;
+        }
+        
+        #archiveSearch {
+            width: 100%;
+            padding: 14px 20px;
+            background: #1e293b;
+            border: 2px solid #6366f1;
+            border-radius: 12px;
+            color: white;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        #archiveSearch:focus {
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+            border-color: #818cf8;
+            background: #2d3748;
+        }
+        
+        #archiveSearch::placeholder {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        
+        /* تنسيق ملخص البحث */
+        .search-summary {
+            background: #1e293b;
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 1px solid #6366f1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .search-summary-item {
+            font-size: 14px;
+        }
+        
+        .search-summary-value {
+            font-weight: bold;
+            color: #6366f1;
+            font-size: 18px;
+            margin-right: 5px;
+        }
+        
+        .clear-search {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 5px 15px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        
+        .clear-search:hover {
+            background: #dc2626;
+        }
+        
         @media (max-width: 600px) {
             body { padding: 8px; }
             
@@ -490,11 +572,10 @@
             .quick-stats { grid-template-columns: repeat(2, 1fr); }
             .archive-stats { grid-template-columns: repeat(2, 1fr); }
             .export-buttons { grid-template-columns: repeat(2, 1fr); }
+            .action-buttons .main-btn { min-width: 100%; }
             
             .customer-header { grid-template-columns: 1fr; }
-            .product-row { flex-direction: column; align-items: stretch; }
-            .product-row input { width: 100%; }
-            .remove-product { align-self: flex-end; }
+            .product-entry { flex-direction: row; }
             .branch-entry { flex-direction: column; align-items: stretch; }
             .branch-entry input { width: 100%; }
             
@@ -517,20 +598,24 @@
             
             .main-btn { padding: 12px; font-size: 14px; }
             .stat-number { font-size: 18px; }
+            
+            .search-summary {
+                flex-direction: column;
+                align-items: flex-start;
+            }
         }
         
         @media (max-width: 380px) {
             .stats-grid { grid-template-columns: 1fr; }
             .quick-stats, .archive-stats, .export-buttons { grid-template-columns: 1fr; }
             .grid-3 { grid-template-columns: 1fr !important; }
-            .counter { flex-wrap: wrap; }
         }
     </style>
 </head>
 <body>
     <div class="wrapper">
         <header style="text-align: center; margin-bottom: 20px;">
-            <h1 style="color: #6366f1;">📊 نظام إدارة العمليات V8.4</h1>
+            <h1 style="color: #6366f1;">📊 نظام إدارة العمليات V8.6</h1>
             <div id="liveTime"></div>
             <div class="progress-bar">
                 <div class="progress-fill" id="progressFill" style="width: 0%"></div>
@@ -538,19 +623,19 @@
         </header>
 
         <div id="editNotice" class="edit-notice">
-            ⚠️ وضع التعديل: تم تحميل بيانات سجل قديم. بعد التعديل اضغط "حفظ في الأرشيف" لتحديث البيانات.
+            ⚠️ وضع التعديل: تم تحميل بيانات سجل قديم. بعد التعديل اضغط "حفظ الكل" ثم "أرشفة الوردية" لتحديث البيانات.
         </div>
 
         <div class="tabs">
             <button class="tab-btn active" onclick="showTab('entry')">🏠 لوحة التحكم</button>
             <button class="tab-btn" onclick="showTab('shortages')">🔔 متابعة النواقص</button>
-            <button class="tab-btn" onclick="showTab('archive')">📊 الأرشيف</button>
+            <button class="tab-btn" onclick="showTab('archive')">📊 الأرشيف + بحث</button>
         </div>
 
         <div id="entry" class="view-content active">
             <div class="quick-stats">
                 <div class="stat-item"><div>⏳ نواقص</div><div class="stat-number" id="pendingCount">0</div></div>
-                <div class="stat-item"><div>✅ تم اليوم</div><div class="stat-number" id="completedTodayCount">0</div></div>
+                <div class="stat-item"><div>📢 تم التبليغ</div><div class="stat-number" id="reportedCount">0</div></div>
                 <div class="stat-item"><div>📦 إجمالي</div><div class="stat-number" id="todayTotal">0</div></div>
                 <div class="stat-item"><div>🚫 ملغيات</div><div class="stat-number" id="cancelTotal">0</div></div>
             </div>
@@ -610,8 +695,7 @@
                         </div>
                     </div>
                 </div>
-                <textarea id="cancelReason" rows="3" placeholder="📝 أسباب الإلغاء والملاحظات..."></textarea>
-                <button class="main-btn" style="background: #ef4444;" onclick="saveCancellations()">💾 حفظ الإلغاءات</button>
+                <textarea id="cancelReason" rows="2" placeholder="📝 أسباب الإلغاء والملاحظات..."></textarea>
             </div>
 
             <div class="section">
@@ -624,7 +708,6 @@
                     </div>
                 </div>
                 <button onclick="addBranchField()" class="small-btn">+ إضافة منتج للفرع</button>
-                <button class="main-btn" style="background: #3b82f6; margin-top:15px;" onclick="saveBranchShortages()">💾 حفظ نواقص الفرع</button>
             </div>
 
             <div class="section" id="customerSection">
@@ -638,10 +721,10 @@
                             <input type="text" class="c-phone" placeholder="رقم الهاتف">
                         </div>
                         <div class="products-list">
-                            <div class="product-row">
+                            <div class="product-entry">
                                 <input type="text" class="p-name" placeholder="المنتج المطلوب">
                                 <input type="text" class="p-company" placeholder="الشركة">
-                                <button class="remove-product" onclick="this.closest('.product-row').remove()">✖</button>
+                                <button class="remove-product" onclick="this.closest('.product-entry').remove()">✕</button>
                             </div>
                         </div>
                         <button class="small-btn" onclick="addProductRow(this)">+ إضافة منتج لهذا العميل</button>
@@ -650,17 +733,19 @@
                 
                 <div style="display: flex; gap: 10px; margin-top: 20px;">
                     <button class="add-customer-btn" onclick="addNewCustomer()">➕ إضافة عميل آخر</button>
-                    <button class="main-btn" style="background: #6366f1;" onclick="saveAllCustomers()">💾 حفظ جميع الطلبات</button>
                 </div>
             </div>
 
             <div class="section">
                 <h3>📞 متابعة العملاء</h3>
-                <textarea id="customerFollowup" rows="3" placeholder="ملاحظات المتابعة..."></textarea>
+                <textarea id="customerFollowup" rows="2" placeholder="ملاحظات المتابعة..."></textarea>
             </div>
 
-            <button class="main-btn" style="background: #10b981;" onclick="generateWhatsAppReport()">📤 نسخ التقرير للواتساب</button>
-            <button class="main-btn" style="background: #334155;" onclick="saveShiftToArchive()">💾 حفظ الوردية في الأرشيف</button>
+            <div class="action-buttons">
+                <button class="main-btn" style="background: #10b981;" onclick="generateWhatsAppReport()">📤 تقرير واتساب</button>
+                <button class="main-btn" style="background: #6366f1;" onclick="saveAllData()">💾 حفظ الكل</button>
+                <button class="main-btn" style="background: #334155;" onclick="saveShiftToArchive()">📋 أرشفة الوردية</button>
+            </div>
         </div>
 
         <div id="shortages" class="view-content">
@@ -669,8 +754,8 @@
             <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
                 <select id="statusFilter" style="flex:1; min-width: 150px;" onchange="renderShortagesTable()">
                     <option value="all">جميع النواقص</option>
-                    <option value="pending">في الانتظار فقط</option>
-                    <option value="done">المنتهية فقط</option>
+                    <option value="waiting">في الانتظار</option>
+                    <option value="reported">تم التبليغ</option>
                 </select>
                 <button onclick="renderShortagesTable()" class="main-btn" style="margin:0; width:auto; padding:12px 25px;">🔄 تحديث</button>
             </div>
@@ -681,8 +766,10 @@
                         <tr>
                             <th>العميل</th>
                             <th>رقم الهاتف</th>
-                            <th>المنتجات الناقصة</th>
-                            <th>الإجراءات</th>
+                            <th>المنتج الناقص</th>
+                            <th>الإجراء</th>
+                            <th>المُبلّغ عنه</th>
+                            <th>الملاحظة</th>
                         </tr>
                     </thead>
                     <tbody id="shortagesBody"></tbody>
@@ -691,7 +778,7 @@
         </div>
 
         <div id="archive" class="view-content">
-            <h2 style="margin-bottom: 20px;">📋 سجل التقارير اليومية</h2>
+            <h2 style="margin-bottom: 20px;">📋 سجل التقارير اليومية مع البحث الذكي</h2>
             
             <div class="archive-stats" id="archiveStats"></div>
             
@@ -703,14 +790,34 @@
                 <button onclick="exportSummaryExcel()" class="export-btn summary-btn">📈 ملخص شامل</button>
             </div>
             
+            <!-- شريط البحث الذكي -->
+            <div class="search-container">
+                <input type="text" id="archiveSearch" onkeyup="filterArchive()" 
+                       placeholder="🔍 ابحث بالتاريخ (2026/03/20)، الشيفت (صباحي/ليلي)، أو الملاحظات...">
+            </div>
+            
+            <!-- ملخص نتائج البحث -->
+            <div class="search-summary" id="searchSummary" style="display: none;">
+                <span class="search-summary-item">
+                    📊 النتائج: <span class="search-summary-value" id="resultCount">0</span> سجل
+                </span>
+                <span class="search-summary-item">
+                    💰 إجمالي الأوردرات: <span class="search-summary-value" id="filteredTotal">0</span>
+                </span>
+                <span class="search-summary-item">
+                    🚫 إجمالي الملغيات: <span class="search-summary-value" id="filteredCancel">0</span>
+                </span>
+                <button class="clear-search" onclick="clearSearch()">✕ مسح البحث</button>
+            </div>
+            
             <div class="table-container">
-                <table class="archive-table">
+                <table class="archive-table" id="archiveTable">
                     <thead>
                         <tr>
                             <th>التاريخ</th>
                             <th>الوردية</th>
                             <th>فرع</th>
-                            <th>برنامج طلبات</th>
+                            <th>طلبات</th>
                             <th>انستا</th>
                             <th>الإجمالي</th>
                             <th>ملغيات</th>
@@ -723,8 +830,8 @@
             </div>
             
             <div style="display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;">
-                <button class="main-btn" style="background: #6366f1; flex:1;" onclick="exportArchiveBackup()">💾 تصدير نسخة احتياطية</button>
-                <button class="main-btn" style="background: #ef4444; flex:1;" onclick="clearAllArchive()">🗑️ مسح الأرشيف بالكامل</button>
+                <button class="main-btn" style="background: #6366f1; flex:1;" onclick="exportArchiveBackup()">💾 نسخة احتياطية</button>
+                <button class="main-btn" style="background: #ef4444; flex:1;" onclick="clearAllArchive()">🗑️ مسح الأرشيف</button>
             </div>
         </div>
     </div>
@@ -775,7 +882,7 @@
             const currentShift = getShiftName();
             const savedShift = localStorage.getItem('activeShift');
             if (savedShift && savedShift !== currentShift) {
-                alert("تم تغيير الوردية. الرجاء حفظ التقرير السابق في الأرشيف.");
+                alert("تم تغيير الوردية. الرجاء أرشفة التقرير السابق.");
             }
             localStorage.setItem('activeShift', currentShift);
         }
@@ -793,11 +900,12 @@
 
         function updateSummaryStats() {
             const pendingCount = dailyShortages.filter(s => s.status === 'waiting').length;
-            const completedToday = dailyShortages.filter(s => s.status === 'done').length;
+            const reportedCount = dailyShortages.filter(s => s.status === 'reported').length;
             const todayTotal = ordersCount.branch + ordersCount.talabat + ordersCount.insta;
             const todayCanceled = cancelCounts.branch + cancelCounts.talabat + cancelCounts.insta;
+            
             document.getElementById('pendingCount').innerText = pendingCount;
-            document.getElementById('completedTodayCount').innerText = completedToday;
+            document.getElementById('reportedCount').innerText = reportedCount;
             document.getElementById('todayTotal').innerText = todayTotal;
             document.getElementById('cancelTotal').innerText = todayCanceled;
         }
@@ -814,30 +922,6 @@
             updateUI();
         }
 
-        function saveCancellations() {
-            const reason = document.getElementById('cancelReason').value;
-            const total = cancelCounts.branch + cancelCounts.talabat + cancelCounts.insta;
-            if (total === 0) return alert("❌ لم يتم إضافة أي إلغاءات");
-            
-            canceledOrders.push({
-                date: new Date().toLocaleDateString('ar-EG'),
-                shift: getShiftName(),
-                branch: cancelCounts.branch,
-                talabat: cancelCounts.talabat,
-                insta: cancelCounts.insta,
-                total: total,
-                reason: reason || '-',
-                time: new Date().toLocaleTimeString()
-            });
-            
-            localStorage.setItem('canceledOrders', JSON.stringify(canceledOrders));
-            cancelCounts = { branch: 0, talabat: 0, insta: 0 };
-            document.getElementById('cancelReason').value = '';
-            localStorage.setItem('cancelCounts', JSON.stringify(cancelCounts));
-            updateUI();
-            alert("✅ تم حفظ الإلغاءات بنجاح");
-        }
-
         function addNewCustomer() {
             const container = document.getElementById('customersContainer');
             const newCard = document.createElement('div');
@@ -849,10 +933,10 @@
                     <input type="text" class="c-phone" placeholder="رقم الهاتف">
                 </div>
                 <div class="products-list">
-                    <div class="product-row">
+                    <div class="product-entry">
                         <input type="text" class="p-name" placeholder="المنتج المطلوب">
                         <input type="text" class="p-company" placeholder="الشركة">
-                        <button class="remove-product" onclick="this.closest('.product-row').remove()">✖</button>
+                        <button class="remove-product" onclick="this.closest('.product-entry').remove()">✕</button>
                     </div>
                 </div>
                 <button class="small-btn" onclick="addProductRow(this)">+ إضافة منتج لهذا العميل</button>
@@ -863,11 +947,11 @@
         function addProductRow(btn) {
             const list = btn.closest('.customer-card').querySelector('.products-list');
             const row = document.createElement('div');
-            row.className = 'product-row';
+            row.className = 'product-entry';
             row.innerHTML = `
                 <input type="text" class="p-name" placeholder="المنتج المطلوب">
                 <input type="text" class="p-company" placeholder="الشركة">
-                <button class="remove-product" onclick="this.closest('.product-row').remove()">✖</button>
+                <button class="remove-product" onclick="this.closest('.product-entry').remove()">✕</button>
             `;
             list.appendChild(row);
         }
@@ -884,14 +968,14 @@
             container.appendChild(newField);
         }
 
-        function saveAllCustomers() {
+        function saveAllData() {
             const customerCards = document.querySelectorAll('.customer-card');
             let addedCount = 0;
             
             customerCards.forEach(card => {
                 const name = card.querySelector('.c-name').value.trim();
                 const phone = card.querySelector('.c-phone').value.trim();
-                const productRows = card.querySelectorAll('.product-row');
+                const productRows = card.querySelectorAll('.product-entry');
                 
                 if (!name || !phone) return;
                 
@@ -906,6 +990,7 @@
                             product: pName,
                             company: pComp || '-',
                             status: 'waiting',
+                            reported: '-',
                             note: '',
                             date: new Date().toLocaleDateString('ar-EG'),
                             time: new Date().toLocaleTimeString()
@@ -915,100 +1000,99 @@
                 });
             });
             
-            if (addedCount === 0) return alert("❌ لم يتم إضافة أي منتجات");
-            
-            localStorage.setItem('dailyShortages', JSON.stringify(dailyShortages));
-            document.getElementById('customersContainer').innerHTML = '';
-            addNewCustomer();
-            updateSummaryStats();
-            renderShortagesTable();
-            alert(`✅ تم إضافة ${addedCount} منتج/منتجات للجدول`);
-        }
-
-        function saveBranchShortages() {
-            let items = [];
+            const branchItems = [];
             document.querySelectorAll('.branch-entry').forEach(div => {
                 const name = div.querySelector('.b-name').value.trim();
                 const comp = div.querySelector('.b-company').value.trim();
-                if (name) items.push(comp ? `${name} (${comp})` : name);
+                if (name) {
+                    branchItems.push(comp ? `${name} (${comp})` : name);
+                }
             });
             
-            if (items.length === 0) return alert("❌ أدخل منتج واحد على الأقل");
+            if (branchItems.length > 0) {
+                branchShortages.push({
+                    date: new Date().toLocaleDateString('ar-EG'),
+                    shift: getShiftName(),
+                    items: branchItems.join(" + "),
+                    time: new Date().toLocaleTimeString()
+                });
+                localStorage.setItem('branchShortages', JSON.stringify(branchShortages));
+            }
             
-            branchShortages.push({
-                date: new Date().toLocaleDateString('ar-EG'),
-                shift: getShiftName(),
-                items: items.join(" + "),
-                time: new Date().toLocaleTimeString()
-            });
+            const currentData = {
+                orders: { branch: ordersCount.branch, talabat: ordersCount.talabat, insta: ordersCount.insta },
+                cancels: { branch: cancelCounts.branch, talabat: cancelCounts.talabat, insta: cancelCounts.insta },
+                shortages: dailyShortages,
+                branchShortages: branchShortages,
+                notes: document.getElementById('cancelReason').value,
+                followup: document.getElementById('customerFollowup').value
+            };
             
-            localStorage.setItem('branchShortages', JSON.stringify(branchShortages));
+            localStorage.setItem('dailyShortages', JSON.stringify(dailyShortages));
+            localStorage.setItem('currentShiftData', JSON.stringify(currentData));
+            
+            document.getElementById('customersContainer').innerHTML = '';
+            addNewCustomer();
+            
             document.getElementById('branchProductsContainer').innerHTML = `
                 <div class="branch-entry">
                     <input type="text" class="b-name" placeholder="اسم المنتج الناقص">
                     <input type="text" class="b-company" placeholder="الشركة">
                     <button class="remove-field" onclick="this.parentElement.remove()">✖</button>
                 </div>`;
-            alert("✅ تم حفظ نواقص الفرع");
+            
+            updateSummaryStats();
+            renderShortagesTable();
+            
+            if (addedCount > 0) {
+                alert(`✅ تم إضافة ${addedCount} منتج/منتجات وحفظ جميع البيانات`);
+            } else {
+                alert("✅ تم حفظ جميع البيانات");
+            }
         }
 
         function renderShortagesTable() {
             const filter = document.getElementById('statusFilter').value;
             let filtered = dailyShortages;
-            if (filter === 'pending') filtered = dailyShortages.filter(s => s.status === 'waiting');
-            else if (filter === 'done') filtered = dailyShortages.filter(s => s.status === 'done');
-            
-            const grouped = {};
-            filtered.forEach(item => {
-                const key = `${item.name}_${item.phone}`;
-                if (!grouped[key]) {
-                    grouped[key] = { name: item.name, phone: item.phone, products: [], allDone: true };
-                }
-                grouped[key].products.push(item);
-                if (item.status !== 'done') grouped[key].allDone = false;
-            });
+            if (filter !== 'all') {
+                filtered = dailyShortages.filter(s => s.status === filter);
+            }
             
             const tbody = document.getElementById('shortagesBody');
             tbody.innerHTML = '';
             
-            Object.values(grouped).forEach(customer => {
+            filtered.forEach((item, index) => {
+                const originalIndex = dailyShortages.findIndex(s => s.id === item.id);
                 const row = document.createElement('tr');
-                if (customer.allDone) row.className = 'completed';
                 
-                let productsHtml = '';
-                let actionsHtml = '';
-                
-                customer.products.forEach(p => {
-                    const itemIndex = dailyShortages.findIndex(s => s.id === p.id);
-                    productsHtml += `<div style="margin: 5px 0; padding: 5px; background: #2d3748; border-radius: 4px;">
-                        <strong>${p.product}</strong> ${p.company !== '-' ? `(${p.company})` : ''}
-                        ${p.status === 'done' ? '<br><small class="note-text">✅ ' + p.note + '</small>' : ''}
-                    </div>`;
-                    
-                    if (p.status === 'waiting') {
-                        actionsHtml += `<button class="done-btn" onclick="markProductAsDone(${itemIndex})">✔ ${p.product}</button> `;
-                    }
-                });
+                let actionButton = '';
+                if (item.status === 'waiting') {
+                    actionButton = `<button class="report-btn" onclick="markAsReported(${originalIndex})">📩 تبليغ</button>`;
+                } else {
+                    actionButton = `✅ تم التبليغ`;
+                }
                 
                 row.innerHTML = `
-                    <td>${customer.name}</td>
-                    <td>${customer.phone}</td>
-                    <td>${productsHtml}</td>
-                    <td>${actionsHtml || '✅ تم الكل'}</td>
+                    <td>${item.name}</td>
+                    <td>${item.phone}</td>
+                    <td>${item.product} ${item.company !== '-' ? `(${item.company})` : ''}</td>
+                    <td>${actionButton}</td>
+                    <td>${item.reported || '-'}</td>
+                    <td><small>${item.note || '-'}</small></td>
                 `;
                 tbody.appendChild(row);
             });
             
             if (tbody.children.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:30px;">لا توجد نواقص</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px;">لا توجد نواقص</td></tr>';
             }
         }
 
-        function markProductAsDone(index) {
-            const note = prompt("📝 أضف ملاحظة التأكيد:");
-            if (note !== null) {
-                dailyShortages[index].status = 'done';
-                dailyShortages[index].note = note;
+        function markAsReported(index) {
+            const reportedTo = prompt("📢 تم التبليغ إلى (مورد/مدير/غيره):");
+            if (reportedTo) {
+                dailyShortages[index].status = 'reported';
+                dailyShortages[index].reported = reportedTo;
                 localStorage.setItem('dailyShortages', JSON.stringify(dailyShortages));
                 renderShortagesTable();
                 updateSummaryStats();
@@ -1055,58 +1139,72 @@
         function generateWhatsAppReport() {
             const shiftTime = getShiftTimeRange();
             const waitingItems = dailyShortages.filter(s => s.status === 'waiting');
-            const doneItems = dailyShortages.filter(s => s.status === 'done');
+            const reportedItems = dailyShortages.filter(s => s.status === 'reported');
             const lastBranchShortage = branchShortages.length > 0 ? branchShortages[branchShortages.length-1].items : 'لا يوجد';
             const followup = document.getElementById('customerFollowup').value || 'لا يوجد';
+            const cancelReason = document.getElementById('cancelReason').value || '';
             
-            let shortagesText = '';
-            if (waitingItems.length > 0) {
+            let report = `⏱️ *الشيفت:* ${shiftTime}\n\n`;
+            
+            report += `📦 *إحصائيات الأوردرات:*\n`;
+            report += `▪️ فرع: ${ordersCount.branch}\n`;
+            report += `▪️ برنامج طلبات: ${ordersCount.talabat}\n`;
+            report += `▪️ انستا: ${ordersCount.insta}\n`;
+            report += `💰 *الإجمالي:* ${ordersCount.branch + ordersCount.talabat + ordersCount.insta}\n\n`;
+            
+            report += `🚫 *الملغيات اليوم:*\n`;
+            report += `▪️ ملغي فرع: ${cancelCounts.branch}\n`;
+            report += `▪️ ملغي طلبات: ${cancelCounts.talabat}\n`;
+            report += `▪️ ملغي انستا: ${cancelCounts.insta}\n`;
+            report += `📉 *إجمالي الملغيات:* ${cancelCounts.branch + cancelCounts.talabat + cancelCounts.insta}\n\n`;
+            
+            if (cancelReason.trim() !== "") {
+                report += `📝 *ملاحظات الإلغاء:*\n${cancelReason}\n\n`;
+            }
+            
+            if (lastBranchShortage !== 'لا يوجد') {
+                report += `🏢 *نواقص الفرع:*\n`;
+                const branchItems = lastBranchShortage.split(' + ');
+                branchItems.forEach(item => {
+                    report += `🔹 ${item}\n`;
+                });
+                report += `\n`;
+            }
+            
+            if (waitingItems.length > 0 || reportedItems.length > 0) {
+                report += `⚠️ *نواقص العملاء:*\n`;
+                
+                const allShortages = [...waitingItems, ...reportedItems];
                 const grouped = {};
-                waitingItems.forEach(item => {
+                allShortages.forEach(item => {
                     const key = `${item.name} - ${item.phone}`;
-                    if (!grouped[key]) grouped[key] = [];
-                    grouped[key].push(item.product);
+                    if (!grouped[key]) {
+                        grouped[key] = { name: item.name, phone: item.phone, products: [] };
+                    }
+                    grouped[key].products.push({
+                        name: item.product,
+                        company: item.company,
+                        status: item.status,
+                        reported: item.reported
+                    });
                 });
-                shortagesText = '⚠️ *نواقص العملاء:*\n';
+                
                 for (let customer in grouped) {
-                    shortagesText += `👤 ${customer}\n`;
-                    grouped[customer].forEach(p => shortagesText += `  - ${p}\n`);
+                    report += `👤 ${customer}\n`;
+                    grouped[customer].products.forEach(p => {
+                        let status = p.status === 'reported' ? ` (📢 تم التبليغ: ${p.reported})` : '';
+                        report += `  - ${p.name}${p.company !== '-' ? ` (${p.company})` : ''}${status}\n`;
+                    });
+                    report += `\n`;
                 }
-            } else {
-                shortagesText = '⚠️ *نواقص العملاء:* لا توجد\n';
             }
             
-            let doneText = '';
-            if (doneItems.length > 0) {
-                doneText = '\n✅ *عمليات تمت اليوم:*\n';
-                doneItems.forEach(o => {
-                    doneText += `▪️ ${o.name}: ${o.product} (${o.note})\n`;
-                });
+            if (followup.trim() !== "" && followup !== 'لا يوجد') {
+                report += `📞 *متابعة العملاء:*\n${followup}\n`;
             }
             
-            const report = `⏱️ *الشيفت:* ${shiftTime}
-
-📦 *إحصائيات الأوردرات:*
-▪️ فرع: ${ordersCount.branch}
-▪️ برنامج طلبات: ${ordersCount.talabat}
-▪️ انستا: ${ordersCount.insta}
-
-🏢 *نواقص الفرع:*
-▪️ ${lastBranchShortage}
-
-${shortagesText}
-🚫 *الملغيات اليوم:*
-▪️ فرع: ${cancelCounts.branch}
-▪️ برنامج طلبات: ${cancelCounts.talabat}
-▪️ انستا: ${cancelCounts.insta}
-📝 ملاحظات: ${document.getElementById('cancelReason').value || 'لا يوجد'}
-${doneText}
-
-📞 *متابعة العملاء:*
-${followup}
-
-📅 ${new Date().toLocaleString('ar-EG')}`;
-
+            report += `\n📅 ${new Date().toLocaleString('ar-EG')}`;
+            
             navigator.clipboard.writeText(report);
             alert("✅ تم نسخ التقرير بنجاح!");
         }
@@ -1142,13 +1240,17 @@ ${followup}
                 alert("✅ تم تحديث السجل بنجاح!");
             } else {
                 archive.push(shiftData);
-                alert("✅ تم حفظ الوردية في الأرشيف بنجاح!");
+                alert("✅ تم أرشفة الوردية بنجاح!");
             }
             
             localStorage.setItem('monthlyArchive', JSON.stringify(archive));
             monthlyArchive = archive;
             renderArchiveTable();
             updateArchiveStats();
+            
+            // إعادة تعيين حقل البحث بعد التحديث
+            document.getElementById('archiveSearch').value = '';
+            document.getElementById('searchSummary').style.display = 'none';
         }
 
         function renderArchiveTable() {
@@ -1156,7 +1258,7 @@ ${followup}
             const tbody = document.getElementById('archiveBody');
             
             if (archive.length === 0) {
-                tbody.innerHTML = "<tr><td colspan='9' style='text-align:center; padding:30px;'>📭 لا توجد سجلات محفوظة في الأرشيف</td></tr>";
+                tbody.innerHTML = "<tr><td colspan='9' style='text-align:center; padding:30px;'>📭 لا توجد سجلات محفوظة</td></tr>";
                 return;
             }
 
@@ -1173,7 +1275,7 @@ ${followup}
                     <td>${entry.insta || 0}</td>
                     <td><strong>${entry.total || 0}</strong></td>
                     <td>${entry.cancelTotal || 0}</td>
-                    <td><small>${(entry.cancelReason || '-').substring(0,15)}${(entry.cancelReason || '').length > 15 ? '...' : ''}</small></td>
+                    <td><small title="${entry.cancelReason}">${(entry.cancelReason || '-').substring(0,15)}${(entry.cancelReason || '').length > 15 ? '...' : ''}</small></td>
                     <td>
                         <button class="action-btn edit-btn" onclick="editArchiveEntry(${originalIndex})">✏️</button>
                         <button class="action-btn delete-btn" onclick="deleteArchiveEntry(${originalIndex})">🗑️</button>
@@ -1182,12 +1284,85 @@ ${followup}
             `}).join('');
         }
 
+        // ================ دوال البحث الذكي ================
+        function filterArchive() {
+            const input = document.getElementById('archiveSearch');
+            const filter = input.value.toLowerCase().trim();
+            const table = document.getElementById('archiveTable');
+            const tr = table.getElementsByTagName('tr');
+            let visibleCount = 0;
+            let filteredTotal = 0;
+            let filteredCancel = 0;
+
+            // المرور على كل الصفوف (نبدأ من 1 لتخطي رأس الجدول)
+            for (let i = 1; i < tr.length; i++) {
+                let visible = false;
+                const tds = tr[i].getElementsByTagName('td');
+                
+                // البحث في جميع الخلايا
+                for (let j = 0; j < tds.length - 1; j++) { // نتجاهل آخر عمود (الإجراءات)
+                    if (tds[j]) {
+                        const textValue = tds[j].textContent || tds[j].innerText;
+                        if (textValue.toLowerCase().indexOf(filter) > -1) {
+                            visible = true;
+                            break;
+                        }
+                    }
+                }
+                
+                // إظهار أو إخفاء الصف
+                tr[i].style.display = visible ? '' : 'none';
+                
+                // حساب الإحصائيات للصفوف الظاهرة
+                if (visible && filter !== '') {
+                    visibleCount++;
+                    if (tds[5]) { // عمود الإجمالي
+                        const total = parseInt(tds[5].textContent.replace(/[^\d]/g, '')) || 0;
+                        filteredTotal += total;
+                    }
+                    if (tds[6]) { // عمود الملغيات
+                        const cancel = parseInt(tds[6].textContent.replace(/[^\d]/g, '')) || 0;
+                        filteredCancel += cancel;
+                    }
+                }
+            }
+
+            // تحديث ملخص البحث
+            const summaryDiv = document.getElementById('searchSummary');
+            if (filter !== '' && visibleCount > 0) {
+                document.getElementById('resultCount').innerText = visibleCount;
+                document.getElementById('filteredTotal').innerText = filteredTotal;
+                document.getElementById('filteredCancel').innerText = filteredCancel;
+                summaryDiv.style.display = 'flex';
+            } else if (filter !== '' && visibleCount === 0) {
+                document.getElementById('resultCount').innerText = '0';
+                document.getElementById('filteredTotal').innerText = '0';
+                document.getElementById('filteredCancel').innerText = '0';
+                summaryDiv.style.display = 'flex';
+            } else {
+                summaryDiv.style.display = 'none';
+            }
+        }
+
+        function clearSearch() {
+            document.getElementById('archiveSearch').value = '';
+            document.getElementById('searchSummary').style.display = 'none';
+            
+            // إظهار جميع الصفوف
+            const table = document.getElementById('archiveTable');
+            const tr = table.getElementsByTagName('tr');
+            for (let i = 1; i < tr.length; i++) {
+                tr[i].style.display = '';
+            }
+        }
+
         function deleteArchiveEntry(index) {
             if (confirm("⚠️ هل أنت متأكد من حذف هذا السجل نهائياً؟")) {
                 monthlyArchive.splice(index, 1);
                 localStorage.setItem('monthlyArchive', JSON.stringify(monthlyArchive));
                 renderArchiveTable();
                 updateArchiveStats();
+                clearSearch(); // إعادة تعيين البحث بعد الحذف
                 alert("✅ تم حذف السجل");
             }
         }
@@ -1291,7 +1466,9 @@ ${followup}
             const data = dailyShortages.map(s => ({
                 "التاريخ": s.date || '-', "العميل": s.name, "الهاتف": s.phone,
                 "المنتج": s.product, "الشركة": s.company,
-                "الحالة": s.status === 'done' ? 'تم' : 'في الانتظار', "ملاحظة": s.note || '-'
+                "الحالة": s.status === 'reported' ? 'تم التبليغ' : 'في الانتظار',
+                "تم التبليغ إلى": s.reported || '-',
+                "ملاحظة": s.note || '-'
             }));
             
             const ws = XLSX.utils.json_to_sheet(data);
@@ -1334,8 +1511,8 @@ ${followup}
                 ["نسبة الإلغاء", `${cancellationRate}%`],
                 ["متوسط الأوردرات اليومي", avgOrders],
                 ["إجمالي النواقص", dailyShortages.length],
-                ["نواقص منتظرة", dailyShortages.filter(s => s.status === 'waiting').length],
-                ["نواقص منتهية", dailyShortages.filter(s => s.status === 'done').length]
+                ["في الانتظار", dailyShortages.filter(s => s.status === 'waiting').length],
+                ["تم التبليغ", dailyShortages.filter(s => s.status === 'reported').length]
             ];
             
             const ws = XLSX.utils.aoa_to_sheet(summary);
@@ -1363,13 +1540,14 @@ ${followup}
         }
 
         function clearAllArchive() {
-            if (confirm("⚠️ تحذير شديد! هل أنت متأكد من مسح الأرشيف بالكامل؟")) {
+            if (confirm("⚠️ تحذير! هل أنت متأكد من مسح الأرشيف بالكامل؟")) {
                 const confirmText = prompt("اكتب 'نعم' للمتابعة:");
                 if (confirmText === 'نعم') {
                     monthlyArchive = [];
                     localStorage.setItem('monthlyArchive', JSON.stringify(monthlyArchive));
                     renderArchiveTable();
                     updateArchiveStats();
+                    clearSearch();
                     alert("✅ تم مسح الأرشيف بالكامل");
                 }
             }
@@ -1392,6 +1570,7 @@ ${followup}
             if (tabId === 'archive') {
                 renderArchiveTable();
                 updateArchiveStats();
+                clearSearch(); // إعادة تعيين البحث عند فتح الأرشيف
             }
         }
     </script>
