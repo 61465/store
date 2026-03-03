@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام إدارة الوردية - متابعة العمليات والنواقص</title>
+    <title>نظام إدارة الوردية - تقارير احترافية</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <style>
@@ -90,18 +90,43 @@
             display: flex;
             gap: 10px;
             margin: 10px 0;
+            flex-wrap: wrap;
         }
         .export-btn {
             flex: 1;
-            padding: 10px;
+            min-width: 150px;
+            padding: 12px;
             border: none;
             border-radius: 8px;
             color: white;
             font-weight: bold;
             cursor: pointer;
+            transition: 0.3s;
         }
+        .export-btn:hover { opacity: 0.9; transform: translateY(-2px); }
         .orders-btn { background: #27ae60; }
         .shortages-btn { background: #e67e22; }
+        .summary-btn { background: #3498db; }
+        
+        /* إحصائيات سريعة */
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .summary-card {
+            background: var(--card);
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid var(--primary);
+        }
+        .summary-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--primary);
+        }
     </style>
 </head>
 <body>
@@ -127,6 +152,22 @@
             <div class="stat-card"><h4>📍 فرع</h4><div class="counter"><button onclick="change('branch', -1)" class="btn-c" style="background:#ef4444">-</button><b id="branch">0</b><button onclick="change('branch', 1)" class="btn-c" style="background:var(--primary)">+</button></div></div>
             <div class="stat-card"><h4>📱 طلبات</h4><div class="counter"><button onclick="change('talabat', -1)" class="btn-c" style="background:#ef4444">-</button><b id="talabat">0</b><button onclick="change('talabat', 1)" class="btn-c" style="background:var(--primary)">+</button></div></div>
             <div class="stat-card"><h4>🌐 انستا</h4><div class="counter"><button onclick="change('instashop', -1)" class="btn-c" style="background:#ef4444">-</button><b id="instashop">0</b><button onclick="change('instashop', 1)" class="btn-c" style="background:var(--primary)">+</button></div></div>
+        </div>
+
+        <!-- إحصائيات سريعة -->
+        <div class="stats-summary">
+            <div class="summary-card">
+                <div>⏳ نواقص عملاء</div>
+                <div class="summary-number" id="pendingCount">0</div>
+            </div>
+            <div class="summary-card">
+                <div>✅ تم التوفير</div>
+                <div class="summary-number" id="completedCount">0</div>
+            </div>
+            <div class="summary-card">
+                <div>📊 إجمالي اليوم</div>
+                <div class="summary-number" id="todayTotal">0</div>
+            </div>
         </div>
 
         <!-- ✅ متابعة العمليات اليومية -->
@@ -171,10 +212,14 @@
     <div id="archive" class="view-content">
         <h3>📋 سجل التقارير اليومية</h3>
         
-        <!-- أزرار تصدير منفصلة -->
+        <!-- إحصائيات الأرشيف -->
+        <div class="stats-summary" id="archiveStats"></div>
+        
+        <!-- أزرار تصدير احترافية -->
         <div class="export-buttons">
-            <button onclick="exportOrdersExcel()" class="export-btn orders-btn">📊 تقرير الأوردرات</button>
-            <button onclick="exportShortagesExcel()" class="export-btn shortages-btn">⚠️ تقرير النواقص</button>
+            <button onclick="exportOrdersExcel()" class="export-btn orders-btn">📊 تقرير الأوردرات الاحترافي</button>
+            <button onclick="exportShortagesExcel()" class="export-btn shortages-btn">⚠️ تقرير النواقص الشامل</button>
+            <button onclick="exportSummaryExcel()" class="export-btn summary-btn">📈 تقرير ملخص شامل</button>
         </div>
         
         <table class="archive-table">
@@ -182,9 +227,11 @@
                 <tr>
                     <th>التاريخ</th>
                     <th>الوردية</th>
-                    <th>إجمالي الأوردرات</th>
+                    <th>فرع</th>
+                    <th>طلبات</th>
+                    <th>انستا</th>
+                    <th>الإجمالي</th>
                     <th>نواقص الصالة</th>
-                    <th>متابعة العملاء</th>
                 </tr>
             </thead>
             <tbody id="archiveBody"></tbody>
@@ -207,7 +254,10 @@
         document.getElementById(tabId).classList.add('active');
         event.currentTarget.classList.add('active');
         if(tabId === 'followup') renderPending();
-        if(tabId === 'archive') renderArchive();
+        if(tabId === 'archive') {
+            renderArchive();
+            updateArchiveStats();
+        }
     }
 
     // ================ عدادات الأوردرات ================
@@ -215,6 +265,7 @@
         data[type] = Math.max(0, data[type] + val);
         localStorage.setItem('shiftData', JSON.stringify(data));
         updateUI();
+        updateSummaryStats();
     }
 
     // ================ تايمر الوردية ================
@@ -285,6 +336,18 @@
         document.getElementById('talabat').innerText = data.talabat;
         document.getElementById('instashop').innerText = data.instashop;
         updateTimer();
+        updateSummaryStats();
+    }
+
+    // ================ إحصائيات سريعة ================
+    function updateSummaryStats() {
+        const pendingCount = pendingOrders.filter(o => o.status === 'waiting').length;
+        const completedCount = pendingOrders.filter(o => o.status === 'done').length;
+        const todayTotal = data.branch + data.talabat + data.instashop;
+        
+        document.getElementById('pendingCount').innerText = pendingCount;
+        document.getElementById('completedCount').innerText = completedCount;
+        document.getElementById('todayTotal').innerText = todayTotal;
     }
 
     // ================ إدارة نواقص العملاء ================
@@ -311,8 +374,8 @@
         document.getElementById('custOrder').value = '';
         
         alert("✅ تمت إضافة النواقص بنجاح");
+        updateSummaryStats();
         
-        // تحديث عرض النواقص إذا كنا في تبويب المتابعة
         if (document.getElementById('followup').classList.contains('active')) {
             renderPending();
         }
@@ -336,6 +399,7 @@
         // تحديث عداد التبويب
         const followupTab = document.querySelectorAll('.tab-btn')[1];
         followupTab.innerHTML = `🔔 متابعة النواقص ${waitingCount ? '('+waitingCount+')' : ''}`;
+        updateSummaryStats();
     }
 
     function markAsDone(index) {
@@ -344,6 +408,7 @@
             pendingOrders[index].status = 'done';
             localStorage.setItem('pendingOrders', JSON.stringify(pendingOrders));
             renderPending();
+            updateSummaryStats();
         }
     }
 
@@ -379,6 +444,7 @@
         }
         
         renderArchive();
+        updateArchiveStats();
     }
 
     // ================ عرض الأرشيف ================
@@ -387,59 +453,196 @@
             `<tr>
                 <td>${item["التاريخ"]}</td>
                 <td>${item["الوردية"]}</td>
+                <td>${item["فرع"]}</td>
+                <td>${item["طلبات"]}</td>
+                <td>${item["انستا"]}</td>
                 <td>${item["إجمالي الأوردرات"]}</td>
                 <td>${item["نواقص الصالة"]}</td>
-                <td>${item["متابعة العملاء"]}</td>
             </tr>`
-        ).join('') || '<tr><td colspan="5" style="text-align:center">لا توجد تقارير محفوظة</td></tr>';
+        ).join('') || '<tr><td colspan="7" style="text-align:center">لا توجد تقارير محفوظة</td></tr>';
     }
 
-    // ================ تصدير تقارير Excel ================
+    function updateArchiveStats() {
+        if (dailyReports.length === 0) {
+            document.getElementById('archiveStats').innerHTML = '';
+            return;
+        }
+        
+        const totalOrders = dailyReports.reduce((sum, item) => sum + (item["إجمالي الأوردرات"] || 0), 0);
+        const avgOrders = Math.round(totalOrders / dailyReports.length);
+        
+        document.getElementById('archiveStats').innerHTML = `
+            <div class="summary-card">
+                <div>📊 عدد التقارير</div>
+                <div class="summary-number">${dailyReports.length}</div>
+            </div>
+            <div class="summary-card">
+                <div>📦 إجمالي الأوردرات</div>
+                <div class="summary-number">${totalOrders}</div>
+            </div>
+            <div class="summary-card">
+                <div>📈 متوسط يومي</div>
+                <div class="summary-number">${avgOrders}</div>
+            </div>
+        `;
+    }
+
+    // ================ تقارير Excel احترافية ================
+
+    // 1. تقرير الأوردرات الاحترافي
     function exportOrdersExcel() {
-        // تقرير الأوردرات فقط
+        if(dailyReports.length === 0) return alert("📭 لا توجد تقارير محفوظة!");
+        
+        // حساب الإحصائيات
+        const totalOrders = dailyReports.reduce((sum, item) => sum + item["إجمالي الأوردرات"], 0);
+        const avgOrders = Math.round(totalOrders / dailyReports.length);
+        const maxOrders = Math.max(...dailyReports.map(item => item["إجمالي الأوردرات"]));
+        
+        // تجهيز البيانات
         const ordersData = dailyReports.map(item => ({
-            "التاريخ": item["التاريخ"],
-            "الوردية": item["الوردية"],
-            "فرع": item["فرع"],
-            "طلبات": item["طلبات"],
-            "انستا": item["انستا"],
-            "الإجمالي": item["إجمالي الأوردرات"]
+            "📅 التاريخ": item["التاريخ"],
+            "🕐 الوردية": item["الوردية"],
+            "📍 فرع": item["فرع"],
+            "📱 طلبات": item["طلبات"],
+            "🌐 انستا": item["انستا"],
+            "✅ الإجمالي": item["إجمالي الأوردرات"],
+            "📝 ملاحظات": item["مراجعة الطلبات"]
         }));
 
         const ws = XLSX.utils.json_to_sheet(ordersData);
+        
+        // إضافة ملخص في البداية
+        XLSX.utils.sheet_add_aoa(ws, [
+            ["📊 تقرير الأوردرات الشامل"],
+            [`الفترة: ${dailyReports[0]["التاريخ"]} - ${dailyReports[dailyReports.length-1]["التاريخ"]}`],
+            [],
+            ["📈 ملخص إحصائي:"],
+            [`إجمالي الأوردرات: ${totalOrders}`, `متوسط يومي: ${avgOrders}`, `أعلى يوم: ${maxOrders}`],
+            [],
+            ["تفاصيل الأوردرات:"]
+        ], { origin: "A1" });
+        
+        // ضبط عرض الأعمدة
+        ws['!cols'] = [
+            {wch: 15}, {wch: 20}, {wch: 10}, {wch: 10}, {wch: 10}, {wch: 12}, {wch: 30}
+        ];
+
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "الأوردرات");
-        XLSX.writeFile(wb, `تقرير_الأوردرات_${new Date().toLocaleDateString().replace(/\//g, '-')}.xlsx`);
+        XLSX.utils.book_append_sheet(wb, ws, "تقرير الأوردرات");
+        
+        // تنسيق اسم الملف
+        const monthNames = ["يناير", "فبراير", "مارس", "إبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+        const currentMonth = monthNames[new Date().getMonth()];
+        
+        XLSX.writeFile(wb, `📊_تقرير_الأوردرات_${currentMonth}.xlsx`);
     }
 
+    // 2. تقرير النواقص الشامل
     function exportShortagesExcel() {
-        // تقرير النواقص (العملاء + الصالة)
+        // تجهيز نواقص العملاء
         const customerShortages = pendingOrders.map(item => ({
-            "النوع": "عميل",
-            "التاريخ": item.date,
-            "العميل": item.name,
-            "الموبايل": item.phone || '-',
-            "المنتجات": item.order,
-            "الحالة": item.status === 'done' ? 'تم التوفير' : 'لم يتوفر'
+            "📅 تاريخ الطلب": item.date,
+            "👤 اسم العميل": item.name,
+            "📞 رقم التواصل": item.phone || '-',
+            "📦 المنتجات المطلوبة": item.order,
+            "⏱️ الحالة": item.status === 'done' ? '✅ تم التوفير' : '⏳ في الانتظار',
+            "🕐 وقت التسجيل": item.time || '-'
         }));
-        
-        const loungeShortages = dailyReports
-            .filter(item => item["نواقص الصالة"] && item["نواقص الصالة"] !== '-')
-            .map(item => ({
-                "النوع": "صالة",
-                "التاريخ": item["التاريخ"],
-                "العميل": "-",
-                "الموبايل": "-",
-                "المنتجات": item["نواقص الصالة"],
-                "الحالة": "مسجل"
-            }));
-        
-        const allShortages = [...customerShortages, ...loungeShortages];
 
-        const ws = XLSX.utils.json_to_sheet(allShortages);
+        const ws = XLSX.utils.json_to_sheet(customerShortages);
+        
+        // إضافة عنوان
+        XLSX.utils.sheet_add_aoa(ws, [
+            ["⚠️ تقرير النواقص الشامل"],
+            [`تاريخ التقرير: ${new Date().toLocaleDateString('ar-EG')}`],
+            [],
+            ["📊 إحصائيات سريعة:"],
+            [`إجمالي النواقص: ${pendingOrders.length}`, `منتظر: ${pendingOrders.filter(o => o.status === 'waiting').length}`, `تم التوفير: ${pendingOrders.filter(o => o.status === 'done').length}`],
+            [],
+            ["📋 نواقص العملاء:"]
+        ], { origin: "A1" });
+        
+        // إضافة نواقص الصالة الحالية
+        const loungeShortages = document.getElementById('loungeShortages').value;
+        if (loungeShortages) {
+            XLSX.utils.sheet_add_aoa(ws, [
+                [],
+                ["🏢 نواقص الصالة:"],
+                [loungeShortages]
+            ], { origin: -1 });
+        }
+        
+        // إضافة نواقص الصالة من التقارير السابقة
+        const historicalLounge = dailyReports
+            .filter(item => item["نواقص الصالة"] && item["نواقص الصالة"] !== '-')
+            .map(item => [item["التاريخ"], item["نواقص الصالة"]]);
+        
+        if (historicalLounge.length > 0) {
+            XLSX.utils.sheet_add_aoa(ws, [
+                [],
+                ["📜 سجل نواقص الصالة السابقة:"],
+                ...historicalLounge.map(([date, shortages]) => [date, shortages])
+            ], { origin: -1 });
+        }
+        
+        // ضبط عرض الأعمدة
+        ws['!cols'] = [
+            {wch: 15}, {wch: 20}, {wch: 15}, {wch: 40}, {wch: 15}, {wch: 10}
+        ];
+
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "النواقص");
-        XLSX.writeFile(wb, `تقرير_النواقص_${new Date().toLocaleDateString().replace(/\//g, '-')}.xlsx`);
+        XLSX.utils.book_append_sheet(wb, ws, "تقرير النواقص");
+        
+        XLSX.writeFile(wb, `⚠️_تقرير_النواقص_${new Date().toLocaleDateString().replace(/\//g, '-')}.xlsx`);
+    }
+
+    // 3. تقرير ملخص شامل (Bonus)
+    function exportSummaryExcel() {
+        if(dailyReports.length === 0) return alert("📭 لا توجد تقارير محفوظة!");
+        
+        // حساب الإحصائيات
+        const totalOrders = dailyReports.reduce((sum, item) => sum + item["إجمالي الأوردرات"], 0);
+        const totalBranch = dailyReports.reduce((sum, item) => sum + item["فرع"], 0);
+        const totalTalabat = dailyReports.reduce((sum, item) => sum + item["طلبات"], 0);
+        const totalInsta = dailyReports.reduce((sum, item) => sum + item["انستا"], 0);
+        
+        const summary = [
+            ["📊 الملخص الشامل للفترة"],
+            [`من: ${dailyReports[0]["التاريخ"]}`, `إلى: ${dailyReports[dailyReports.length-1]["التاريخ"]}`],
+            [],
+            ["📈 إحصائيات عامة:"],
+            ["البيان", "الإجمالي", "المتوسط", "النسبة"],
+            ["📍 أوردرات فرع", totalBranch, Math.round(totalBranch/dailyReports.length), `${Math.round(totalBranch/totalOrders*100)}%`],
+            ["📱 أوردرات طلبات", totalTalabat, Math.round(totalTalabat/dailyReports.length), `${Math.round(totalTalabat/totalOrders*100)}%`],
+            ["🌐 أوردرات انستا", totalInsta, Math.round(totalInsta/dailyReports.length), `${Math.round(totalInsta/totalOrders*100)}%`],
+            ["✅ الإجمالي", totalOrders, Math.round(totalOrders/dailyReports.length), "100%"],
+            [],
+            ["📅 تفاصيل يومية:"]
+        ];
+        
+        const ws = XLSX.utils.aoa_to_sheet(summary);
+        
+        // إضافة التفاصيل اليومية
+        const dailyDetails = dailyReports.map(item => ([
+            item["التاريخ"],
+            item["الوردية"],
+            item["فرع"],
+            item["طلبات"],
+            item["انستا"],
+            item["إجمالي الأوردرات"]
+        ]));
+        
+        XLSX.utils.sheet_add_aoa(ws, dailyDetails, { origin: -1 });
+        
+        // ضبط عرض الأعمدة
+        ws['!cols'] = [
+            {wch: 15}, {wch: 20}, {wch: 12}, {wch: 12}, {wch: 12}, {wch: 15}
+        ];
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "ملخص شامل");
+        
+        XLSX.writeFile(wb, `📈_ملخص_شامل_${new Date().getMonth()+1}.xlsx`);
     }
 
     // ================ تقرير الواتساب ================
@@ -449,12 +652,10 @@
         const orderReview = document.getElementById('orderReview').value || 'تمت';
         const loungeShortages = document.getElementById('loungeShortages').value || 'لا يوجد';
         
-        // النواقص الحالية للعملاء
         const currentPending = pendingOrders
             .filter(o => o.status === 'waiting')
             .map(o => `▪️ ${o.name}: ${o.order}`).join('\n') || 'لا توجد نواقص حالية';
 
-        // الوقت المتبقي
         const timerSpan = document.querySelector('#liveTime .timer-critical, #liveTime .timer-warning, #liveTime .timer-normal');
         const timeLeft = timerSpan ? timerSpan.innerText.replace('⏳ متبقي: ', '') : '';
 
@@ -471,6 +672,7 @@ ${loungeShortages}
 
 ⚠️ *نواقص العملاء الحالية:*
 ${currentPending}
+⏳ العدد: ${pendingOrders.filter(o => o.status === 'waiting').length}
 
 📋 *متابعة العمليات:*
 ▪️ متابعة العملاء: ${followup}
@@ -490,6 +692,7 @@ ${currentPending}
             localStorage.removeItem('dailyReports');
             dailyReports = [];
             renderArchive();
+            updateArchiveStats();
         }
     }
 
@@ -497,6 +700,8 @@ ${currentPending}
     updateUI();
     renderPending();
     renderArchive();
+    updateArchiveStats();
+    updateSummaryStats();
     
     // تشغيل التايمر كل ثانية
     setInterval(updateTimer, 1000);
