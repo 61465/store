@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة الوردية والنواقص الاحترافي</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <style>
+        :root { --primary: #6366f1; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --success: #10b981; --danger: #ef4444; --warning: #f59e0b; }
+        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); margin: 0; padding: 15px; }
+        .wrapper { width: 100%; max-width: 900px; margin: auto; }
+        header { text-align: center; padding: 15px; border-bottom: 2px solid var(--primary); margin-bottom: 20px; }
+        .tabs { display: flex; gap: 5px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
+        .tab-btn { flex: 1; min-width: 100px; padding: 10px; border: none; background: #334155; color: white; cursor: pointer; border-radius: 8px; font-size: 13px; }
+        .tab-btn.active { background: var(--primary); font-weight: bold; }
+        .view-content { display: none; }
+        .view-content.active { display: block; }
+        
+        /* سجل النواقص الخاص بالعملاء */
+        .pending-item { background: var(--card); padding: 12px; border-radius: 10px; margin-bottom: 10px; border-right: 5px solid #ef4444; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.3s; }
+        .pending-item.completed { border-right-color: var(--success); opacity: 0.8; background: #064e3b; }
+        .pending-item span b { color: var(--primary); }
+
+        /* الأشكال العامة */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+        .stat-card { background: var(--card); padding: 10px; border-radius: 12px; text-align: center; border: 1px solid #444; }
+        .counter { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 5px; }
+        .btn-c { width: 30px; height: 30px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; }
+        .input-group { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid #444; margin-top: 15px; }
+        input, textarea { width: 100%; background: #0f172a; border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; margin-top: 5px; }
+        .main-btn { width: 100%; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .archive-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+        .archive-table th, .archive-table td { border: 1px solid #444; padding: 10px; text-align: center; }
+        
+        /* الإضافات الجديدة */
+        .task-item { display: flex; align-items: center; gap: 10px; padding: 5px; cursor: pointer; background: #0f172a; margin: 5px 0; border-radius: 5px; }
+        .task-item input[type="checkbox"] { width: auto; margin: 0; }
+        .seller-btn { background: #334155; border: 1px solid #4f46e5; color: white; padding: 8px 12px; border-radius: 6px; cursor: pointer; transition: 0.3s; flex: 1; min-width: 70px; }
+        .seller-btn:hover { background: var(--primary); }
+        .seller-btn span { color: #10b981; font-weight: bold; margin-right: 5px; }
+        .rush-tip { background: #1e293b; border-right: 4px solid #eab308; padding: 15px; margin-bottom: 20px; font-size: 1em; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .seller-stats { margin-top: 10px; font-size: 14px; color: #94a3b8; }
+        .badge { background: var(--primary); padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-right: 5px; }
+        
+        /* تنسيقات التايمر */
+        #liveTime { 
+            font-family: 'Cairo', monospace; 
+            font-size: 1.2em; 
+            padding: 10px;
+            background: #1e293b;
+            border-radius: 50px;
+            margin-top: 10px;
+            border: 1px solid #444;
+        }
+        .timer-critical { 
+            animation: pulse 1s infinite;
+            font-weight: bold;
+        }
+        @keyframes pulse {
+            0% { color: #ef4444; }
+            50% { color: #ffffff; }
+            100% { color: #ef4444; }
+        }
+        .timer-warning { color: #f59e0b; }
+        .timer-normal { color: #10b981; }
+        
+        /* شريط التقدم */
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #334155;
+            border-radius: 3px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), #818cf8);
+            transition: width 1s linear;
+            border-radius: 3px;
+        }
+
+        /* تنسيق إضافة المنتج الجديد */
+        .add-product-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            align-items: center;
+        }
+        .add-product-row input {
+            flex: 2;
+            margin: 0;
+            background: #0f172a;
+        }
+        .add-product-btn {
+            flex: 1;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .add-product-btn:hover {
+            background: #059669;
+        }
+        .delete-product-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 5px;
+        }
+        .delete-product-btn:hover {
+            background: #dc2626;
+        }
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .reset-sellers-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <header>
+        <h2 id="shiftTitle">تحديد الوردية...</h2>
+        <div id="liveTime"></div>
+        <div class="progress-bar" id="progressBar">
+            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('entry')">🏠 الإدخال</button>
+        <button class="tab-btn" onclick="showTab('followup')">🔔 متابعة النواقص</button>
+        <button class="tab-btn" onclick="showTab('archive')">📊 الأرشيف</button>
+    </div>
+
+    <div id="entry" class="view-content active">
+        <div class="stats-grid">
+            <div class="stat-card"><h4>📍 فرع</h4><div class="counter"><button onclick="change('branch', -1)" class="btn-c" style="background:#ef4444">-</button><b id="branch">0</b><button onclick="change('branch', 1)" class="btn-c" style="background:var(--primary)">+</button></div></div>
+            <div class="stat-card"><h4>📱 طلبات</h4><div class="counter"><button onclick="change('talabat', -1)" class="btn-c" style="background:#ef4444">-</button><b id="talabat">0</b><button onclick="change('talabat', 1)" class="btn-c" style="background:var(--primary)">+</button></div></div>
+            <div class="stat-card"><h4>🌐 انستا</h4><div class="counter"><button onclick="change('instashop', -1)" class="btn-c" style="background:#ef4444">-</button><b id="instashop">0</b><button onclick="change('instashop', 1)" class="btn-c" style="background:var(--primary)">+</button></div></div>
+        </div>
+
+        <!-- ✅ Checklist: مهام الشفت -->
+        <div class="input-group">
+            <h3>✅ مهام الشفت (Checklist)</h3>
+            <div id="checklist"></div>
+        </div>
+
+        <!-- 🔥 Top Sellers: الأعلى مبيعاً (محدث مع إضافة منتجات جديدة) -->
+        <div class="input-group">
+            <div class="product-header">
+                <h3>🔥 الأعلى مبيعاً <span id="sellerTotal" class="badge">0</span></h3>
+                <button class="reset-sellers-btn" onclick="resetAllSellers()" title="تصفير جميع العدادات">🔄 تصفير</button>
+            </div>
+            <div id="sellers" style="display:flex; gap:10px; flex-wrap:wrap;"></div>
+            
+            <!-- حقل إضافة منتج جديد -->
+            <div class="add-product-row">
+                <input type="text" id="newProductName" placeholder="اسم المنتج الجديد..." style="margin-top: 0;">
+                <button onclick="addNewProductBtn()" class="add-product-btn">+ إضافة منتج</button>
+            </div>
+            
+            <div id="sellerStats" class="seller-stats"></div>
+        </div>
+
+        <!-- 🚨 Incident: بلاغ طوارئ -->
+        <div class="input-group">
+            <h3>🚨 بلاغ طوارئ</h3>
+            <textarea id="incident" rows="2" placeholder="أي مشكلة طارئة (عطل، مشكلة مع عميل)..."></textarea>
+        </div>
+
+        <!-- الإدخالات الأصلية -->
+        <div class="input-group">
+            <h3>📝 إضافة عميل بطلب ناقص</h3>
+            <input type="text" id="custName" placeholder="اسم العميل">
+            <input type="text" id="custPhone" placeholder="رقم الموبايل">
+            <input type="text" id="custOrder" placeholder="المنتج الناقص">
+            <button class="main-btn" style="background:var(--primary); color:white" onclick="addPendingOrder()">إضافة لقائمة الانتظار 📌</button>
+        </div>
+        
+        <button class="main-btn" style="background:#10b981; color:white" onclick="generateReport()">نسخ التقرير للواتساب 📤</button>
+        <button class="main-btn" style="background:#334155; color:white" onclick="saveToArchive()">حفظ اليوم في الأرشيف 💾</button>
+    </div>
+
+    <div id="followup" class="view-content">
+        <h3>🔔 طلبات عملاء في انتظار التوفر</h3>
+        <p><small>اضغط على الطلب عند توفره ليتحول للأخضر ويُؤرشف</small></p>
+        <div id="pendingList"></div>
+    </div>
+
+    <div id="archive" class="view-content">
+        <h3>📋 سجل الأرشيف الشهري</h3>
+        <button class="main-btn" style="background:#27ae60; color:white" onclick="exportToExcel()">تحميل Excel 📗</button>
+        <table class="archive-table">
+            <thead><tr><th>التاريخ</th><th>الشيفت</th><th>الإجمالي</th><th>المهام</th><th>الطوارئ</th><th>المبيعات</th></tr></thead>
+            <tbody id="archiveBody"></tbody>
+        </table>
+        <button class="main-btn" style="background:#ef4444; color:white; margin-top:20px" onclick="clearArchive()">مسح الأرشيف</button>
+    </div>
+</div>
+
+<script>
+    let data = JSON.parse(localStorage.getItem('shiftData')) || { branch: 0, talabat: 0, instashop: 0, cancelled: 0 };
+    let pendingOrders = JSON.parse(localStorage.getItem('pendingOrders')) || [];
+    
+    // 🔥 تحديث مصفوفة المنتجات - تبدأ بالأساسيات ويمكن إضافة المزيد
+    let topSellers = JSON.parse(localStorage.getItem('customSellers')) || ["☕ قهوة", "🥤 بيبسي", "💧 مياه", "🥪 ساندوتش", "🍫 شوكولاتة", "🍟 بطاطس"];
+    let sellerCounts = JSON.parse(localStorage.getItem('sellerCounts')) || {};
+    let tasksStatus = JSON.parse(localStorage.getItem('tasksStatus')) || {};
+
+    // المهام الأساسية
+    const tasks = ["جرد الخزينة", "نظافة الصالة", "استلام البضاعة", "تسديد الفواتير", "مراجعة الطلبات"];
+
+    function showTab(tabId) {
+        document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        event.currentTarget.classList.add('active');
+        if(tabId === 'followup') renderPending();
+        if(tabId === 'archive') renderArchive();
+    }
+
+    function change(type, val) {
+        data[type] = Math.max(0, data[type] + val);
+        localStorage.setItem('shiftData', JSON.stringify(data));
+        updateUI();
+    }
+
+    function updateUI() {
+        document.getElementById('branch').innerText = data.branch;
+        document.getElementById('talabat').innerText = data.talabat;
+        document.getElementById('instashop').innerText = data.instashop;
+        
+        // تحديث التايمر
+        updateTimer();
+    }
+
+    // ✅ دوال Checklist
+    function renderTasks() {
+        const list = document.getElementById('checklist');
+        list.innerHTML = tasks.map(t => {
+            const checked = tasksStatus[t] ? 'checked' : '';
+            return `<div class="task-item">
+                <input type="checkbox" ${checked} onchange="toggleTask('${t}')"> 
+                <span>${t}</span>
+            </div>`;
+        }).join('');
+    }
+
+    function toggleTask(task) {
+        tasksStatus[task] = !tasksStatus[task];
+        localStorage.setItem('tasksStatus', JSON.stringify(tasksStatus));
+    }
+
+    // 🔥 دوال Top Sellers المطورة
+    function renderSellers() {
+        const div = document.getElementById('sellers');
+        div.innerHTML = topSellers.map(s => {
+            const count = sellerCounts[s] || 0;
+            return `
+                <div style="position: relative; flex: 1 0 auto; min-width: 80px;">
+                    <button class="seller-btn" onclick="addSeller('${s.replace(/'/g, "\\'")}')">
+                        ${s} <span>${count > 0 ? count : ''}</span>
+                    </button>
+                    <button class="delete-product-btn" onclick="removeProduct('${s.replace(/'/g, "\\'")}')" title="حذف المنتج">×</button>
+                </div>
+            `;
+        }).join('');
+        
+        // تحديث إجمالي المبيعات
+        const total = Object.values(sellerCounts).reduce((a, b) => a + b, 0);
+        document.getElementById('sellerTotal').innerText = total;
+        
+        updateSellerStats();
+    }
+
+    function addSeller(name) {
+        sellerCounts[name] = (sellerCounts[name] || 0) + 1;
+        localStorage.setItem('sellerCounts', JSON.stringify(sellerCounts));
+        renderSellers();
+    }
+
+    // إضافة منتج جديد
+    function addNewProductBtn() {
+        const name = document.getElementById('newProductName').value.trim();
+        if (name === "") return alert("✏️ اكتب اسم المنتج أولاً!");
+        
+        // إضافة رمز إيموجي افتراضي إذا لم يوجد
+        let productName = name;
+        if (!productName.match(/[\u{1F300}-\u{1F6FF}]/u)) {
+            productName = "📦 " + productName;
+        }
+        
+        if (!topSellers.includes(productName)) {
+            topSellers.push(productName);
+            localStorage.setItem('customSellers', JSON.stringify(topSellers));
+            renderSellers();
+            document.getElementById('newProductName').value = "";
+            alert(`✅ تم إضافة "${productName}" بنجاح!`);
+        } else {
+            alert("❌ هذا المنتج موجود بالفعل!");
+        }
+    }
+
+    // حذف منتج
+    function removeProduct(name) {
+        if (confirm(`هل تريد حذف "${name}" من القائمة؟`)) {
+            topSellers = topSellers.filter(p => p !== name);
+            delete sellerCounts[name];
+            localStorage.setItem('customSellers', JSON.stringify(topSellers));
+            localStorage.setItem('sellerCounts', JSON.stringify(sellerCounts));
+            renderSellers();
+        }
+    }
+
+    // تصفير جميع العدادات
+    function resetAllSellers() {
+        if (confirm("هل تريد تصفير جميع عدادات المبيعات؟")) {
+            sellerCounts = {};
+            localStorage.setItem('sellerCounts', JSON.stringify(sellerCounts));
+            renderSellers();
+        }
+    }
+
+    function updateSellerStats() {
+        const stats = document.getElementById('sellerStats');
+        const sorted = Object.entries(sellerCounts).sort((a, b) => b[1] - a[1]).slice(0, 3);
+        if(sorted.length > 0) {
+            stats.innerHTML = '⭐ الأكثر مبيعاً: ' + sorted.map(([name, count]) => `${name} (${count})`).join(' | ');
+        } else {
+            stats.innerHTML = '✨ اضغط على المنتجات لتسجيل المبيعات';
+        }
+    }
+
+    // 💡 تنبيه Rush Hour
+    function showRushTip() {
+        const h = new Date().getHours();
+        let tip = '';
+        if (h >= 12 && h <= 14) tip = "⚠️ ذروة الغداء - استعد للزحمة!";
+        else if (h >= 20 && h <= 23) tip = "⚠️ ذروة العشاء - تجهز!";
+        else if (h >= 0 && h <= 5) tip = "🌙 وردية هادئة - وقت المهام الإدارية";
+        else tip = "✅ وقت هادئ - مناسب للمراجعة";
+
+        const oldTip = document.querySelector('.rush-tip');
+        if(oldTip) oldTip.remove();
+        
+        document.querySelector('.wrapper').insertAdjacentHTML('afterbegin', 
+            `<div class="rush-tip">💡 ${tip}</div>`);
+    }
+
+    // ⏱️ تايمر الوردية الحقيقي
+    function updateTimer() {
+        const now = new Date();
+        const h = now.getHours();
+
+        let shiftName = "";
+        let endHour = 0;
+        let startHour = 0;
+
+        if (h >= 9 && h < 16) {
+            shiftName = "الصباحي (9ص - 4م)";
+            startHour = 9;
+            endHour = 16;
+        } else if (h >= 16 && h < 24) {
+            shiftName = "الليلي (4م - 12ص)";
+            startHour = 16;
+            endHour = 24;
+        } else {
+            shiftName = "الأوفر نايت (12ص - 9ص)";
+            startHour = 0;
+            endHour = 9;
+        }
+
+        let target = new Date();
+        target.setHours(endHour, 0, 0, 0);
+        
+        if (endHour === 9 && h >= 0 && h < 9) {
+            target.setDate(target.getDate() + 0);
+        } else if (endHour <= startHour) {
+            target.setDate(target.getDate() + 1);
+        }
+        
+        let diff = target - now;
+        
+        let hours = Math.floor(diff / (1000 * 60 * 60));
+        let minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        let seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        const format = (num) => num < 10 ? "0" + num : num;
+
+        const totalShiftHours = endHour - startHour;
+        const elapsedHours = (now - new Date().setHours(startHour, 0, 0, 0)) / (1000 * 60 * 60);
+        const progress = Math.min(100, (elapsedHours / totalShiftHours) * 100);
+        
+        document.getElementById('progressFill').style.width = progress + '%';
+
+        let timerClass = 'timer-normal';
+        if (hours < 1) {
+            timerClass = 'timer-critical';
+        } else if (hours < 2) {
+            timerClass = 'timer-warning';
+        }
+
+        document.getElementById('shiftTitle').innerHTML = `
+            <span style="color: var(--primary);">الوردية: ${shiftName}</span>
+        `;
+        
+        document.getElementById('liveTime').innerHTML = `
+            <span style="color:#94a3b8">🕐 ${now.toLocaleTimeString('ar-EG')}</span><br>
+            <span class="${timerClass}" style="font-size: 1.3em;">⏳ متبقي: ${format(hours)}:${format(minutes)}:${format(seconds)}</span>
+        `;
+    }
+
+    // 📝 إضافة طلب ناقص
+    function addPendingOrder() {
+        const name = document.getElementById('custName').value;
+        const phone = document.getElementById('custPhone').value;
+        const order = document.getElementById('custOrder').value;
+        if(!name || !order) return alert("أكمل البيانات!");
+
+        pendingOrders.push({ 
+            name, 
+            phone, 
+            order, 
+            status: 'waiting', 
+            date: new Date().toLocaleDateString(),
+            time: new Date().toLocaleTimeString()
+        });
+        localStorage.setItem('pendingOrders', JSON.stringify(pendingOrders));
+        
+        document.getElementById('custName').value = '';
+        document.getElementById('custPhone').value = '';
+        document.getElementById('custOrder').value = '';
+        alert("✅ تمت الإضافة لقائمة المتابعة");
+    }
+
+    // عرض قائمة النواقص
+    function renderPending() {
+        const list = document.getElementById('pendingList');
+        const waitingCount = pendingOrders.filter(o => o.status === 'waiting').length;
+        
+        list.innerHTML = pendingOrders.map((item, index) => `
+            <div class="pending-item ${item.status === 'done' ? 'completed' : ''}" onclick="markAsDone(${index})">
+                <span>
+                    <b>${item.name}</b> (${item.phone})<br>
+                    طلب: ${item.order} <small>📅 ${item.date} ${item.time || ''}</small>
+                </span>
+                <span>${item.status === 'done' ? '✅ تم التوفير' : '⏳ في الانتظار'}</span>
+            </div>
+        `).join('') || '<p style="text-align:center; color:#94a3b8;">✨ لا توجد نواقص حالياً</p>';
+        
+        const followupTab = document.querySelectorAll('.tab-btn')[1];
+        if (waitingCount > 0) {
+            followupTab.innerHTML = `🔔 متابعة النواقص (${waitingCount})`;
+        } else {
+            followupTab.innerHTML = `🔔 متابعة النواقص`;
+        }
+    }
+
+    // تحويل الطلب لتم التوفير
+    function markAsDone(index) {
+        if(pendingOrders[index].status === 'done') return;
+        if(confirm("هل توفر هذا المنتج بالفعل؟")) {
+            pendingOrders[index].status = 'done';
+            localStorage.setItem('pendingOrders', JSON.stringify(pendingOrders));
+            
+            let archive = JSON.parse(localStorage.getItem('monthlyArchive')) || [];
+            archive.push({ 
+                "التاريخ": new Date().toLocaleDateString('ar-EG'), 
+                "الشيفت": "توفير نواقص", 
+                "الإجمالي الفعلي": pendingOrders[index].order,
+                "المهام": "-",
+                "الطوارئ": "-",
+                "المبيعات": "-"
+            });
+            localStorage.setItem('monthlyArchive', JSON.stringify(archive));
+            
+            renderPending();
+        }
+    }
+
+    // حفظ في الأرشيف (محدث)
+    function saveToArchive() {
+        let archive = JSON.parse(localStorage.getItem('monthlyArchive')) || [];
+        
+        const completedTasks = Object.values(tasksStatus).filter(v => v).length;
+        const tasksSummary = `✅ ${completedTasks}/${tasks.length} مهام`;
+
+        // تفاصيل المبيعات
+        const salesDetails = Object.entries(sellerCounts)
+            .filter(([_, count]) => count > 0)
+            .map(([name, count]) => `${name}:${count}`)
+            .join(' | ');
+
+        const topSeller = Object.entries(sellerCounts).sort((a, b) => b[1] - a[1])[0];
+        const salesSummary = topSeller ? `🔥 ${topSeller[0]} (${topSeller[1]})` : 'لا يوجد مبيعات';
+
+        const incident = document.getElementById('incident').value || 'لا يوجد';
+
+        archive.push({ 
+            "التاريخ": new Date().toLocaleDateString('ar-EG'), 
+            "الشيفت": document.getElementById('shiftTitle').innerText.replace('الوردية: ', ''), 
+            "الإجمالي الفعلي": data.branch + data.talabat + data.instashop,
+            "المهام": tasksSummary,
+            "الطوارئ": incident,
+            "المبيعات": salesDetails || 'لا يوجد'
+        });
+        localStorage.setItem('monthlyArchive', JSON.stringify(archive));
+        
+        if(confirm("✅ تم الحفظ! هل تريد تصفير عدادات اليوم؟")) {
+            data = { branch: 0, talabat: 0, instashop: 0, cancelled: 0 };
+            sellerCounts = {};
+            tasksStatus = {};
+            document.getElementById('incident').value = '';
+            localStorage.setItem('shiftData', JSON.stringify(data));
+            localStorage.setItem('sellerCounts', JSON.stringify(sellerCounts));
+            localStorage.setItem('tasksStatus', JSON.stringify(tasksStatus));
+            updateUI();
+            renderSellers();
+            renderTasks();
+        }
+    }
+
+    // عرض الأرشيف (محدث)
+    function renderArchive() {
+        let archive = JSON.parse(localStorage.getItem('monthlyArchive')) || [];
+        document.getElementById('archiveBody').innerHTML = archive.map(item => 
+            `<tr>
+                <td>${item["التاريخ"]}</td>
+                <td>${item["الشيفت"]}</td>
+                <td>${item["الإجمالي الفعلي"]}</td>
+                <td>${item["المهام"] || '-'}</td>
+                <td>${item["الطوارئ"] || '-'}</td>
+                <td>${item["المبيعات"] || '-'}</td>
+            </tr>`
+        ).join('');
+    }
+
+    // تصدير Excel (محدث)
+    function exportToExcel() {
+        let archive = JSON.parse(localStorage.getItem('monthlyArchive')) || [];
+        const ws = XLSX.utils.json_to_sheet(archive);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "التقرير الشهري");
+        XLSX.writeFile(wb, `Monthly_Report_${new Date().toLocaleDateString().replace(/\//g, '-')}.xlsx`);
+    }
+
+    // تقرير واتساب (محدث)
+    function generateReport() {
+        const incident = document.getElementById('incident').value;
+        const completedTasks = Object.values(tasksStatus).filter(v => v).length;
+        const waitingCount = pendingOrders.filter(o => o.status === 'waiting').length;
+        
+        // تفاصيل المبيعات للتقرير
+        let sellersText = "📊 *تفاصيل المبيعات:*\n";
+        const activeSales = Object.entries(sellerCounts).filter(([_, count]) => count > 0);
+        if (activeSales.length > 0) {
+            activeSales.forEach(([name, count]) => {
+                sellersText += `▪️ ${name}: ${count}\n`;
+            });
+        } else {
+            sellersText += `▪️ لا توجد مبيعات مسجلة\n`;
+        }
+        
+        const timerText = document.querySelector('#liveTime .timer-critical, #liveTime .timer-warning, #liveTime .timer-normal')?.innerText || '';
+        
+        const report = `📊 *تقرير الوردية الشامل*
+━━━━━━━━━━━━━━
+📍 *الفرع:* ${data.branch}
+📱 *طلبات:* ${data.talabat}
+🌐 *انستا:* ${data.instashop}
+✅ *الإجمالي:* ${data.branch + data.talabat + data.instashop}
+
+${sellersText}
+✅ *المهام المنجزة:* ${completedTasks}/${tasks.length}
+🚨 *بلاغ الطوارئ:* ${incident || 'لا يوجد'}
+
+⏳ *النواقص المتبقية:* ${waitingCount}
+⏱️ *الوقت المتبقي:* ${timerText.replace('⏳ متبقي: ', '')}
+
+📅 ${new Date().toLocaleString('ar-EG')}`;
+
+        navigator.clipboard.writeText(report);
+        alert("✅ تم نسخ التقرير!");
+    }
+
+    // مسح الأرشيف
+    function clearArchive() { 
+        if(confirm("⚠️ هل أنت متأكد؟ سيتم حذف كل البيانات!")) { 
+            localStorage.clear(); 
+            location.reload(); 
+        } 
+    }
+
+    // التهيئة
+    updateUI();
+    renderTasks();
+    renderSellers();
+    showRushTip();
+    renderPending();
+    
+    // تشغيل التايمر كل ثانية
+    setInterval(updateTimer, 1000);
+    setInterval(showRushTip, 60000);
+</script>
+</body>
+</html>
