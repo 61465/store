@@ -3,14 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام إدارة الوردية - تقارير احترافية</title>
+    <title>نظام إدارة العمليات المتكامل - الوردية</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <style>
-        :root { --primary: #6366f1; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --success: #10b981; --danger: #ef4444; --warning: #f59e0b; }
+        :root { 
+            --primary: #6366f1; 
+            --bg: #0f172a; 
+            --card: #1e293b; 
+            --text: #f8fafc; 
+            --success: #10b981; 
+            --danger: #ef4444; 
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --purple: #8b5cf6;
+        }
         * { box-sizing: border-box; font-family: 'Cairo', sans-serif; }
         body { background-color: var(--bg); color: var(--text); margin: 0; padding: 15px; }
-        .wrapper { width: 100%; max-width: 900px; margin: auto; }
+        .wrapper { width: 100%; max-width: 1200px; margin: auto; }
         header { text-align: center; padding: 15px; border-bottom: 2px solid var(--primary); margin-bottom: 20px; }
         .tabs { display: flex; gap: 5px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
         .tab-btn { flex: 1; min-width: 100px; padding: 10px; border: none; background: #334155; color: white; cursor: pointer; border-radius: 8px; font-size: 13px; }
@@ -18,10 +28,44 @@
         .view-content { display: none; }
         .view-content.active { display: block; }
         
-        /* سجل النواقص الخاص بالعملاء */
-        .pending-item { background: var(--card); padding: 12px; border-radius: 10px; margin-bottom: 10px; border-right: 5px solid #ef4444; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.3s; }
-        .pending-item.completed { border-right-color: var(--success); opacity: 0.8; background: #064e3b; }
-        .pending-item span b { color: var(--primary); }
+        /* سجل النواقص الخاص بالعملاء - تصميم جدولي */
+        .shortages-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        .shortages-table th {
+            background: var(--primary);
+            color: white;
+            padding: 10px;
+            font-weight: bold;
+        }
+        .shortages-table td {
+            border: 1px solid #444;
+            padding: 8px;
+            background: var(--card);
+        }
+        .shortages-table tr.completed td {
+            background: #064e3b;
+            opacity: 0.8;
+        }
+        .oos-badge {
+            background: var(--danger);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+        }
+        .confirm-btn {
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 12px;
+        }
 
         /* الأشكال العامة */
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
@@ -29,7 +73,7 @@
         .counter { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 5px; }
         .btn-c { width: 30px; height: 30px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; }
         .input-group { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid #444; margin-top: 15px; }
-        input, textarea { width: 100%; background: #0f172a; border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; margin-top: 5px; }
+        input, textarea, select { width: 100%; background: #0f172a; border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; margin-top: 5px; }
         .main-btn { width: 100%; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .archive-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
         .archive-table th, .archive-table td { border: 1px solid #444; padding: 10px; text-align: center; }
@@ -44,10 +88,7 @@
             margin-top: 10px;
             border: 1px solid #444;
         }
-        .timer-critical { 
-            animation: pulse 1s infinite;
-            font-weight: bold;
-        }
+        .timer-critical { animation: pulse 1s infinite; font-weight: bold; }
         @keyframes pulse {
             0% { color: #ef4444; }
             50% { color: #ffffff; }
@@ -78,14 +119,6 @@
             margin: 10px 0 5px 0;
             font-size: 1.1em;
         }
-        .shortage-badge {
-            background: var(--danger);
-            color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            margin-right: 10px;
-        }
         .export-buttons {
             display: flex;
             gap: 10px;
@@ -107,11 +140,12 @@
         .orders-btn { background: #27ae60; }
         .shortages-btn { background: #e67e22; }
         .summary-btn { background: #3498db; }
+        .canceled-btn { background: #ef4444; }
         
         /* إحصائيات سريعة */
         .stats-summary {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 10px;
             margin: 15px 0;
         }
@@ -127,6 +161,24 @@
             font-weight: bold;
             color: var(--primary);
         }
+        
+        /* Grid للإدخالات */
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .checkbox-label input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
     </style>
 </head>
 <body>
@@ -141,23 +193,16 @@
     </header>
 
     <div class="tabs">
-        <button class="tab-btn active" onclick="showTab('entry')">🏠 الإدخال</button>
-        <button class="tab-btn" onclick="showTab('followup')">🔔 متابعة النواقص</button>
+        <button class="tab-btn active" onclick="showTab('entry')">🏠 لوحة التحكم</button>
+        <button class="tab-btn" onclick="showTab('shortages')">🔔 جدول النواقص</button>
         <button class="tab-btn" onclick="showTab('archive')">📊 الأرشيف</button>
     </div>
 
     <div id="entry" class="view-content active">
-        <!-- عدادات الأوردرات -->
-        <div class="stats-grid">
-            <div class="stat-card"><h4>📍 فرع</h4><div class="counter"><button onclick="change('branch', -1)" class="btn-c" style="background:#ef4444">-</button><b id="branch">0</b><button onclick="change('branch', 1)" class="btn-c" style="background:var(--primary)">+</button></div></div>
-            <div class="stat-card"><h4>📱 طلبات</h4><div class="counter"><button onclick="change('talabat', -1)" class="btn-c" style="background:#ef4444">-</button><b id="talabat">0</b><button onclick="change('talabat', 1)" class="btn-c" style="background:var(--primary)">+</button></div></div>
-            <div class="stat-card"><h4>🌐 انستا</h4><div class="counter"><button onclick="change('instashop', -1)" class="btn-c" style="background:#ef4444">-</button><b id="instashop">0</b><button onclick="change('instashop', 1)" class="btn-c" style="background:var(--primary)">+</button></div></div>
-        </div>
-
         <!-- إحصائيات سريعة -->
         <div class="stats-summary">
             <div class="summary-card">
-                <div>⏳ نواقص عملاء</div>
+                <div>⏳ نواقص</div>
                 <div class="summary-number" id="pendingCount">0</div>
             </div>
             <div class="summary-card">
@@ -165,37 +210,63 @@
                 <div class="summary-number" id="completedCount">0</div>
             </div>
             <div class="summary-card">
-                <div>📊 إجمالي اليوم</div>
+                <div>📦 إجمالي اليوم</div>
                 <div class="summary-number" id="todayTotal">0</div>
+            </div>
+            <div class="summary-card">
+                <div>🚫 ملغيات</div>
+                <div class="summary-number" id="cancelTotal">0</div>
             </div>
         </div>
 
-        <!-- ✅ متابعة العمليات اليومية -->
-        <div class="input-group">
-            <h3>✅ متابعة العمليات اليومية</h3>
-            <div class="section-title">متابعة العملاء:</div>
-            <textarea id="customerFollowup" rows="2" placeholder="ملاحظات متابعة العملاء..."></textarea>
-            
-            <div class="section-title">تسجيل البضاعة الجديدة:</div>
-            <textarea id="newStock" rows="2" placeholder="البضاعة المستلمة اليوم..."></textarea>
-            
-            <div class="section-title">مراجعة الطلبات:</div>
-            <textarea id="orderReview" rows="2" placeholder="ملاحظات مراجعة الطلبات..."></textarea>
+        <!-- عدادات الأوردرات الأساسية -->
+        <div class="stats-grid">
+            <div class="stat-card"><h4>📍 فرع</h4><div class="counter"><button onclick="change('branch', -1)" class="btn-c" style="background:#ef4444">-</button><b id="branch">0</b><button onclick="change('branch', 1)" class="btn-c" style="background:var(--primary)">+</button></div></div>
+            <div class="stat-card"><h4>📱 طلبات</h4><div class="counter"><button onclick="change('talabat', -1)" class="btn-c" style="background:#ef4444">-</button><b id="talabat">0</b><button onclick="change('talabat', 1)" class="btn-c" style="background:var(--primary)">+</button></div></div>
+            <div class="stat-card"><h4>🌐 انستا</h4><div class="counter"><button onclick="change('instashop', -1)" class="btn-c" style="background:#ef4444">-</button><b id="instashop">0</b><button onclick="change('instashop', 1)" class="btn-c" style="background:var(--primary)">+</button></div></div>
         </div>
 
-        <!-- 🏢 نواقص الصالة -->
-        <div class="input-group">
-            <h3>🏢 نواقص الصالة</h3>
-            <textarea id="loungeShortages" rows="3" placeholder="اكتب نواقص الصالة هنا (منتجات، أدوات، مستلزمات)..."></textarea>
+        <!-- 🚫 الأوردرات الملغية مع السبب -->
+        <div class="input-group" style="border-right: 5px solid #ef4444;">
+            <h3>🚫 الأوردرات الملغية</h3>
+            <div class="input-grid">
+                <div>
+                    <label>📍 فرع ملغي:</label>
+                    <input type="number" id="cancelBranch" value="0" min="0">
+                </div>
+                <div>
+                    <label>📱 طلبات ملغية:</label>
+                    <input type="number" id="cancelTalabat" value="0" min="0">
+                </div>
+                <div>
+                    <label>🌐 انستا ملغي:</label>
+                    <input type="number" id="cancelInsta" value="0" min="0">
+                </div>
+            </div>
+            <textarea id="cancelReason" rows="2" placeholder="🔍 سبب الإلغاء بالتفصيل (نقص منتج، تأخير، خطأ من العميل...)"></textarea>
+            <button class="main-btn" style="background:#ef4444; color:white" onclick="addCancellation()">➕ تسجيل الإلغاءات</button>
         </div>
 
-        <!-- 📝 إضافة نواقص العملاء -->
+        <!-- 📦 العمليات الحسابية واللوجستية -->
         <div class="input-group">
-            <h3>📝 إضافة نواقص العملاء</h3>
-            <input type="text" id="custName" placeholder="اسم العميل">
-            <input type="text" id="custPhone" placeholder="رقم الموبايل">
-            <textarea id="custOrder" rows="2" placeholder="المنتجات الناقصة (يمكن كتابة أكثر من صنف)"></textarea>
-            <button class="main-btn" style="background:var(--primary); color:white" onclick="addPendingOrder()">➕ إضافة لقائمة النواقص</button>
+            <h3>📦 العمليات الحسابية واللوجستية</h3>
+            <textarea id="newStockOrders" rows="3" placeholder="تسجيل البضاعة الجديدة على طلبات..."></textarea>
+        </div>
+
+        <!-- 👤 إضافة نقص عميل جديد -->
+        <div class="input-group">
+            <h3>👤 إضافة طلب عميل جديد</h3>
+            <div class="input-grid">
+                <input type="text" id="cName" placeholder="اسم العميل">
+                <input type="text" id="cPhone" placeholder="رقم العميل">
+                <input type="text" id="cProduct" placeholder="اسم المنتج">
+                <input type="text" id="cCompany" placeholder="الشركة / المورد">
+            </div>
+            <div class="checkbox-label">
+                <input type="checkbox" id="cNotAvailable">
+                <label for="cNotAvailable">⚠️ المنتج غير متوفر تماماً (Out of Stock - يحتاج طلب)</label>
+            </div>
+            <button class="main-btn" style="background:var(--primary); color:white" onclick="addNewShortage()">➕ إضافة نقص جديد</button>
         </div>
         
         <!-- أزرار التقارير -->
@@ -203,10 +274,37 @@
         <button class="main-btn" style="background:#334155; color:white" onclick="saveDailyReport()">💾 حفظ تقرير اليوم</button>
     </div>
 
-    <div id="followup" class="view-content">
-        <h3>🔔 نواقص العملاء في انتظار التوفر</h3>
-        <p><small>اضغط على الطلب عند توفره ليتحول للأخضر</small></p>
-        <div id="pendingList"></div>
+    <div id="shortages" class="view-content">
+        <h3>🔔 جدول متابعة نواقص العملاء</h3>
+        
+        <!-- فلتر عرض -->
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <select id="statusFilter" onchange="renderShortagesTable()" style="flex:1;">
+                <option value="all">جميع النواقص</option>
+                <option value="pending">في الانتظار فقط</option>
+                <option value="done">المنتهية فقط</option>
+            </select>
+            <button onclick="renderShortagesTable()" class="main-btn" style="margin:0; background:var(--info);">🔄 تحديث</button>
+        </div>
+        
+        <div style="overflow-x: auto;">
+            <table class="shortages-table" id="shortagesTable">
+                <thead>
+                    <tr>
+                        <th>التاريخ</th>
+                        <th>الشيفت</th>
+                        <th>العميل</th>
+                        <th>رقم الهاتف</th>
+                        <th>المنتج</th>
+                        <th>الشركة</th>
+                        <th>حالة</th>
+                        <th>ملاحظات</th>
+                        <th>تأكيد</th>
+                    </tr>
+                </thead>
+                <tbody id="shortagesBody"></tbody>
+            </table>
+        </div>
     </div>
 
     <div id="archive" class="view-content">
@@ -217,25 +315,29 @@
         
         <!-- أزرار تصدير احترافية -->
         <div class="export-buttons">
-            <button onclick="exportOrdersExcel()" class="export-btn orders-btn">📊 تقرير الأوردرات الاحترافي</button>
-            <button onclick="exportShortagesExcel()" class="export-btn shortages-btn">⚠️ تقرير النواقص الشامل</button>
-            <button onclick="exportSummaryExcel()" class="export-btn summary-btn">📈 تقرير ملخص شامل</button>
+            <button onclick="exportOrdersExcel()" class="export-btn orders-btn">📊 تقرير الأوردرات</button>
+            <button onclick="exportShortagesExcel()" class="export-btn shortages-btn">⚠️ تقرير النواقص</button>
+            <button onclick="exportCanceledExcel()" class="export-btn canceled-btn">🚫 تقرير الملغيات</button>
+            <button onclick="exportSummaryExcel()" class="export-btn summary-btn">📈 ملخص شامل</button>
         </div>
         
-        <table class="archive-table">
-            <thead>
-                <tr>
-                    <th>التاريخ</th>
-                    <th>الوردية</th>
-                    <th>فرع</th>
-                    <th>طلبات</th>
-                    <th>انستا</th>
-                    <th>الإجمالي</th>
-                    <th>نواقص الصالة</th>
-                </tr>
-            </thead>
-            <tbody id="archiveBody"></tbody>
-        </table>
+        <div style="overflow-x: auto;">
+            <table class="archive-table">
+                <thead>
+                    <tr>
+                        <th>التاريخ</th>
+                        <th>الوردية</th>
+                        <th>فرع</th>
+                        <th>طلبات</th>
+                        <th>انستا</th>
+                        <th>الإجمالي</th>
+                        <th>ملغيات</th>
+                        <th>عمليات</th>
+                    </tr>
+                </thead>
+                <tbody id="archiveBody"></tbody>
+            </table>
+        </div>
         
         <button class="main-btn" style="background:#ef4444; color:white; margin-top:20px" onclick="clearArchive()">🗑️ مسح الأرشيف</button>
     </div>
@@ -246,14 +348,22 @@
     let data = JSON.parse(localStorage.getItem('shiftData')) || { branch: 0, talabat: 0, instashop: 0 };
     let pendingOrders = JSON.parse(localStorage.getItem('pendingOrders')) || [];
     let dailyReports = JSON.parse(localStorage.getItem('dailyReports')) || [];
+    let canceledOrders = JSON.parse(localStorage.getItem('canceledOrders')) || [];
 
-    // ================ دالة عرض التبويبات ================
+    // ================ دوال المساعدة ================
+    function getCurrentShift() {
+        const h = new Date().getHours();
+        if (h >= 9 && h < 16) return "صباحي";
+        if (h >= 16 && h < 24) return "ليلي";
+        return "أوفر نايت";
+    }
+
     function showTab(tabId) {
         document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(tabId).classList.add('active');
         event.currentTarget.classList.add('active');
-        if(tabId === 'followup') renderPending();
+        if(tabId === 'shortages') renderShortagesTable();
         if(tabId === 'archive') {
             renderArchive();
             updateArchiveStats();
@@ -265,7 +375,6 @@
         data[type] = Math.max(0, data[type] + val);
         localStorage.setItem('shiftData', JSON.stringify(data));
         updateUI();
-        updateSummaryStats();
     }
 
     // ================ تايمر الوردية ================
@@ -341,104 +450,161 @@
 
     // ================ إحصائيات سريعة ================
     function updateSummaryStats() {
-        const pendingCount = pendingOrders.filter(o => o.status === 'waiting').length;
+        const pendingCount = pendingOrders.filter(o => o.status === 'pending').length;
         const completedCount = pendingOrders.filter(o => o.status === 'done').length;
         const todayTotal = data.branch + data.talabat + data.instashop;
+        
+        // إجمالي الملغيات اليوم
+        const todayCanceled = canceledOrders
+            .filter(c => c.date === new Date().toLocaleDateString('ar-EG'))
+            .reduce((sum, c) => sum + c.branch + c.talabat + c.insta, 0);
         
         document.getElementById('pendingCount').innerText = pendingCount;
         document.getElementById('completedCount').innerText = completedCount;
         document.getElementById('todayTotal').innerText = todayTotal;
+        document.getElementById('cancelTotal').innerText = todayCanceled;
     }
 
-    // ================ إدارة نواقص العملاء ================
-    function addPendingOrder() {
-        const name = document.getElementById('custName').value;
-        const phone = document.getElementById('custPhone').value;
-        const order = document.getElementById('custOrder').value;
+    // ================ إضافة إلغاء ================
+    function addCancellation() {
+        const branch = parseInt(document.getElementById('cancelBranch').value) || 0;
+        const talabat = parseInt(document.getElementById('cancelTalabat').value) || 0;
+        const insta = parseInt(document.getElementById('cancelInsta').value) || 0;
+        const reason = document.getElementById('cancelReason').value;
         
-        if(!name || !order) return alert("❌ أكمل البيانات الأساسية!");
-
-        pendingOrders.push({ 
-            name, 
-            phone, 
-            order, 
-            status: 'waiting', 
-            date: new Date().toLocaleDateString(),
+        if ((branch + talabat + insta) === 0) {
+            return alert("❌ أدخل عدد الإلغاءات على الأقل");
+        }
+        
+        canceledOrders.push({
+            date: new Date().toLocaleDateString('ar-EG'),
+            shift: getCurrentShift(),
+            branch,
+            talabat,
+            insta,
+            reason,
             time: new Date().toLocaleTimeString()
         });
+        
+        localStorage.setItem('canceledOrders', JSON.stringify(canceledOrders));
+        
+        // تصفير الحقول
+        document.getElementById('cancelBranch').value = 0;
+        document.getElementById('cancelTalabat').value = 0;
+        document.getElementById('cancelInsta').value = 0;
+        document.getElementById('cancelReason').value = '';
+        
+        alert("✅ تم تسجيل الإلغاءات");
+        updateSummaryStats();
+    }
+
+    // ================ إضافة نقص عميل جديد ================
+    function addNewShortage() {
+        const name = document.getElementById('cName').value;
+        const phone = document.getElementById('cPhone').value;
+        const product = document.getElementById('cProduct').value;
+        const company = document.getElementById('cCompany').value;
+        const isOOS = document.getElementById('cNotAvailable').checked;
+        
+        if (!name || !product) {
+            return alert("❌ اسم العميل والمنتج مطلوبان");
+        }
+        
+        const entry = {
+            id: Date.now(),
+            name,
+            phone,
+            product,
+            company,
+            isOOS,
+            date: new Date().toLocaleDateString('ar-EG'),
+            shift: getCurrentShift(),
+            time: new Date().toLocaleTimeString(),
+            status: 'pending',
+            note: ''
+        };
+        
+        pendingOrders.push(entry);
         localStorage.setItem('pendingOrders', JSON.stringify(pendingOrders));
         
         // تفريغ الحقول
-        document.getElementById('custName').value = '';
-        document.getElementById('custPhone').value = '';
-        document.getElementById('custOrder').value = '';
+        document.getElementById('cName').value = '';
+        document.getElementById('cPhone').value = '';
+        document.getElementById('cProduct').value = '';
+        document.getElementById('cCompany').value = '';
+        document.getElementById('cNotAvailable').checked = false;
         
-        alert("✅ تمت إضافة النواقص بنجاح");
+        alert("✅ تم إضافة النقص بنجاح");
         updateSummaryStats();
         
-        if (document.getElementById('followup').classList.contains('active')) {
-            renderPending();
+        if (document.getElementById('shortages').classList.contains('active')) {
+            renderShortagesTable();
         }
     }
 
-    function renderPending() {
-        const list = document.getElementById('pendingList');
-        const waitingCount = pendingOrders.filter(o => o.status === 'waiting').length;
+    // ================ عرض جدول النواقص ================
+    function renderShortagesTable() {
+        const filter = document.getElementById('statusFilter').value;
+        let filteredOrders = pendingOrders;
         
-        list.innerHTML = pendingOrders.map((item, index) => `
-            <div class="pending-item ${item.status === 'done' ? 'completed' : ''}" onclick="markAsDone(${index})">
-                <span>
-                    <b>${item.name}</b> ${item.phone ? '('+item.phone+')' : ''}<br>
-                    <small>المنتجات: ${item.order}</small><br>
-                    <small style="color:#94a3b8;">📅 ${item.date} ${item.time || ''}</small>
-                </span>
-                <span>${item.status === 'done' ? '✅ تم التوفير' : '⏳ في الانتظار'}</span>
-            </div>
-        `).join('') || '<p style="text-align:center; color:#94a3b8;">✨ لا توجد نواقص حالياً</p>';
+        if (filter === 'pending') {
+            filteredOrders = pendingOrders.filter(o => o.status === 'pending');
+        } else if (filter === 'done') {
+            filteredOrders = pendingOrders.filter(o => o.status === 'done');
+        }
         
-        // تحديث عداد التبويب
-        const followupTab = document.querySelectorAll('.tab-btn')[1];
-        followupTab.innerHTML = `🔔 متابعة النواقص ${waitingCount ? '('+waitingCount+')' : ''}`;
-        updateSummaryStats();
+        const tbody = document.getElementById('shortagesBody');
+        tbody.innerHTML = filteredOrders.map((item, index) => {
+            const originalIndex = pendingOrders.findIndex(o => o.id === item.id);
+            return `
+            <tr class="${item.status === 'done' ? 'completed' : ''}">
+                <td>${item.date}<br><small>${item.time}</small></td>
+                <td>${item.shift}</td>
+                <td>${item.name}</td>
+                <td>${item.phone || '-'}</td>
+                <td>${item.product} ${item.isOOS ? '<span class="oos-badge">غير متوفر</span>' : ''}</td>
+                <td>${item.company || '-'}</td>
+                <td>${item.status === 'done' ? '✅ تم' : '⏳ انتظار'}</td>
+                <td>${item.note || '-'}</td>
+                <td>
+                    ${item.status === 'pending' ? 
+                        `<button class="confirm-btn" onclick="confirmDelivery(${originalIndex})">✔ تأكيد</button>` : 
+                        'تم'
+                    }
+                </td>
+            </tr>
+        `}).join('') || '<tr><td colspan="9" style="text-align:center">لا توجد بيانات</td></tr>';
     }
 
-    function markAsDone(index) {
-        if(pendingOrders[index].status === 'done') return;
-        if(confirm("✅ هل تم توفير هذه المنتجات؟")) {
+    function confirmDelivery(index) {
+        const note = prompt("📝 أكتب ملاحظة التأكيد (ماذا قال العميل، متى سيأتي؟):");
+        if (note !== null) {
             pendingOrders[index].status = 'done';
+            pendingOrders[index].note = note;
             localStorage.setItem('pendingOrders', JSON.stringify(pendingOrders));
-            renderPending();
+            renderShortagesTable();
             updateSummaryStats();
         }
     }
 
     // ================ حفظ التقرير اليومي ================
     function saveDailyReport() {
-        // جمع البيانات
         const report = {
             "التاريخ": new Date().toLocaleDateString('ar-EG'),
-            "الوردية": document.getElementById('shiftTitle').innerText.replace('الوردية: ', ''),
+            "الوردية": getCurrentShift(),
             "فرع": data.branch,
             "طلبات": data.talabat,
             "انستا": data.instashop,
             "إجمالي الأوردرات": data.branch + data.talabat + data.instashop,
-            "متابعة العملاء": document.getElementById('customerFollowup').value || '-',
-            "البضاعة الجديدة": document.getElementById('newStock').value || '-',
-            "مراجعة الطلبات": document.getElementById('orderReview').value || '-',
-            "نواقص الصالة": document.getElementById('loungeShortages').value || '-'
+            "العمليات": document.getElementById('newStockOrders').value || '-'
         };
         
         dailyReports.push(report);
         localStorage.setItem('dailyReports', JSON.stringify(dailyReports));
         
-        // تصفير الحقول
-        if(confirm("✅ تم حفظ التقرير! هل تريد تصفير عدادات وحقول اليوم؟")) {
+        if (confirm("✅ تم حفظ التقرير! هل تريد تصفير عدادات اليوم؟")) {
             data = { branch: 0, talabat: 0, instashop: 0 };
-            document.getElementById('customerFollowup').value = '';
-            document.getElementById('newStock').value = '';
-            document.getElementById('orderReview').value = '';
-            document.getElementById('loungeShortages').value = '';
-            
+            document.getElementById('newStockOrders').value = '';
             localStorage.setItem('shiftData', JSON.stringify(data));
             updateUI();
         }
@@ -449,17 +615,23 @@
 
     // ================ عرض الأرشيف ================
     function renderArchive() {
-        document.getElementById('archiveBody').innerHTML = dailyReports.map(item => 
-            `<tr>
+        document.getElementById('archiveBody').innerHTML = dailyReports.map(item => {
+            // حساب ملغيات هذا اليوم
+            const dayCanceled = canceledOrders
+                .filter(c => c.date === item["التاريخ"])
+                .reduce((sum, c) => sum + c.branch + c.talabat + c.insta, 0);
+            
+            return `<tr>
                 <td>${item["التاريخ"]}</td>
                 <td>${item["الوردية"]}</td>
                 <td>${item["فرع"]}</td>
                 <td>${item["طلبات"]}</td>
                 <td>${item["انستا"]}</td>
                 <td>${item["إجمالي الأوردرات"]}</td>
-                <td>${item["نواقص الصالة"]}</td>
-            </tr>`
-        ).join('') || '<tr><td colspan="7" style="text-align:center">لا توجد تقارير محفوظة</td></tr>';
+                <td>${dayCanceled || 0}</td>
+                <td>${item["العمليات"]}</td>
+            </tr>`;
+        }).join('') || '<tr><td colspan="8" style="text-align:center">لا توجد تقارير محفوظة</td></tr>';
     }
 
     function updateArchiveStats() {
@@ -469,7 +641,7 @@
         }
         
         const totalOrders = dailyReports.reduce((sum, item) => sum + (item["إجمالي الأوردرات"] || 0), 0);
-        const avgOrders = Math.round(totalOrders / dailyReports.length);
+        const totalCanceled = canceledOrders.reduce((sum, c) => sum + c.branch + c.talabat + c.insta, 0);
         
         document.getElementById('archiveStats').innerHTML = `
             <div class="summary-card">
@@ -481,185 +653,159 @@
                 <div class="summary-number">${totalOrders}</div>
             </div>
             <div class="summary-card">
-                <div>📈 متوسط يومي</div>
-                <div class="summary-number">${avgOrders}</div>
+                <div>🚫 إجمالي الملغيات</div>
+                <div class="summary-number">${totalCanceled}</div>
+            </div>
+            <div class="summary-card">
+                <div>⏳ نواقص نشطة</div>
+                <div class="summary-number">${pendingOrders.filter(o => o.status === 'pending').length}</div>
             </div>
         `;
     }
 
     // ================ تقارير Excel احترافية ================
 
-    // 1. تقرير الأوردرات الاحترافي
     function exportOrdersExcel() {
         if(dailyReports.length === 0) return alert("📭 لا توجد تقارير محفوظة!");
         
-        // حساب الإحصائيات
         const totalOrders = dailyReports.reduce((sum, item) => sum + item["إجمالي الأوردرات"], 0);
         const avgOrders = Math.round(totalOrders / dailyReports.length);
-        const maxOrders = Math.max(...dailyReports.map(item => item["إجمالي الأوردرات"]));
         
-        // تجهيز البيانات
         const ordersData = dailyReports.map(item => ({
             "📅 التاريخ": item["التاريخ"],
             "🕐 الوردية": item["الوردية"],
             "📍 فرع": item["فرع"],
             "📱 طلبات": item["طلبات"],
             "🌐 انستا": item["انستا"],
-            "✅ الإجمالي": item["إجمالي الأوردرات"],
-            "📝 ملاحظات": item["مراجعة الطلبات"]
+            "✅ الإجمالي": item["إجمالي الأوردرات"]
         }));
 
         const ws = XLSX.utils.json_to_sheet(ordersData);
         
-        // إضافة ملخص في البداية
         XLSX.utils.sheet_add_aoa(ws, [
             ["📊 تقرير الأوردرات الشامل"],
             [`الفترة: ${dailyReports[0]["التاريخ"]} - ${dailyReports[dailyReports.length-1]["التاريخ"]}`],
             [],
-            ["📈 ملخص إحصائي:"],
-            [`إجمالي الأوردرات: ${totalOrders}`, `متوسط يومي: ${avgOrders}`, `أعلى يوم: ${maxOrders}`],
-            [],
-            ["تفاصيل الأوردرات:"]
+            ["📈 ملخص:", `إجمالي: ${totalOrders}`, `متوسط: ${avgOrders}`],
+            []
         ], { origin: "A1" });
         
-        // ضبط عرض الأعمدة
-        ws['!cols'] = [
-            {wch: 15}, {wch: 20}, {wch: 10}, {wch: 10}, {wch: 10}, {wch: 12}, {wch: 30}
-        ];
+        ws['!cols'] = [{wch: 15}, {wch: 15}, {wch: 10}, {wch: 10}, {wch: 10}, {wch: 12}];
 
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "تقرير الأوردرات");
-        
-        // تنسيق اسم الملف
-        const monthNames = ["يناير", "فبراير", "مارس", "إبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
-        const currentMonth = monthNames[new Date().getMonth()];
-        
-        XLSX.writeFile(wb, `📊_تقرير_الأوردرات_${currentMonth}.xlsx`);
+        XLSX.writeFile(wb, `📊_تقرير_الأوردرات_${new Date().toLocaleDateString().replace(/\//g, '-')}.xlsx`);
     }
 
-    // 2. تقرير النواقص الشامل
     function exportShortagesExcel() {
-        // تجهيز نواقص العملاء
-        const customerShortages = pendingOrders.map(item => ({
-            "📅 تاريخ الطلب": item.date,
-            "👤 اسم العميل": item.name,
-            "📞 رقم التواصل": item.phone || '-',
-            "📦 المنتجات المطلوبة": item.order,
-            "⏱️ الحالة": item.status === 'done' ? '✅ تم التوفير' : '⏳ في الانتظار',
-            "🕐 وقت التسجيل": item.time || '-'
+        const shortagesData = pendingOrders.map(o => ({
+            "📅 التاريخ": o.date,
+            "🕐 الشيفت": o.shift,
+            "👤 العميل": o.name,
+            "📞 الهاتف": o.phone || '-',
+            "📦 المنتج": o.product,
+            "🏢 الشركة": o.company || '-',
+            "⚠️ غير متوفر": o.isOOS ? 'نعم' : 'لا',
+            "✅ الحالة": o.status === 'done' ? 'تم التوفير' : 'في الانتظار',
+            "📝 ملاحظة التأكيد": o.note || '-'
         }));
 
-        const ws = XLSX.utils.json_to_sheet(customerShortages);
+        const ws = XLSX.utils.json_to_sheet(shortagesData);
         
-        // إضافة عنوان
         XLSX.utils.sheet_add_aoa(ws, [
             ["⚠️ تقرير النواقص الشامل"],
             [`تاريخ التقرير: ${new Date().toLocaleDateString('ar-EG')}`],
             [],
-            ["📊 إحصائيات سريعة:"],
-            [`إجمالي النواقص: ${pendingOrders.length}`, `منتظر: ${pendingOrders.filter(o => o.status === 'waiting').length}`, `تم التوفير: ${pendingOrders.filter(o => o.status === 'done').length}`],
-            [],
-            ["📋 نواقص العملاء:"]
+            [`إجمالي النواقص: ${pendingOrders.length}`, `منتظر: ${pendingOrders.filter(o => o.status === 'pending').length}`, `تم: ${pendingOrders.filter(o => o.status === 'done').length}`],
+            []
         ], { origin: "A1" });
         
-        // إضافة نواقص الصالة الحالية
-        const loungeShortages = document.getElementById('loungeShortages').value;
-        if (loungeShortages) {
-            XLSX.utils.sheet_add_aoa(ws, [
-                [],
-                ["🏢 نواقص الصالة:"],
-                [loungeShortages]
-            ], { origin: -1 });
-        }
-        
-        // إضافة نواقص الصالة من التقارير السابقة
-        const historicalLounge = dailyReports
-            .filter(item => item["نواقص الصالة"] && item["نواقص الصالة"] !== '-')
-            .map(item => [item["التاريخ"], item["نواقص الصالة"]]);
-        
-        if (historicalLounge.length > 0) {
-            XLSX.utils.sheet_add_aoa(ws, [
-                [],
-                ["📜 سجل نواقص الصالة السابقة:"],
-                ...historicalLounge.map(([date, shortages]) => [date, shortages])
-            ], { origin: -1 });
-        }
-        
-        // ضبط عرض الأعمدة
-        ws['!cols'] = [
-            {wch: 15}, {wch: 20}, {wch: 15}, {wch: 40}, {wch: 15}, {wch: 10}
-        ];
+        ws['!cols'] = [{wch: 15}, {wch: 10}, {wch: 20}, {wch: 15}, {wch: 25}, {wch: 15}, {wch: 10}, {wch: 15}, {wch: 30}];
 
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "تقرير النواقص");
-        
         XLSX.writeFile(wb, `⚠️_تقرير_النواقص_${new Date().toLocaleDateString().replace(/\//g, '-')}.xlsx`);
     }
 
-    // 3. تقرير ملخص شامل (Bonus)
+    function exportCanceledExcel() {
+        if(canceledOrders.length === 0) return alert("📭 لا توجد إلغاءات مسجلة!");
+        
+        const canceledData = canceledOrders.map(c => ({
+            "📅 التاريخ": c.date,
+            "🕐 الشيفت": c.shift,
+            "📍 فرع ملغي": c.branch,
+            "📱 طلبات ملغية": c.talabat,
+            "🌐 انستا ملغي": c.insta,
+            "🚫 إجمالي": c.branch + c.talabat + c.insta,
+            "🔍 السبب": c.reason || '-',
+            "🕒 الوقت": c.time
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(canceledData);
+        
+        const totalCanceled = canceledOrders.reduce((sum, c) => sum + c.branch + c.talabat + c.insta, 0);
+        
+        XLSX.utils.sheet_add_aoa(ws, [
+            ["🚫 تقرير الأوردرات الملغية"],
+            [`تاريخ التقرير: ${new Date().toLocaleDateString('ar-EG')}`],
+            [],
+            [`إجمالي الملغيات: ${totalCanceled}`, `عدد مرات الإلغاء: ${canceledOrders.length}`],
+            []
+        ], { origin: "A1" });
+        
+        ws['!cols'] = [{wch: 15}, {wch: 10}, {wch: 10}, {wch: 10}, {wch: 10}, {wch: 10}, {wch: 40}, {wch: 10}];
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "الملغيات");
+        XLSX.writeFile(wb, `🚫_تقرير_الملغيات_${new Date().toLocaleDateString().replace(/\//g, '-')}.xlsx`);
+    }
+
     function exportSummaryExcel() {
         if(dailyReports.length === 0) return alert("📭 لا توجد تقارير محفوظة!");
         
-        // حساب الإحصائيات
         const totalOrders = dailyReports.reduce((sum, item) => sum + item["إجمالي الأوردرات"], 0);
-        const totalBranch = dailyReports.reduce((sum, item) => sum + item["فرع"], 0);
-        const totalTalabat = dailyReports.reduce((sum, item) => sum + item["طلبات"], 0);
-        const totalInsta = dailyReports.reduce((sum, item) => sum + item["انستا"], 0);
+        const totalCanceled = canceledOrders.reduce((sum, c) => sum + c.branch + c.talabat + c.insta, 0);
         
         const summary = [
-            ["📊 الملخص الشامل للفترة"],
-            [`من: ${dailyReports[0]["التاريخ"]}`, `إلى: ${dailyReports[dailyReports.length-1]["التاريخ"]}`],
+            ["📈 الملخص الشامل للعمليات"],
+            [`الفترة: ${dailyReports[0]["التاريخ"]} - ${dailyReports[dailyReports.length-1]["التاريخ"]}`],
             [],
-            ["📈 إحصائيات عامة:"],
-            ["البيان", "الإجمالي", "المتوسط", "النسبة"],
-            ["📍 أوردرات فرع", totalBranch, Math.round(totalBranch/dailyReports.length), `${Math.round(totalBranch/totalOrders*100)}%`],
-            ["📱 أوردرات طلبات", totalTalabat, Math.round(totalTalabat/dailyReports.length), `${Math.round(totalTalabat/totalOrders*100)}%`],
-            ["🌐 أوردرات انستا", totalInsta, Math.round(totalInsta/dailyReports.length), `${Math.round(totalInsta/totalOrders*100)}%`],
-            ["✅ الإجمالي", totalOrders, Math.round(totalOrders/dailyReports.length), "100%"],
-            [],
-            ["📅 تفاصيل يومية:"]
+            ["إجمالي الأوردرات", totalOrders],
+            ["إجمالي الملغيات", totalCanceled],
+            ["نسبة الإلغاء", `${Math.round((totalCanceled / totalOrders) * 100)}%`],
+            ["إجمالي النواقص", pendingOrders.length],
+            ["نواقص منتظرة", pendingOrders.filter(o => o.status === 'pending').length],
+            ["نواقص منتهية", pendingOrders.filter(o => o.status === 'done').length],
+            []
         ];
         
         const ws = XLSX.utils.aoa_to_sheet(summary);
         
-        // إضافة التفاصيل اليومية
-        const dailyDetails = dailyReports.map(item => ([
-            item["التاريخ"],
-            item["الوردية"],
-            item["فرع"],
-            item["طلبات"],
-            item["انستا"],
-            item["إجمالي الأوردرات"]
-        ]));
-        
-        XLSX.utils.sheet_add_aoa(ws, dailyDetails, { origin: -1 });
-        
-        // ضبط عرض الأعمدة
-        ws['!cols'] = [
-            {wch: 15}, {wch: 20}, {wch: 12}, {wch: 12}, {wch: 12}, {wch: 15}
-        ];
-
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "ملخص شامل");
-        
-        XLSX.writeFile(wb, `📈_ملخص_شامل_${new Date().getMonth()+1}.xlsx`);
+        XLSX.writeFile(wb, `📈_ملخص_شامل_${new Date().toLocaleDateString().replace(/\//g, '-')}.xlsx`);
     }
 
-    // ================ تقرير الواتساب ================
+    // ================ تقرير الواتساب المطور ================
     function generateReport() {
-        const followup = document.getElementById('customerFollowup').value || 'لا يوجد';
-        const newStock = document.getElementById('newStock').value || 'لا يوجد';
-        const orderReview = document.getElementById('orderReview').value || 'تمت';
-        const loungeShortages = document.getElementById('loungeShortages').value || 'لا يوجد';
+        const stockOrders = document.getElementById('newStockOrders').value || 'لا يوجد';
         
-        const currentPending = pendingOrders
-            .filter(o => o.status === 'waiting')
-            .map(o => `▪️ ${o.name}: ${o.order}`).join('\n') || 'لا توجد نواقص حالية';
-
+        // الأوردرات الملغية اليوم
+        const todayCanceled = canceledOrders
+            .filter(c => c.date === new Date().toLocaleDateString('ar-EG'))
+            .map(c => `▪️ فرع: ${c.branch} | طلبات: ${c.talabat} | انستا: ${c.insta} (${c.reason})`)
+            .join('\n') || 'لا توجد إلغاءات اليوم';
+        
+        // نواقص العملاء النشطة
+        const activeShortages = pendingOrders
+            .filter(o => o.status === 'pending')
+            .map(o => `▪️ ${o.name} (${o.shift}): ${o.product} ${o.isOOS ? '⚠️ غير متوفر' : ''}`)
+            .join('\n') || 'لا توجد نواقص نشطة';
+        
         const timerSpan = document.querySelector('#liveTime .timer-critical, #liveTime .timer-warning, #liveTime .timer-normal');
         const timeLeft = timerSpan ? timerSpan.innerText.replace('⏳ متبقي: ', '') : '';
 
-        const report = `📊 *تقرير العمل والعمليات*
+        const report = `📊 *تقرير العمليات الشامل*
 ━━━━━━━━━━━━━━━━━
 📍 *إحصائيات الأوردرات:*
 ▪️ فرع: ${data.branch}
@@ -667,17 +813,14 @@
 ▪️ انستا: ${data.instashop}
 ✅ *الإجمالي:* ${data.branch + data.talabat + data.instashop}
 
-🏢 *نواقص الصالة:*
-${loungeShortages}
+🚫 *الملغيات اليوم:*
+${todayCanceled}
 
-⚠️ *نواقص العملاء الحالية:*
-${currentPending}
-⏳ العدد: ${pendingOrders.filter(o => o.status === 'waiting').length}
+⚠️ *نواقص العملاء النشطة:*
+${activeShortages}
 
-📋 *متابعة العمليات:*
-▪️ متابعة العملاء: ${followup}
-▪️ بضاعة جديدة: ${newStock}
-▪️ مراجعة الطلبات: ${orderReview}
+📦 *العمليات اللوجستية:*
+${stockOrders}
 
 ⏱️ *الوقت المتبقي:* ${timeLeft}
 📅 ${new Date().toLocaleString('ar-EG')}`;
@@ -688,22 +831,18 @@ ${currentPending}
 
     // ================ مسح الأرشيف ================
     function clearArchive() {
-        if(confirm("⚠️ هل أنت متأكد؟ سيتم حذف جميع التقارير المحفوظة!")) {
-            localStorage.removeItem('dailyReports');
-            dailyReports = [];
-            renderArchive();
-            updateArchiveStats();
+        if(confirm("⚠️ هل أنت متأكد؟ سيتم حذف جميع البيانات!")) {
+            localStorage.clear();
+            location.reload();
         }
     }
 
     // ================ التهيئة ================
     updateUI();
-    renderPending();
+    renderShortagesTable();
     renderArchive();
     updateArchiveStats();
-    updateSummaryStats();
     
-    // تشغيل التايمر كل ثانية
     setInterval(updateTimer, 1000);
 </script>
 </body>
