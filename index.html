@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>نظام إدارة العمليات - V8.6 (مع بحث ذكي)</title>
+    <title>نظام إدارة العمليات - V8.7 (بنية متطورة)</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <style>
@@ -212,62 +212,159 @@
             width: 100%;
         }
         
+        /* تنسيق بطاقة العميل الجديد */
         .customer-card {
             background: #2d3748;
-            border: 2px dashed #6366f1;
+            border: 2px solid #6366f1;
             border-radius: 12px;
             padding: 15px;
             margin-bottom: 20px;
             position: relative;
         }
         
+        .customer-header {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .customer-header input {
+            flex: 1;
+            min-width: 150px;
+            margin: 0;
+        }
+        
         .delete-customer {
-            position: absolute;
-            left: 10px;
-            top: 10px;
             background: #ef4444;
             color: white;
             border: none;
             border-radius: 6px;
-            padding: 5px 10px;
+            padding: 8px 15px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 13px;
+            white-space: nowrap;
         }
         
-        .customer-header {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        
-        .product-entry {
+        /* تنسيق صف المنتج - الأهم */
+        .product-row {
             display: flex;
             gap: 8px;
             align-items: center;
             margin-bottom: 8px;
+            width: 100%;
         }
         
-        .product-entry input:first-child {
+        .product-row input:first-child {
             flex: 2;
+            min-width: 0;
         }
         
-        .product-entry input:nth-child(2) {
+        .product-row input:nth-child(2) {
             flex: 1;
+            min-width: 0;
         }
         
         .remove-product {
-            background: none;
+            background: #ef4444;
+            color: white;
             border: none;
-            color: #ef4444;
-            font-size: 20px;
+            border-radius: 4px;
+            padding: 8px 12px;
             cursor: pointer;
-            width: 35px;
-            height: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-size: 14px;
             font-weight: bold;
+            white-space: nowrap;
+        }
+        
+        .remove-product:hover {
+            background: #dc2626;
+        }
+        
+        /* جدول النواقص الجديد (شجري) */
+        .customer-block {
+            background: #2d3748;
+            border: 1px solid #6366f1;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        
+        .customer-block-header {
+            background: #6366f1;
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .customer-info {
+            font-weight: bold;
+        }
+        
+        .customer-info span {
+            margin-left: 15px;
+        }
+        
+        .customer-shortages {
+            padding: 10px;
+        }
+        
+        .shortage-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 10px;
+            border-bottom: 1px solid #444;
+        }
+        
+        .shortage-item:last-child {
+            border-bottom: none;
+        }
+        
+        .shortage-product {
+            font-weight: bold;
+        }
+        
+        .shortage-company {
+            color: #94a3b8;
+            font-size: 12px;
+        }
+        
+        .shortage-status {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        .status-waiting {
+            background: #f59e0b;
+            color: #000;
+        }
+        
+        .status-reported {
+            background: #10b981;
+            color: white;
+        }
+        
+        .report-shortage-btn {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 11px;
         }
         
         .table-container {
@@ -275,50 +372,6 @@
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
             margin: 15px 0;
-        }
-        
-        .shortages-table, .archive-table {
-            min-width: 600px;
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-        }
-        
-        .shortages-table th, .archive-table th {
-            background: #6366f1;
-            padding: 10px;
-            text-align: center;
-            font-size: 13px;
-        }
-        
-        .shortages-table td, .archive-table td {
-            padding: 10px;
-            border: 1px solid #444;
-            background: #1e293b;
-        }
-        
-        .shortages-table tr.completed td {
-            background: #064e3b;
-            opacity: 0.7;
-        }
-        
-        .report-btn {
-            background: #f59e0b;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 5px 8px;
-            cursor: pointer;
-            font-size: 11px;
-            margin: 2px;
-            white-space: nowrap;
-        }
-        
-        .note-text {
-            color: #94a3b8;
-            font-size: 11px;
-            display: block;
-            margin-top: 3px;
         }
         
         .progress-bar {
@@ -409,6 +462,21 @@
         
         .archive-table {
             min-width: 700px;
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        
+        .archive-table th {
+            background: #6366f1;
+            padding: 10px;
+            text-align: center;
+        }
+        
+        .archive-table td {
+            padding: 10px;
+            border: 1px solid #444;
+            background: #1e293b;
         }
         
         .action-btn {
@@ -431,19 +499,6 @@
             margin: 15px 0;
         }
         
-        .add-customer-btn {
-            background: #4f46e5;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            margin: 10px 0;
-            font-size: 14px;
-            width: 100%;
-        }
-        
         .branch-entry {
             display: flex;
             gap: 8px;
@@ -458,16 +513,13 @@
         }
         
         .remove-field {
-            background: none;
+            background: #ef4444;
+            color: white;
             border: none;
-            color: #ef4444;
-            font-size: 24px;
+            border-radius: 4px;
+            padding: 8px 12px;
             cursor: pointer;
-            width: 35px;
-            height: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-size: 14px;
         }
         
         .edit-notice {
@@ -520,48 +572,25 @@
             background: #2d3748;
         }
         
-        #archiveSearch::placeholder {
-            color: #94a3b8;
-            font-size: 14px;
-        }
-        
-        /* تنسيق ملخص البحث */
-        .search-summary {
-            background: #1e293b;
-            padding: 12px 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            border: 1px solid #6366f1;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        
-        .search-summary-item {
-            font-size: 14px;
-        }
-        
-        .search-summary-value {
-            font-weight: bold;
-            color: #6366f1;
-            font-size: 18px;
-            margin-right: 5px;
-        }
-        
-        .clear-search {
-            background: #ef4444;
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #10b981;
             color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 5px 15px;
-            cursor: pointer;
-            font-size: 13px;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1000;
+            animation: slideUp 0.3s ease;
         }
         
-        .clear-search:hover {
-            background: #dc2626;
+        @keyframes slideUp {
+            from { bottom: -50px; opacity: 0; }
+            to { bottom: 20px; opacity: 1; }
         }
         
         @media (max-width: 600px) {
@@ -574,12 +603,16 @@
             .export-buttons { grid-template-columns: repeat(2, 1fr); }
             .action-buttons .main-btn { min-width: 100%; }
             
-            .customer-header { grid-template-columns: 1fr; }
-            .product-entry { flex-direction: row; }
+            .customer-header { flex-direction: column; }
+            .customer-header input { width: 100%; }
+            .delete-customer { width: 100%; }
+            
+            .product-row { flex-direction: column; }
+            .product-row input { width: 100%; }
+            .remove-product { width: 100%; }
+            
             .branch-entry { flex-direction: column; align-items: stretch; }
             .branch-entry input { width: 100%; }
-            
-            .shortages-table, .archive-table { min-width: 500px; }
             
             h1 { font-size: 20px; }
             h2 { font-size: 18px; }
@@ -592,17 +625,8 @@
             }
             
             #liveTime { font-size: 14px; }
-            #liveTime .timer-critical,
-            #liveTime .timer-warning,
-            #liveTime .timer-normal { font-size: 18px !important; }
-            
             .main-btn { padding: 12px; font-size: 14px; }
             .stat-number { font-size: 18px; }
-            
-            .search-summary {
-                flex-direction: column;
-                align-items: flex-start;
-            }
         }
         
         @media (max-width: 380px) {
@@ -615,7 +639,7 @@
 <body>
     <div class="wrapper">
         <header style="text-align: center; margin-bottom: 20px;">
-            <h1 style="color: #6366f1;">📊 نظام إدارة العمليات V8.6</h1>
+            <h1 style="color: #6366f1;">📊 نظام إدارة العمليات V8.7</h1>
             <div id="liveTime"></div>
             <div class="progress-bar">
                 <div class="progress-fill" id="progressFill" style="width: 0%"></div>
@@ -623,20 +647,20 @@
         </header>
 
         <div id="editNotice" class="edit-notice">
-            ⚠️ وضع التعديل: تم تحميل بيانات سجل قديم. بعد التعديل اضغط "حفظ الكل" ثم "أرشفة الوردية" لتحديث البيانات.
+            ⚠️ وضع التعديل: تم تحميل بيانات سجل قديم. بعد التعديل اضغط "حفظ البيانات" ثم "أرشفة الوردية".
         </div>
 
         <div class="tabs">
             <button class="tab-btn active" onclick="showTab('entry')">🏠 لوحة التحكم</button>
             <button class="tab-btn" onclick="showTab('shortages')">🔔 متابعة النواقص</button>
-            <button class="tab-btn" onclick="showTab('archive')">📊 الأرشيف + بحث</button>
+            <button class="tab-btn" onclick="showTab('archive')">📊 الأرشيف</button>
         </div>
 
         <div id="entry" class="view-content active">
             <div class="quick-stats">
-                <div class="stat-item"><div>⏳ نواقص</div><div class="stat-number" id="pendingCount">0</div></div>
+                <div class="stat-item"><div>👥 عملاء</div><div class="stat-number" id="customersCount">0</div></div>
+                <div class="stat-item"><div>📦 منتجات ناقصة</div><div class="stat-number" id="productsCount">0</div></div>
                 <div class="stat-item"><div>📢 تم التبليغ</div><div class="stat-number" id="reportedCount">0</div></div>
-                <div class="stat-item"><div>📦 إجمالي</div><div class="stat-number" id="todayTotal">0</div></div>
                 <div class="stat-item"><div>🚫 ملغيات</div><div class="stat-number" id="cancelTotal">0</div></div>
             </div>
 
@@ -704,36 +728,42 @@
                     <div class="branch-entry">
                         <input type="text" class="b-name" placeholder="اسم المنتج الناقص">
                         <input type="text" class="b-company" placeholder="الشركة">
-                        <button class="remove-field" onclick="this.parentElement.remove()">✖</button>
+                        <button class="remove-field" onclick="this.parentElement.remove()">✖ حذف</button>
                     </div>
                 </div>
                 <button onclick="addBranchField()" class="small-btn">+ إضافة منتج للفرع</button>
             </div>
 
+            <!-- قسم العملاء الجديد - بنية شجرية -->
             <div class="section" id="customerSection">
-                <h3>👤 إضافة طلبات العملاء</h3>
+                <h3>👤 إضافة عميل جديد</h3>
                 
-                <div id="customersContainer">
-                    <div class="customer-card">
-                        <button class="delete-customer" onclick="this.closest('.customer-card').remove()">🗑️ حذف</button>
-                        <div class="customer-header">
-                            <input type="text" class="c-name" placeholder="اسم العميل">
-                            <input type="text" class="c-phone" placeholder="رقم الهاتف">
-                        </div>
-                        <div class="products-list">
-                            <div class="product-entry">
-                                <input type="text" class="p-name" placeholder="المنتج المطلوب">
-                                <input type="text" class="p-company" placeholder="الشركة">
-                                <button class="remove-product" onclick="this.closest('.product-entry').remove()">✕</button>
-                            </div>
-                        </div>
-                        <button class="small-btn" onclick="addProductRow(this)">+ إضافة منتج لهذا العميل</button>
+                <div class="customer-card">
+                    <div class="customer-header">
+                        <input type="text" id="newCustomerName" placeholder="اسم العميل">
+                        <input type="text" id="newCustomerPhone" placeholder="رقم الهاتف">
                     </div>
+                    
+                    <h4 style="color: #94a3b8; margin: 10px 0;">المنتجات الناقصة:</h4>
+                    
+                    <div id="newCustomerProducts">
+                        <!-- صف المنتج الأول - تنسيق أفقي -->
+                        <div class="product-row">
+                            <input type="text" class="new-p-name" placeholder="اسم المنتج">
+                            <input type="text" class="new-p-company" placeholder="الشركة">
+                            <button class="remove-product" onclick="this.parentElement.remove()">✖ حذف</button>
+                        </div>
+                    </div>
+                    
+                    <button class="small-btn" onclick="addProductRow()">+ إضافة منتج آخر</button>
+                    <button class="main-btn" style="background: #6366f1; margin-top: 15px;" onclick="addNewCustomer()">➕ إضافة العميل للقائمة</button>
                 </div>
-                
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button class="add-customer-btn" onclick="addNewCustomer()">➕ إضافة عميل آخر</button>
-                </div>
+            </div>
+
+            <!-- قائمة العملاء المضافة -->
+            <div class="section">
+                <h3>📋 قائمة العملاء الحاليين</h3>
+                <div id="customersList"></div>
             </div>
 
             <div class="section">
@@ -743,42 +773,28 @@
 
             <div class="action-buttons">
                 <button class="main-btn" style="background: #10b981;" onclick="generateWhatsAppReport()">📤 تقرير واتساب</button>
-                <button class="main-btn" style="background: #6366f1;" onclick="saveAllData()">💾 حفظ الكل</button>
+                <button class="main-btn" style="background: #6366f1;" onclick="saveToCurrentShift()">💾 حفظ البيانات</button>
                 <button class="main-btn" style="background: #334155;" onclick="saveShiftToArchive()">📋 أرشفة الوردية</button>
             </div>
         </div>
 
         <div id="shortages" class="view-content">
-            <h2 style="margin-bottom: 20px;">🔔 جدول متابعة النواقص</h2>
+            <h2 style="margin-bottom: 20px;">🔔 متابعة النواقص (حسب العميل)</h2>
             
             <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
-                <select id="statusFilter" style="flex:1; min-width: 150px;" onchange="renderShortagesTable()">
+                <select id="statusFilter" style="flex:1; min-width: 150px;" onchange="renderShortagesTree()">
                     <option value="all">جميع النواقص</option>
                     <option value="waiting">في الانتظار</option>
                     <option value="reported">تم التبليغ</option>
                 </select>
-                <button onclick="renderShortagesTable()" class="main-btn" style="margin:0; width:auto; padding:12px 25px;">🔄 تحديث</button>
+                <button onclick="renderShortagesTree()" class="main-btn" style="margin:0; width:auto; padding:12px 25px;">🔄 تحديث</button>
             </div>
             
-            <div class="table-container">
-                <table class="shortages-table">
-                    <thead>
-                        <tr>
-                            <th>العميل</th>
-                            <th>رقم الهاتف</th>
-                            <th>المنتج الناقص</th>
-                            <th>الإجراء</th>
-                            <th>المُبلّغ عنه</th>
-                            <th>الملاحظة</th>
-                        </tr>
-                    </thead>
-                    <tbody id="shortagesBody"></tbody>
-                </table>
-            </div>
+            <div id="shortagesTreeContainer"></div>
         </div>
 
         <div id="archive" class="view-content">
-            <h2 style="margin-bottom: 20px;">📋 سجل التقارير اليومية مع البحث الذكي</h2>
+            <h2 style="margin-bottom: 20px;">📋 سجل التقارير اليومية</h2>
             
             <div class="archive-stats" id="archiveStats"></div>
             
@@ -790,24 +806,9 @@
                 <button onclick="exportSummaryExcel()" class="export-btn summary-btn">📈 ملخص شامل</button>
             </div>
             
-            <!-- شريط البحث الذكي -->
             <div class="search-container">
                 <input type="text" id="archiveSearch" onkeyup="filterArchive()" 
-                       placeholder="🔍 ابحث بالتاريخ (2026/03/20)، الشيفت (صباحي/ليلي)، أو الملاحظات...">
-            </div>
-            
-            <!-- ملخص نتائج البحث -->
-            <div class="search-summary" id="searchSummary" style="display: none;">
-                <span class="search-summary-item">
-                    📊 النتائج: <span class="search-summary-value" id="resultCount">0</span> سجل
-                </span>
-                <span class="search-summary-item">
-                    💰 إجمالي الأوردرات: <span class="search-summary-value" id="filteredTotal">0</span>
-                </span>
-                <span class="search-summary-item">
-                    🚫 إجمالي الملغيات: <span class="search-summary-value" id="filteredCancel">0</span>
-                </span>
-                <button class="clear-search" onclick="clearSearch()">✕ مسح البحث</button>
+                       placeholder="🔍 ابحث بالتاريخ، الشيفت، أو الملاحظات...">
             </div>
             
             <div class="table-container">
@@ -837,31 +838,45 @@
     </div>
 
     <script>
+        // ================ بنية البيانات الجديدة ================
         let ordersCount = JSON.parse(localStorage.getItem('ordersCount')) || { branch: 0, talabat: 0, insta: 0 };
         let cancelCounts = JSON.parse(localStorage.getItem('cancelCounts')) || { branch: 0, talabat: 0, insta: 0 };
-        let dailyShortages = JSON.parse(localStorage.getItem('dailyShortages')) || [];
         let branchShortages = JSON.parse(localStorage.getItem('branchShortages')) || [];
         let monthlyArchive = JSON.parse(localStorage.getItem('monthlyArchive')) || [];
         let canceledOrders = JSON.parse(localStorage.getItem('canceledOrders')) || [];
+        
+        // البيانات الحالية للشيفت - بنية شجرية
+        let allCustomersData = JSON.parse(localStorage.getItem('activeShiftData'))?.customers || [];
         let editingIndex = -1;
 
         window.onload = function() {
             loadDataFromStorage();
-            checkShiftChange();
+            checkShiftStatus();
             updateUI();
-            renderShortagesTable();
+            renderCustomersList();
+            renderShortagesTree();
             renderArchiveTable();
             updateArchiveStats();
             setInterval(updateTimer, 1000);
         };
 
         function loadDataFromStorage() {
-            ordersCount = JSON.parse(localStorage.getItem('ordersCount')) || { branch: 0, talabat: 0, insta: 0 };
-            cancelCounts = JSON.parse(localStorage.getItem('cancelCounts')) || { branch: 0, talabat: 0, insta: 0 };
-            dailyShortages = JSON.parse(localStorage.getItem('dailyShortages')) || [];
+            const savedData = JSON.parse(localStorage.getItem('activeShiftData'));
+            if (savedData) {
+                ordersCount = savedData.orders || { branch: 0, talabat: 0, insta: 0 };
+                cancelCounts = savedData.cancels || { branch: 0, talabat: 0, insta: 0 };
+                allCustomersData = savedData.customers || [];
+                document.getElementById('cancelReason').value = savedData.notes || '';
+                document.getElementById('customerFollowup').value = savedData.followup || '';
+            }
+            
             branchShortages = JSON.parse(localStorage.getItem('branchShortages')) || [];
             monthlyArchive = JSON.parse(localStorage.getItem('monthlyArchive')) || [];
             canceledOrders = JSON.parse(localStorage.getItem('canceledOrders')) || [];
+        }
+
+        function getVal(id) {
+            return parseInt(document.getElementById(id)?.innerText) || 0;
         }
 
         function getShiftName() {
@@ -878,13 +893,31 @@
             return "من (12:00 ص) إلى (09:00 ص)";
         }
 
-        function checkShiftChange() {
-            const currentShift = getShiftName();
-            const savedShift = localStorage.getItem('activeShift');
-            if (savedShift && savedShift !== currentShift) {
-                alert("تم تغيير الوردية. الرجاء أرشفة التقرير السابق.");
+        function checkShiftStatus() {
+            const savedData = JSON.parse(localStorage.getItem('activeShiftData'));
+            if (!savedData) return;
+            
+            const lastUpdate = savedData.lastUpdate;
+            const now = new Date().getTime();
+            
+            // إذا مر أكثر من 9 ساعات (مدة الشيفت)
+            if (lastUpdate && (now - lastUpdate > 9 * 60 * 60 * 1000)) {
+                if (confirm("⚠️ تم اكتشاف بداية شيفت جديد. هل تريد تصفير البيانات القديمة؟")) {
+                    localStorage.removeItem('activeShiftData');
+                    location.reload();
+                }
             }
-            localStorage.setItem('activeShift', currentShift);
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
         }
 
         function updateUI() {
@@ -894,66 +927,44 @@
             document.getElementById('canBranch').innerText = cancelCounts.branch;
             document.getElementById('canTalabat').innerText = cancelCounts.talabat;
             document.getElementById('canInsta').innerText = cancelCounts.insta;
+            
             updateTimer();
             updateSummaryStats();
         }
 
         function updateSummaryStats() {
-            const pendingCount = dailyShortages.filter(s => s.status === 'waiting').length;
-            const reportedCount = dailyShortages.filter(s => s.status === 'reported').length;
-            const todayTotal = ordersCount.branch + ordersCount.talabat + ordersCount.insta;
+            const customersCount = allCustomersData.length;
+            const productsCount = allCustomersData.reduce((sum, c) => sum + c.shortages.length, 0);
+            const reportedCount = allCustomersData.reduce((sum, c) => 
+                sum + c.shortages.filter(s => s.status === 'reported').length, 0);
             const todayCanceled = cancelCounts.branch + cancelCounts.talabat + cancelCounts.insta;
             
-            document.getElementById('pendingCount').innerText = pendingCount;
+            document.getElementById('customersCount').innerText = customersCount;
+            document.getElementById('productsCount').innerText = productsCount;
             document.getElementById('reportedCount').innerText = reportedCount;
-            document.getElementById('todayTotal').innerText = todayTotal;
             document.getElementById('cancelTotal').innerText = todayCanceled;
         }
 
         function updateCount(type, delta) {
             ordersCount[type] = Math.max(0, ordersCount[type] + delta);
-            localStorage.setItem('ordersCount', JSON.stringify(ordersCount));
             updateUI();
         }
 
         function updateCancel(type, delta) {
             cancelCounts[type] = Math.max(0, cancelCounts[type] + delta);
-            localStorage.setItem('cancelCounts', JSON.stringify(cancelCounts));
             updateUI();
         }
 
-        function addNewCustomer() {
-            const container = document.getElementById('customersContainer');
-            const newCard = document.createElement('div');
-            newCard.className = 'customer-card';
-            newCard.innerHTML = `
-                <button class="delete-customer" onclick="this.closest('.customer-card').remove()">🗑️ حذف</button>
-                <div class="customer-header">
-                    <input type="text" class="c-name" placeholder="اسم العميل">
-                    <input type="text" class="c-phone" placeholder="رقم الهاتف">
-                </div>
-                <div class="products-list">
-                    <div class="product-entry">
-                        <input type="text" class="p-name" placeholder="المنتج المطلوب">
-                        <input type="text" class="p-company" placeholder="الشركة">
-                        <button class="remove-product" onclick="this.closest('.product-entry').remove()">✕</button>
-                    </div>
-                </div>
-                <button class="small-btn" onclick="addProductRow(this)">+ إضافة منتج لهذا العميل</button>
-            `;
-            container.appendChild(newCard);
-        }
-
-        function addProductRow(btn) {
-            const list = btn.closest('.customer-card').querySelector('.products-list');
+        function addProductRow() {
+            const container = document.getElementById('newCustomerProducts');
             const row = document.createElement('div');
-            row.className = 'product-entry';
+            row.className = 'product-row';
             row.innerHTML = `
-                <input type="text" class="p-name" placeholder="المنتج المطلوب">
-                <input type="text" class="p-company" placeholder="الشركة">
-                <button class="remove-product" onclick="this.closest('.product-entry').remove()">✕</button>
+                <input type="text" class="new-p-name" placeholder="اسم المنتج">
+                <input type="text" class="new-p-company" placeholder="الشركة">
+                <button class="remove-product" onclick="this.parentElement.remove()">✖ حذف</button>
             `;
-            list.appendChild(row);
+            container.appendChild(row);
         }
 
         function addBranchField() {
@@ -963,43 +974,226 @@
             newField.innerHTML = `
                 <input type="text" class="b-name" placeholder="اسم المنتج الناقص">
                 <input type="text" class="b-company" placeholder="الشركة">
-                <button class="remove-field" onclick="this.parentElement.remove()">✖</button>
+                <button class="remove-field" onclick="this.parentElement.remove()">✖ حذف</button>
             `;
             container.appendChild(newField);
         }
 
-        function saveAllData() {
-            const customerCards = document.querySelectorAll('.customer-card');
-            let addedCount = 0;
+        // ================ إضافة عميل جديد مع منتجاته ================
+        function addNewCustomer() {
+            const name = document.getElementById('newCustomerName').value.trim();
+            const phone = document.getElementById('newCustomerPhone').value.trim();
             
-            customerCards.forEach(card => {
-                const name = card.querySelector('.c-name').value.trim();
-                const phone = card.querySelector('.c-phone').value.trim();
-                const productRows = card.querySelectorAll('.product-entry');
-                
-                if (!name || !phone) return;
-                
-                productRows.forEach(row => {
-                    const pName = row.querySelector('.p-name').value.trim();
-                    const pComp = row.querySelector('.p-company').value.trim();
-                    if (pName) {
-                        dailyShortages.push({
-                            id: Date.now() + Math.random() + addedCount,
-                            name: name,
-                            phone: phone,
-                            product: pName,
-                            company: pComp || '-',
-                            status: 'waiting',
-                            reported: '-',
-                            note: '',
-                            date: new Date().toLocaleDateString('ar-EG'),
-                            time: new Date().toLocaleTimeString()
-                        });
-                        addedCount++;
-                    }
-                });
+            if (!name || !phone) {
+                alert("❌ الرجاء إدخال اسم العميل ورقم الهاتف");
+                return;
+            }
+            
+            const shortages = [];
+            document.querySelectorAll('#newCustomerProducts .product-row').forEach(row => {
+                const pName = row.querySelector('.new-p-name').value.trim();
+                const pComp = row.querySelector('.new-p-company').value.trim();
+                if (pName) {
+                    shortages.push({
+                        id: Date.now() + Math.random(),
+                        product: pName,
+                        company: pComp || '-',
+                        status: 'waiting',
+                        reported: '-',
+                        note: ''
+                    });
+                }
             });
             
+            if (shortages.length === 0) {
+                alert("❌ أضف منتج ناقص واحد على الأقل");
+                return;
+            }
+            
+            const customer = {
+                id: Date.now(),
+                name: name,
+                phone: phone,
+                shortages: shortages,
+                date: new Date().toLocaleDateString('ar-EG'),
+                time: new Date().toLocaleTimeString()
+            };
+            
+            allCustomersData.push(customer);
+            saveToCurrentShift(); // حفظ تلقائي
+            renderCustomersList();
+            renderShortagesTree();
+            updateSummaryStats();
+            
+            // تفريغ الحقول
+            document.getElementById('newCustomerName').value = '';
+            document.getElementById('newCustomerPhone').value = '';
+            document.getElementById('newCustomerProducts').innerHTML = `
+                <div class="product-row">
+                    <input type="text" class="new-p-name" placeholder="اسم المنتج">
+                    <input type="text" class="new-p-company" placeholder="الشركة">
+                    <button class="remove-product" onclick="this.parentElement.remove()">✖ حذف</button>
+                </div>
+            `;
+            
+            showToast("✅ تم إضافة العميل بنجاح");
+        }
+
+        // ================ عرض قائمة العملاء ================
+        function renderCustomersList() {
+            const container = document.getElementById('customersList');
+            
+            if (allCustomersData.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:20px; background:#2d3748; border-radius:8px;">📭 لا يوجد عملاء بعد</div>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            allCustomersData.forEach((customer, customerIndex) => {
+                const customerDiv = document.createElement('div');
+                customerDiv.className = 'customer-block';
+                
+                let shortagesHtml = '';
+                customer.shortages.forEach((shortage, shortageIndex) => {
+                    shortagesHtml += `
+                        <div class="shortage-item">
+                            <div>
+                                <span class="shortage-product">${shortage.product}</span>
+                                ${shortage.company !== '-' ? `<span class="shortage-company"> (${shortage.company})</span>` : ''}
+                            </div>
+                            <div class="shortage-status">
+                                <span class="status-badge ${shortage.status === 'reported' ? 'status-reported' : 'status-waiting'}">
+                                    ${shortage.status === 'reported' ? '📢 تم التبليغ' : '⏳ انتظار'}
+                                </span>
+                                ${shortage.status === 'waiting' ? 
+                                    `<button class="report-shortage-btn" onclick="reportShortage(${customerIndex}, ${shortageIndex})">📩 تبليغ</button>` : 
+                                    `<small>${shortage.reported}</small>`
+                                }
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                customerDiv.innerHTML = `
+                    <div class="customer-block-header">
+                        <div class="customer-info">
+                            <span>👤 ${customer.name}</span>
+                            <span>📞 ${customer.phone}</span>
+                        </div>
+                        <button class="delete-btn" style="padding:5px 10px;" onclick="deleteCustomer(${customerIndex})">🗑️ حذف العميل</button>
+                    </div>
+                    <div class="customer-shortages">
+                        ${shortagesHtml}
+                    </div>
+                `;
+                
+                container.appendChild(customerDiv);
+            });
+        }
+
+        function deleteCustomer(index) {
+            if (confirm("⚠️ هل أنت متأكد من حذف هذا العميل وجميع منتجاته؟")) {
+                allCustomersData.splice(index, 1);
+                saveToCurrentShift();
+                renderCustomersList();
+                renderShortagesTree();
+                updateSummaryStats();
+                showToast("✅ تم حذف العميل");
+            }
+        }
+
+        function reportShortage(customerIndex, shortageIndex) {
+            const reportedTo = prompt("📢 تم التبليغ إلى (مورد/مدير/غيره):");
+            if (reportedTo) {
+                allCustomersData[customerIndex].shortages[shortageIndex].status = 'reported';
+                allCustomersData[customerIndex].shortages[shortageIndex].reported = reportedTo;
+                saveToCurrentShift();
+                renderCustomersList();
+                renderShortagesTree();
+                updateSummaryStats();
+                showToast("✅ تم تحديث حالة التبليغ");
+            }
+        }
+
+        // ================ عرض النواقص بشكل شجري ================
+        function renderShortagesTree() {
+            const filter = document.getElementById('statusFilter').value;
+            const container = document.getElementById('shortagesTreeContainer');
+            
+            if (allCustomersData.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:40px; background:#1e293b; border-radius:12px;">📭 لا توجد نواقص</div>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            allCustomersData.forEach((customer, customerIndex) => {
+                const filteredShortages = filter === 'all' 
+                    ? customer.shortages 
+                    : customer.shortages.filter(s => s.status === filter);
+                
+                if (filteredShortages.length === 0) return;
+                
+                const customerDiv = document.createElement('div');
+                customerDiv.className = 'customer-block';
+                
+                let shortagesHtml = '';
+                filteredShortages.forEach((shortage, idx) => {
+                    const shortageIndex = customer.shortages.findIndex(s => s.id === shortage.id);
+                    
+                    shortagesHtml += `
+                        <div class="shortage-item">
+                            <div>
+                                <span class="shortage-product">${shortage.product}</span>
+                                ${shortage.company !== '-' ? `<span class="shortage-company"> (${shortage.company})</span>` : ''}
+                            </div>
+                            <div class="shortage-status">
+                                <span class="status-badge ${shortage.status === 'reported' ? 'status-reported' : 'status-waiting'}">
+                                    ${shortage.status === 'reported' ? '📢 تم التبليغ' : '⏳ انتظار'}
+                                </span>
+                                ${shortage.status === 'waiting' ? 
+                                    `<button class="report-shortage-btn" onclick="reportShortage(${customerIndex}, ${shortageIndex})">📩 تبليغ</button>` : 
+                                    `<small>${shortage.reported}</small>`
+                                }
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                customerDiv.innerHTML = `
+                    <div class="customer-block-header">
+                        <div class="customer-info">
+                            <span>👤 ${customer.name}</span>
+                            <span>📞 ${customer.phone}</span>
+                        </div>
+                    </div>
+                    <div class="customer-shortages">
+                        ${shortagesHtml}
+                    </div>
+                `;
+                
+                container.appendChild(customerDiv);
+            });
+            
+            if (container.children.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:40px; background:#1e293b; border-radius:12px;">📭 لا توجد نتائج مطابقة</div>';
+            }
+        }
+
+        // ================ حفظ البيانات (بدون مسح) ================
+        function saveToCurrentShift() {
+            const shiftData = {
+                orders: ordersCount,
+                cancels: cancelCounts,
+                customers: allCustomersData,
+                notes: document.getElementById('cancelReason').value,
+                followup: document.getElementById('customerFollowup').value,
+                lastUpdate: new Date().getTime()
+            };
+
+            localStorage.setItem('activeShiftData', JSON.stringify(shiftData));
+            
+            // حفظ نواقص الفرع إذا وجدت
             const branchItems = [];
             document.querySelectorAll('.branch-entry').forEach(div => {
                 const name = div.querySelector('.b-name').value.trim();
@@ -1019,130 +1213,14 @@
                 localStorage.setItem('branchShortages', JSON.stringify(branchShortages));
             }
             
-            const currentData = {
-                orders: { branch: ordersCount.branch, talabat: ordersCount.talabat, insta: ordersCount.insta },
-                cancels: { branch: cancelCounts.branch, talabat: cancelCounts.talabat, insta: cancelCounts.insta },
-                shortages: dailyShortages,
-                branchShortages: branchShortages,
-                notes: document.getElementById('cancelReason').value,
-                followup: document.getElementById('customerFollowup').value
-            };
-            
-            localStorage.setItem('dailyShortages', JSON.stringify(dailyShortages));
-            localStorage.setItem('currentShiftData', JSON.stringify(currentData));
-            
-            document.getElementById('customersContainer').innerHTML = '';
-            addNewCustomer();
-            
-            document.getElementById('branchProductsContainer').innerHTML = `
-                <div class="branch-entry">
-                    <input type="text" class="b-name" placeholder="اسم المنتج الناقص">
-                    <input type="text" class="b-company" placeholder="الشركة">
-                    <button class="remove-field" onclick="this.parentElement.remove()">✖</button>
-                </div>`;
-            
-            updateSummaryStats();
-            renderShortagesTable();
-            
-            if (addedCount > 0) {
-                alert(`✅ تم إضافة ${addedCount} منتج/منتجات وحفظ جميع البيانات`);
-            } else {
-                alert("✅ تم حفظ جميع البيانات");
-            }
+            showToast("✅ تم حفظ البيانات بنجاح");
         }
 
-        function renderShortagesTable() {
-            const filter = document.getElementById('statusFilter').value;
-            let filtered = dailyShortages;
-            if (filter !== 'all') {
-                filtered = dailyShortages.filter(s => s.status === filter);
-            }
-            
-            const tbody = document.getElementById('shortagesBody');
-            tbody.innerHTML = '';
-            
-            filtered.forEach((item, index) => {
-                const originalIndex = dailyShortages.findIndex(s => s.id === item.id);
-                const row = document.createElement('tr');
-                
-                let actionButton = '';
-                if (item.status === 'waiting') {
-                    actionButton = `<button class="report-btn" onclick="markAsReported(${originalIndex})">📩 تبليغ</button>`;
-                } else {
-                    actionButton = `✅ تم التبليغ`;
-                }
-                
-                row.innerHTML = `
-                    <td>${item.name}</td>
-                    <td>${item.phone}</td>
-                    <td>${item.product} ${item.company !== '-' ? `(${item.company})` : ''}</td>
-                    <td>${actionButton}</td>
-                    <td>${item.reported || '-'}</td>
-                    <td><small>${item.note || '-'}</small></td>
-                `;
-                tbody.appendChild(row);
-            });
-            
-            if (tbody.children.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px;">لا توجد نواقص</td></tr>';
-            }
-        }
-
-        function markAsReported(index) {
-            const reportedTo = prompt("📢 تم التبليغ إلى (مورد/مدير/غيره):");
-            if (reportedTo) {
-                dailyShortages[index].status = 'reported';
-                dailyShortages[index].reported = reportedTo;
-                localStorage.setItem('dailyShortages', JSON.stringify(dailyShortages));
-                renderShortagesTable();
-                updateSummaryStats();
-            }
-        }
-
-        function updateTimer() {
-            const now = new Date();
-            const h = now.getHours();
-            let endHour = 16, startHour = 9;
-            
-            if (h >= 16 && h < 24) { startHour = 16; endHour = 24; }
-            else if (h < 9 || h >= 24) { startHour = 0; endHour = 9; }
-            
-            let target = new Date();
-            target.setHours(endHour, 0, 0, 0);
-            if (endHour === 9 && h >= 0 && h < 9) target.setDate(target.getDate());
-            else if (endHour <= startHour) target.setDate(target.getDate() + 1);
-            
-            let diff = target - now;
-            if (diff < 0) diff = 0;
-            
-            const hours = Math.floor(diff / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-            
-            const format = num => num < 10 ? '0' + num : num;
-            const totalShiftHours = endHour - startHour;
-            const elapsedHours = (now - new Date().setHours(startHour, 0, 0, 0)) / (1000 * 60 * 60);
-            const progress = Math.min(100, Math.max(0, (elapsedHours / totalShiftHours) * 100));
-            
-            document.getElementById('progressFill').style.width = progress + '%';
-            
-            let timerClass = 'timer-normal';
-            if (hours < 1) timerClass = 'timer-critical';
-            else if (hours < 2) timerClass = 'timer-warning';
-            
-            document.getElementById('liveTime').innerHTML = `
-                <div style="font-size: 14px; color: #94a3b8;">${getShiftTimeRange()}</div>
-                <div class="${timerClass}" style="font-size: 24px;">⏳ ${format(hours)}:${format(minutes)}:${format(seconds)}</div>
-            `;
-        }
-
+        // ================ تقرير الواتساب ================
         function generateWhatsAppReport() {
             const shiftTime = getShiftTimeRange();
-            const waitingItems = dailyShortages.filter(s => s.status === 'waiting');
-            const reportedItems = dailyShortages.filter(s => s.status === 'reported');
-            const lastBranchShortage = branchShortages.length > 0 ? branchShortages[branchShortages.length-1].items : 'لا يوجد';
-            const followup = document.getElementById('customerFollowup').value || 'لا يوجد';
             const cancelReason = document.getElementById('cancelReason').value || '';
+            const followup = document.getElementById('customerFollowup').value || '';
             
             let report = `⏱️ *الشيفت:* ${shiftTime}\n\n`;
             
@@ -1162,7 +1240,9 @@
                 report += `📝 *ملاحظات الإلغاء:*\n${cancelReason}\n\n`;
             }
             
-            if (lastBranchShortage !== 'لا يوجد') {
+            // نواقص الفرع
+            const lastBranchShortage = branchShortages.length > 0 ? branchShortages[branchShortages.length-1].items : null;
+            if (lastBranchShortage) {
                 report += `🏢 *نواقص الفرع:*\n`;
                 const branchItems = lastBranchShortage.split(' + ');
                 branchItems.forEach(item => {
@@ -1171,44 +1251,31 @@
                 report += `\n`;
             }
             
-            if (waitingItems.length > 0 || reportedItems.length > 0) {
+            // نواقص العملاء - بشكل شجري
+            if (allCustomersData.length > 0) {
                 report += `⚠️ *نواقص العملاء:*\n`;
                 
-                const allShortages = [...waitingItems, ...reportedItems];
-                const grouped = {};
-                allShortages.forEach(item => {
-                    const key = `${item.name} - ${item.phone}`;
-                    if (!grouped[key]) {
-                        grouped[key] = { name: item.name, phone: item.phone, products: [] };
-                    }
-                    grouped[key].products.push({
-                        name: item.product,
-                        company: item.company,
-                        status: item.status,
-                        reported: item.reported
-                    });
-                });
-                
-                for (let customer in grouped) {
-                    report += `👤 ${customer}\n`;
-                    grouped[customer].products.forEach(p => {
-                        let status = p.status === 'reported' ? ` (📢 تم التبليغ: ${p.reported})` : '';
-                        report += `  - ${p.name}${p.company !== '-' ? ` (${p.company})` : ''}${status}\n`;
+                allCustomersData.forEach(customer => {
+                    report += `👤 ${customer.name} - ${customer.phone}\n`;
+                    customer.shortages.forEach(s => {
+                        let status = s.status === 'reported' ? ` (📢 تم التبليغ: ${s.reported})` : '';
+                        report += `  - ${s.product}${s.company !== '-' ? ` (${s.company})` : ''}${status}\n`;
                     });
                     report += `\n`;
-                }
+                });
             }
             
-            if (followup.trim() !== "" && followup !== 'لا يوجد') {
+            if (followup.trim() !== "") {
                 report += `📞 *متابعة العملاء:*\n${followup}\n`;
             }
             
             report += `\n📅 ${new Date().toLocaleString('ar-EG')}`;
             
             navigator.clipboard.writeText(report);
-            alert("✅ تم نسخ التقرير بنجاح!");
+            showToast("✅ تم نسخ التقرير بنجاح");
         }
 
+        // ================ أرشفة الوردية ================
         function saveShiftToArchive() {
             const totalOrders = ordersCount.branch + ordersCount.talabat + ordersCount.insta;
             const totalCancels = cancelCounts.branch + cancelCounts.talabat + cancelCounts.insta;
@@ -1228,6 +1295,8 @@
                 cancelReason: document.getElementById('cancelReason').value || '-',
                 branchShortage: branchShortages.length > 0 ? branchShortages[branchShortages.length-1]?.items : '-',
                 followup: document.getElementById('customerFollowup').value || '-',
+                customersCount: allCustomersData.length,
+                productsCount: allCustomersData.reduce((sum, c) => sum + c.shortages.length, 0),
                 timestamp: new Date().toISOString()
             };
 
@@ -1240,19 +1309,27 @@
                 alert("✅ تم تحديث السجل بنجاح!");
             } else {
                 archive.push(shiftData);
-                alert("✅ تم أرشفة الوردية بنجاح!");
+                
+                if (confirm("✅ تم أرشفة الوردية. هل تريد تصفير بيانات اليوم لبدء شيفت جديد؟")) {
+                    ordersCount = { branch: 0, talabat: 0, insta: 0 };
+                    cancelCounts = { branch: 0, talabat: 0, insta: 0 };
+                    allCustomersData = [];
+                    document.getElementById('cancelReason').value = '';
+                    document.getElementById('customerFollowup').value = '';
+                    localStorage.removeItem('activeShiftData');
+                    renderCustomersList();
+                    renderShortagesTree();
+                    updateUI();
+                }
             }
             
             localStorage.setItem('monthlyArchive', JSON.stringify(archive));
             monthlyArchive = archive;
             renderArchiveTable();
             updateArchiveStats();
-            
-            // إعادة تعيين حقل البحث بعد التحديث
-            document.getElementById('archiveSearch').value = '';
-            document.getElementById('searchSummary').style.display = 'none';
         }
 
+        // ================ دوال الأرشيف والبحث ================
         function renderArchiveTable() {
             let archive = JSON.parse(localStorage.getItem('monthlyArchive')) || [];
             const tbody = document.getElementById('archiveBody');
@@ -1284,23 +1361,16 @@
             `}).join('');
         }
 
-        // ================ دوال البحث الذكي ================
         function filterArchive() {
             const input = document.getElementById('archiveSearch');
-            const filter = input.value.toLowerCase().trim();
+            const filter = input.value.toLowerCase();
             const table = document.getElementById('archiveTable');
             const tr = table.getElementsByTagName('tr');
-            let visibleCount = 0;
-            let filteredTotal = 0;
-            let filteredCancel = 0;
 
-            // المرور على كل الصفوف (نبدأ من 1 لتخطي رأس الجدول)
             for (let i = 1; i < tr.length; i++) {
                 let visible = false;
                 const tds = tr[i].getElementsByTagName('td');
-                
-                // البحث في جميع الخلايا
-                for (let j = 0; j < tds.length - 1; j++) { // نتجاهل آخر عمود (الإجراءات)
+                for (let j = 0; j < tds.length - 1; j++) {
                     if (tds[j]) {
                         const textValue = tds[j].textContent || tds[j].innerText;
                         if (textValue.toLowerCase().indexOf(filter) > -1) {
@@ -1309,50 +1379,7 @@
                         }
                     }
                 }
-                
-                // إظهار أو إخفاء الصف
                 tr[i].style.display = visible ? '' : 'none';
-                
-                // حساب الإحصائيات للصفوف الظاهرة
-                if (visible && filter !== '') {
-                    visibleCount++;
-                    if (tds[5]) { // عمود الإجمالي
-                        const total = parseInt(tds[5].textContent.replace(/[^\d]/g, '')) || 0;
-                        filteredTotal += total;
-                    }
-                    if (tds[6]) { // عمود الملغيات
-                        const cancel = parseInt(tds[6].textContent.replace(/[^\d]/g, '')) || 0;
-                        filteredCancel += cancel;
-                    }
-                }
-            }
-
-            // تحديث ملخص البحث
-            const summaryDiv = document.getElementById('searchSummary');
-            if (filter !== '' && visibleCount > 0) {
-                document.getElementById('resultCount').innerText = visibleCount;
-                document.getElementById('filteredTotal').innerText = filteredTotal;
-                document.getElementById('filteredCancel').innerText = filteredCancel;
-                summaryDiv.style.display = 'flex';
-            } else if (filter !== '' && visibleCount === 0) {
-                document.getElementById('resultCount').innerText = '0';
-                document.getElementById('filteredTotal').innerText = '0';
-                document.getElementById('filteredCancel').innerText = '0';
-                summaryDiv.style.display = 'flex';
-            } else {
-                summaryDiv.style.display = 'none';
-            }
-        }
-
-        function clearSearch() {
-            document.getElementById('archiveSearch').value = '';
-            document.getElementById('searchSummary').style.display = 'none';
-            
-            // إظهار جميع الصفوف
-            const table = document.getElementById('archiveTable');
-            const tr = table.getElementsByTagName('tr');
-            for (let i = 1; i < tr.length; i++) {
-                tr[i].style.display = '';
             }
         }
 
@@ -1362,7 +1389,6 @@
                 localStorage.setItem('monthlyArchive', JSON.stringify(monthlyArchive));
                 renderArchiveTable();
                 updateArchiveStats();
-                clearSearch(); // إعادة تعيين البحث بعد الحذف
                 alert("✅ تم حذف السجل");
             }
         }
@@ -1406,9 +1432,46 @@
             `;
         }
 
+        function updateTimer() {
+            const now = new Date();
+            const h = now.getHours();
+            let endHour = 16, startHour = 9;
+            
+            if (h >= 16 && h < 24) { startHour = 16; endHour = 24; }
+            else if (h < 9 || h >= 24) { startHour = 0; endHour = 9; }
+            
+            let target = new Date();
+            target.setHours(endHour, 0, 0, 0);
+            if (endHour === 9 && h >= 0 && h < 9) target.setDate(target.getDate());
+            else if (endHour <= startHour) target.setDate(target.getDate() + 1);
+            
+            let diff = target - now;
+            if (diff < 0) diff = 0;
+            
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            const format = num => num < 10 ? '0' + num : num;
+            const totalShiftHours = endHour - startHour;
+            const elapsedHours = (now - new Date().setHours(startHour, 0, 0, 0)) / (1000 * 60 * 60);
+            const progress = Math.min(100, Math.max(0, (elapsedHours / totalShiftHours) * 100));
+            
+            document.getElementById('progressFill').style.width = progress + '%';
+            
+            let timerClass = 'timer-normal';
+            if (hours < 1) timerClass = 'timer-critical';
+            else if (hours < 2) timerClass = 'timer-warning';
+            
+            document.getElementById('liveTime').innerHTML = `
+                <div style="font-size: 14px; color: #94a3b8;">${getShiftTimeRange()}</div>
+                <div class="${timerClass}" style="font-size: 24px;">⏳ ${format(hours)}:${format(minutes)}:${format(seconds)}</div>
+            `;
+        }
+
         function exportProfessionalExcel() {
             let archive = JSON.parse(localStorage.getItem('monthlyArchive')) || [];
-            if (archive.length === 0) return alert("📭 لا توجد بيانات في الأرشيف");
+            if (archive.length === 0) return alert("📭 لا توجد بيانات");
             
             const totalBranch = archive.reduce((sum, item) => sum + (item.branch || 0), 0);
             const totalTalabat = archive.reduce((sum, item) => sum + (item.talabat || 0), 0);
@@ -1463,13 +1526,21 @@
         }
 
         function exportShortagesExcel() {
-            const data = dailyShortages.map(s => ({
-                "التاريخ": s.date || '-', "العميل": s.name, "الهاتف": s.phone,
-                "المنتج": s.product, "الشركة": s.company,
-                "الحالة": s.status === 'reported' ? 'تم التبليغ' : 'في الانتظار',
-                "تم التبليغ إلى": s.reported || '-',
-                "ملاحظة": s.note || '-'
-            }));
+            const data = [];
+            allCustomersData.forEach(customer => {
+                customer.shortages.forEach(s => {
+                    data.push({
+                        "التاريخ": customer.date || '-',
+                        "العميل": customer.name,
+                        "الهاتف": customer.phone,
+                        "المنتج": s.product,
+                        "الشركة": s.company,
+                        "الحالة": s.status === 'reported' ? 'تم التبليغ' : 'في الانتظار',
+                        "تم التبليغ إلى": s.reported || '-',
+                        "ملاحظة": s.note || '-'
+                    });
+                });
+            });
             
             const ws = XLSX.utils.json_to_sheet(data);
             const wb = XLSX.utils.book_new();
@@ -1509,10 +1580,7 @@
                 ["إجمالي الأوردرات", totalOrders],
                 ["إجمالي الملغيات", totalCanceled],
                 ["نسبة الإلغاء", `${cancellationRate}%`],
-                ["متوسط الأوردرات اليومي", avgOrders],
-                ["إجمالي النواقص", dailyShortages.length],
-                ["في الانتظار", dailyShortages.filter(s => s.status === 'waiting').length],
-                ["تم التبليغ", dailyShortages.filter(s => s.status === 'reported').length]
+                ["متوسط الأوردرات اليومي", avgOrders]
             ];
             
             const ws = XLSX.utils.aoa_to_sheet(summary);
@@ -1525,7 +1593,7 @@
             const backup = {
                 date: new Date().toLocaleString('ar-EG'),
                 archive: monthlyArchive,
-                shortages: dailyShortages,
+                customers: allCustomersData,
                 branchShortages: branchShortages,
                 canceledOrders: canceledOrders
             };
@@ -1547,7 +1615,6 @@
                     localStorage.setItem('monthlyArchive', JSON.stringify(monthlyArchive));
                     renderArchiveTable();
                     updateArchiveStats();
-                    clearSearch();
                     alert("✅ تم مسح الأرشيف بالكامل");
                 }
             }
@@ -1566,11 +1633,10 @@
                 }
             });
             
-            if (tabId === 'shortages') renderShortagesTable();
+            if (tabId === 'shortages') renderShortagesTree();
             if (tabId === 'archive') {
                 renderArchiveTable();
                 updateArchiveStats();
-                clearSearch(); // إعادة تعيين البحث عند فتح الأرشيف
             }
         }
     </script>
