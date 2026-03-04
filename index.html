@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>نظام إدارة العمليات - V8.8 (مزامنة مستمرة)</title>
+    <title>نظام إدارة العمليات - V8.9 (إدخال يدوي + إضافة منتج)</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <style>
@@ -104,6 +104,31 @@
         
         .btn-c.minus {
             background: #ef4444;
+        }
+        
+        /* تنسيق حقل الإدخال الجديد */
+        .counter-input {
+            width: 70px;
+            height: 45px;
+            text-align: center;
+            background: #0f172a;
+            border: 2px solid #6366f1;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            padding: 5px;
+        }
+        
+        /* إخفاء أسهم الزيادة في المتصفح */
+        .counter-input::-webkit-inner-spin-button, 
+        .counter-input::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        
+        .counter-input[type=number] {
+            -moz-appearance: textfield;
         }
         
         .grid-3 {
@@ -218,7 +243,6 @@
             width: 100%;
         }
         
-        /* تنسيق صف الإدخال الأفقي */
         .input-row {
             display: flex;
             gap: 8px;
@@ -249,10 +273,6 @@
             white-space: nowrap;
         }
         
-        .remove-btn:hover {
-            background: #dc2626;
-        }
-        
         .add-btn {
             background: #10b981;
             color: white;
@@ -264,7 +284,23 @@
             margin: 5px 0;
         }
         
-        /* كتل العرض التراكمي */
+        .add-product-btn {
+            background: #4a5568;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 8px;
+            width: 100%;
+            transition: background 0.2s;
+        }
+        
+        .add-product-btn:hover {
+            background: #6366f1;
+        }
+        
         .records-container {
             margin-top: 15px;
         }
@@ -585,6 +621,7 @@
             #liveTime { font-size: 14px; }
             .main-btn { padding: 12px; font-size: 14px; }
             .stat-number { font-size: 18px; }
+            .counter-input { width: 60px; height: 40px; font-size: 16px; }
         }
         
         @media (max-width: 380px) {
@@ -597,7 +634,7 @@
 <body>
     <div class="wrapper">
         <header style="text-align: center; margin-bottom: 20px;">
-            <h1 style="color: #6366f1;">📊 نظام إدارة العمليات V8.8</h1>
+            <h1 style="color: #6366f1;">📊 نظام إدارة العمليات V8.9</h1>
             <div id="liveTime"></div>
             <div class="progress-bar">
                 <div class="progress-fill" id="progressFill" style="width: 0%"></div>
@@ -622,12 +659,14 @@
                 <div class="stat-item"><div>🚫 ملغيات</div><div class="stat-number" id="cancelTotal">0</div></div>
             </div>
 
+            <!-- قسم العدادات المعدل - إدخال يدوي -->
             <div class="stats-grid">
                 <div class="stat-card">
                     <h3>📍 فرع</h3>
                     <div class="counter">
                         <button onclick="updateCount('branch', -1)" class="btn-c minus">-</button>
-                        <span id="branch">0</span>
+                        <input type="number" id="branch" class="counter-input" value="0" 
+                               onchange="manualUpdate('branch', this.value)" min="0">
                         <button onclick="updateCount('branch', 1)" class="btn-c">+</button>
                     </div>
                 </div>
@@ -635,7 +674,8 @@
                     <h3>📱 برنامج طلبات</h3>
                     <div class="counter">
                         <button onclick="updateCount('talabat', -1)" class="btn-c minus">-</button>
-                        <span id="talabat">0</span>
+                        <input type="number" id="talabat" class="counter-input" value="0" 
+                               onchange="manualUpdate('talabat', this.value)" min="0">
                         <button onclick="updateCount('talabat', 1)" class="btn-c">+</button>
                     </div>
                 </div>
@@ -643,7 +683,8 @@
                     <h3>🌐 انستا</h3>
                     <div class="counter">
                         <button onclick="updateCount('insta', -1)" class="btn-c minus">-</button>
-                        <span id="insta">0</span>
+                        <input type="number" id="insta" class="counter-input" value="0" 
+                               onchange="manualUpdate('insta', this.value)" min="0">
                         <button onclick="updateCount('insta', 1)" class="btn-c">+</button>
                     </div>
                 </div>
@@ -680,7 +721,6 @@
                 <textarea id="cancelReason" rows="2" placeholder="📝 أسباب الإلغاء والملاحظات..." oninput="autoSave()"></textarea>
             </div>
 
-            <!-- ===== قسم إضافة عميل جديد (تنسيق أفقي) ===== -->
             <div class="section">
                 <h3>➕ إضافة عميل جديد</h3>
                 
@@ -696,20 +736,18 @@
                 <button class="main-btn" style="background: #6366f1; margin-top: 15px;" onclick="addCustomer()">💾 إضافة العميل للقائمة</button>
             </div>
 
-            <!-- ===== قائمة العملاء والنواقص التراكمية ===== -->
             <div class="section">
                 <h3>📋 سجل العملاء (تراكمي)</h3>
                 <div id="customersRecords" class="records-container"></div>
             </div>
 
-            <!-- ===== نواقص الفرع ===== -->
             <div class="section">
                 <h3>🏢 نواقص الفرع</h3>
                 <div id="branchProductsContainer"></div>
                 <button class="add-btn" onclick="addBranchInput()">+ إضافة منتج للفرع</button>
+                <button class="main-btn" style="background: #10b981; margin-top: 10px;" onclick="saveBranchShortages()">💾 حفظ نواقص الفرع</button>
             </div>
 
-            <!-- ===== سجل نواقص الفرع ===== -->
             <div class="section">
                 <h3>📋 سجل نواقص الفرع</h3>
                 <div id="branchRecords" class="records-container"></div>
@@ -787,16 +825,16 @@
     </div>
 
     <script>
-        // ================ هيكل البيانات التراكمي ================
+        // ================ هيكل البيانات ================
         let ordersCount = { branch: 0, talabat: 0, insta: 0 };
         let cancelCounts = { branch: 0, talabat: 0, insta: 0 };
-        let customers = []; // مصفوفة العملاء مع منتجاتهم
-        let branchShortagesList = []; // سجل نواقص الفرع
+        let customers = [];
+        let branchShortagesList = [];
         let monthlyArchive = JSON.parse(localStorage.getItem('monthlyArchive')) || [];
         let canceledOrders = JSON.parse(localStorage.getItem('canceledOrders')) || [];
         let editingIndex = -1;
 
-        // ================ التهيئة والتحقق من الشيفت ================
+        // ================ التهيئة ================
         window.onload = function() {
             checkNewShift();
             restoreData();
@@ -806,7 +844,7 @@
             renderArchiveTable();
             updateArchiveStats();
             setInterval(updateTimer, 1000);
-            setInterval(autoSave, 30000); // حفظ تلقائي كل 30 ثانية
+            setInterval(autoSave, 30000);
         };
 
         function checkNewShift() {
@@ -816,7 +854,6 @@
             const lastUpdate = savedData.lastUpdate;
             const now = new Date().getTime();
             
-            // إذا مر أكثر من 8 ساعات على آخر تحديث
             if (lastUpdate && (now - lastUpdate > 8 * 60 * 60 * 1000)) {
                 if (confirm("⚠️ تم اكتشاف بداية شيفت جديد. هل تريد أرشفة البيانات القديمة والبدء من جديد؟")) {
                     archiveShift();
@@ -841,7 +878,6 @@
             updateUI();
         }
 
-        // ================ الحفظ التلقائي والمزامنة ================
         function autoSave() {
             const shiftData = {
                 orders: ordersCount,
@@ -873,9 +909,9 @@
 
         // ================ تحديث الواجهة ================
         function updateUI() {
-            document.getElementById('branch').innerText = ordersCount.branch;
-            document.getElementById('talabat').innerText = ordersCount.talabat;
-            document.getElementById('insta').innerText = ordersCount.insta;
+            document.getElementById('branch').value = ordersCount.branch;
+            document.getElementById('talabat').value = ordersCount.talabat;
+            document.getElementById('insta').value = ordersCount.insta;
             
             document.getElementById('canBranch').innerText = cancelCounts.branch;
             document.getElementById('canTalabat').innerText = cancelCounts.talabat;
@@ -897,9 +933,22 @@
             document.getElementById('cancelTotal').innerText = todayCanceled;
         }
 
+        // دالة التحديث اليدوي الجديدة
+        function manualUpdate(type, value) {
+            let numValue = parseInt(value) || 0;
+            if (numValue < 0) numValue = 0;
+            
+            ordersCount[type] = numValue;
+            document.getElementById(type).value = numValue;
+            
+            updateSummaryStats();
+            autoSave();
+        }
+
         function updateCount(type, delta) {
             ordersCount[type] = Math.max(0, ordersCount[type] + delta);
-            updateUI();
+            document.getElementById(type).value = ordersCount[type];
+            updateSummaryStats();
             autoSave();
         }
 
@@ -909,7 +958,7 @@
             autoSave();
         }
 
-        // ================ إضافة منتج جديد (تنسيق أفقي) ================
+        // ================ إضافة منتج جديد ================
         function addProductInput() {
             const container = document.getElementById('newCustomerProducts');
             const row = document.createElement('div');
@@ -934,7 +983,7 @@
             container.appendChild(row);
         }
 
-        // ================ إضافة عميل جديد للقائمة التراكمية ================
+        // ================ إضافة عميل جديد ================
         function addCustomer() {
             const name = document.getElementById('newCustomerName').value.trim();
             const phone = document.getElementById('newCustomerPhone').value.trim();
@@ -976,11 +1025,10 @@
             
             customers.push(customer);
             
-            // تفريغ الحقول
             document.getElementById('newCustomerName').value = '';
             document.getElementById('newCustomerPhone').value = '';
             document.getElementById('newCustomerProducts').innerHTML = '';
-            addProductInput(); // إضافة صف فارغ
+            addProductInput();
             
             autoSave();
             renderCustomersRecords();
@@ -989,7 +1037,33 @@
             showToast("✅ تم إضافة العميل بنجاح");
         }
 
-        // ================ عرض سجل العملاء ================
+        // ================ إضافة منتج لعميل موجود (التعديل الجديد) ================
+        function addProductToExistingCustomer(customerId) {
+            const newProductName = prompt("📦 أدخل اسم المنتج الجديد:");
+            if (!newProductName) return;
+            
+            const newProductCompany = prompt("🏢 أدخل اسم الشركة (اختياري):") || "-";
+            
+            const customer = customers.find(c => c.id === customerId);
+            if (customer) {
+                customer.products.push({
+                    id: Date.now() + Math.random(),
+                    name: newProductName,
+                    company: newProductCompany,
+                    status: 'waiting',
+                    reported: '-',
+                    note: ''
+                });
+                
+                autoSave();
+                renderCustomersRecords();
+                renderShortages();
+                updateSummaryStats();
+                showToast(`✅ تم إضافة "${newProductName}" للعميل ${customer.name}`);
+            }
+        }
+
+        // ================ عرض سجل العملاء (معدل) ================
         function renderCustomersRecords() {
             const container = document.getElementById('customersRecords');
             
@@ -999,12 +1073,13 @@
             }
             
             container.innerHTML = '';
-            customers.forEach((customer, customerIndex) => {
+            customers.forEach((customer) => {
                 const block = document.createElement('div');
                 block.className = 'record-block';
                 
                 let productsHtml = '';
                 customer.products.forEach((product, productIndex) => {
+                    const productGlobalIndex = customer.products.findIndex(p => p.id === product.id);
                     productsHtml += `
                         <div class="record-product">
                             <div>
@@ -1016,7 +1091,7 @@
                                     ${product.status === 'reported' ? '📢 تم التبليغ' : '⏳ انتظار'}
                                 </span>
                                 ${product.status === 'waiting' ? 
-                                    `<button class="report-product-btn" onclick="reportProduct(${customerIndex}, ${productIndex})">📩 تبليغ</button>` : 
+                                    `<button class="report-product-btn" onclick="reportProduct(${customers.indexOf(customer)}, ${productGlobalIndex})">📩 تبليغ</button>` : 
                                     `<small>${product.reported}</small>`
                                 }
                             </div>
@@ -1030,11 +1105,14 @@
                             <span>👤 ${customer.name}</span>
                             <span>📞 ${customer.phone}</span>
                         </div>
-                        <button class="remove-btn" onclick="deleteCustomer(${customerIndex})">🗑️ حذف العميل</button>
+                        <button class="remove-btn" onclick="deleteCustomer(${customers.indexOf(customer)})">🗑️ حذف العميل</button>
                     </div>
                     <div class="record-products">
                         ${productsHtml}
                     </div>
+                    <button class="add-product-btn" onclick="addProductToExistingCustomer(${customer.id})">
+                        ➕ إضافة منتج آخر للعميل
+                    </button>
                 `;
                 
                 container.appendChild(block);
@@ -1062,7 +1140,6 @@
             });
         }
 
-        // ================ إضافة نواقص الفرع ================
         function saveBranchShortages() {
             const items = [];
             document.querySelectorAll('#branchProductsContainer .input-row').forEach(row => {
@@ -1092,7 +1169,6 @@
             showToast("✅ تم حفظ نواقص الفرع");
         }
 
-        // ================ التبليغ عن منتج ================
         function reportProduct(customerIndex, productIndex) {
             const reportedTo = prompt("📢 تم التبليغ إلى (مورد/مدير/غيره):");
             if (reportedTo) {
@@ -1117,7 +1193,6 @@
             }
         }
 
-        // ================ عرض النواقص ================
         function renderShortages() {
             const filter = document.getElementById('statusFilter').value;
             const container = document.getElementById('shortagesContainer');
@@ -1182,7 +1257,6 @@
             }
         }
 
-        // ================ دوال الشيفت ================
         function getShiftName() {
             const h = new Date().getHours();
             if (h >= 9 && h < 16) return "صباحي";
@@ -1197,12 +1271,10 @@
             return "من (12:00 ص) إلى (09:00 ص)";
         }
 
-        // ================ أرشفة الوردية ================
         function archiveShift() {
             const totalOrders = ordersCount.branch + ordersCount.talabat + ordersCount.insta;
             const totalCancels = cancelCounts.branch + cancelCounts.talabat + cancelCounts.insta;
             
-            // حفظ نواقص الفرع أولاً
             saveBranchShortages();
             
             const shiftData = {
@@ -1256,7 +1328,6 @@
             updateArchiveStats();
         }
 
-        // ================ تقرير الواتساب ================
         function generateWhatsAppReport() {
             const shiftTime = getShiftTimeRange();
             const cancelReason = document.getElementById('cancelReason').value || '';
@@ -1280,7 +1351,6 @@
                 report += `📝 *ملاحظات الإلغاء:*\n${cancelReason}\n\n`;
             }
             
-            // نواقص الفرع
             if (branchShortagesList.length > 0) {
                 const lastBranch = branchShortagesList[branchShortagesList.length-1];
                 report += `🏢 *نواقص الفرع:*\n`;
@@ -1291,7 +1361,6 @@
                 report += `\n`;
             }
             
-            // نواقص العملاء
             if (customers.length > 0) {
                 report += `⚠️ *نواقص العملاء:*\n`;
                 
@@ -1315,7 +1384,6 @@
             showToast("✅ تم نسخ التقرير بنجاح");
         }
 
-        // ================ تحديث التايمر ================
         function updateTimer() {
             const now = new Date();
             const h = now.getHours();
@@ -1353,7 +1421,6 @@
             `;
         }
 
-        // ================ دوال الأرشيف ================
         function renderArchiveTable() {
             let archive = JSON.parse(localStorage.getItem('monthlyArchive')) || [];
             const tbody = document.getElementById('archiveBody');
@@ -1453,7 +1520,6 @@
             `;
         }
 
-        // ================ دوال التصدير ================
         function exportProfessionalExcel() {
             let archive = JSON.parse(localStorage.getItem('monthlyArchive')) || [];
             if (archive.length === 0) return alert("📭 لا توجد بيانات");
