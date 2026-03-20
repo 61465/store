@@ -761,20 +761,20 @@ function closeScanner(){
 async function scStartCam(){
   setScStatus('scanning','🔍 جاري فتح الكاميرا...');
   try{
-    if(scReader){ try{scReader.reset();}catch(e){} }
-    scReader = new ZXing.BrowserMultiFormatReader();
-    const devices = await ZXing.BrowserCodeReader.listVideoInputDevices();
-    // prefer back camera on mobile
-    const device = devices.find(d=>d.label.toLowerCase().includes('back')||d.label.toLowerCase().includes('rear')||d.label.toLowerCase().includes('environment')) || devices[devices.length-1] || devices[0];
-    const deviceId = device ? device.deviceId : undefined;
+    // Stop any previous reader cleanly
+    if(scReader){ try{scReader.reset();}catch(e){} scReader=null; }
 
+    scReader = new ZXing.BrowserMultiFormatReader();
+
+    // decodeFromVideoDevice(undefined) → ZXing uses facingMode:'environment' automatically
+    // This works on ALL browsers/devices without needing listVideoInputDevices
     document.getElementById('scOff').style.display='none';
     document.getElementById('scLaser').style.display='block';
     scSetCamBtn(true);
     setScStatus('scanning','🔍 وجّه الكاميرا للباركود');
     scActive=true;
 
-    await scReader.decodeFromVideoDevice(deviceId, 'scVideo', (result, err)=>{
+    await scReader.decodeFromVideoDevice(undefined, 'scVideo', (result, err)=>{
       if(!scActive) return;
       if(result){
         const code=result.getText(), now=Date.now();
@@ -783,13 +783,20 @@ async function scStartCam(){
           scOnDetected(code);
         }
       }
-      // err is normal when no barcode in frame — ignore
+      // NotFoundException is normal (no barcode in frame) — safely ignore
     });
   }catch(e){
-    console.error('Scanner error:',e);
-    setScStatus('err','❌ لا يمكن الوصول للكاميرا — استخدم الإدخال اليدوي');
+    console.error('ZXing error:',e);
+    // If camera permission denied or no camera
+    const msg = (e&&e.name==='NotAllowedError')
+      ? '❌ رُفض إذن الكاميرا — افتح الإعدادات وأعطِ الإذن'
+      : (e&&e.name==='NotFoundError')
+      ? '❌ لا توجد كاميرا على هذا الجهاز'
+      : '❌ خطأ في الكاميرا — استخدم الإدخال اليدوي';
+    setScStatus('err', msg);
     document.getElementById('scLaser').style.display='none';
     scSetCamBtn(false);
+    scActive=false;
   }
 }
 
