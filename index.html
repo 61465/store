@@ -1,4 +1,16 @@
-<!DOCTYPE html>
+<!-- APP TEAM QUICK LINKS (hidden for branch) -->
+  <div id="app-quick-links" style="display:none;margin-bottom:12px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button onclick="showTab('prods')" style="padding:14px;background:var(--raised);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;text-align:center"
+        onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="font-size:24px;margin-bottom:4px">📦</div>قاعدة المنتجات
+      </button>
+      <button onclick="showTab('checks')" style="padding:14px;background:var(--raised);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;text-align:center"
+        onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="font-size:24px;margin-bottom:4px">✅</div>قائمة المراجعات
+      </button>
+    </div>
+  </div><!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -221,6 +233,10 @@ h4{color:var(--muted);margin:8px 0 5px;font-size:12px;font-weight:600}
 
 /* TIMER COLORS */
 .tc-ok{color:var(--green)}.tc-w{color:var(--warn)}.tc-x{animation:blink 1s infinite;color:var(--red)}
+/* followup AC */
+#followupACList div:hover{background:var(--hover);}
+/* cancel reason modal items */
+#cancelReasonModal .stag.on{background:var(--warn);color:#000;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 
 /* BLOCKED INFO */
@@ -397,10 +413,10 @@ h4{color:var(--muted);margin:8px 0 5px;font-size:12px;font-weight:600}
     <p>اختر الفريق للدخول</p>
     <div class="tcards">
       <div class="tcard bc" onclick="selectTeam('branch')">
-        <div class="ti">🏪</div><div class="tn">فريق الفرع</div><div class="td">طلبات الفرع ونواقصه</div>
+        <div class="ti">🏪</div><div class="tn">فريق الفرع</div><div class="td">فرع + برنامج طلبات + انستا</div>
       </div>
       <div class="tcard ac" onclick="selectTeam('app')">
-        <div class="ti">📱</div><div class="tn">فريق التطبيقات</div><div class="td">برنامج طلبات وانستا</div>
+        <div class="ti">📸</div><div class="tn">انستا شوب</div><div class="td">إدارة طلبات الانستا</div>
       </div>
     </div>
   </div>
@@ -497,9 +513,8 @@ h4{color:var(--muted);margin:8px 0 5px;font-size:12px;font-weight:600}
 
 <!-- ══ TAB: ENTRY ══ -->
 <div id="entry" class="view on">
-  <div class="stats4">
+  <div class="stats4" id="entry-stats" style="grid-template-columns:repeat(3,1fr)">
     <div class="si"><div class="si-l">👥 عملاء</div><div class="si-n" id="sCustomers">0</div></div>
-    <div class="si"><div class="si-l">📦 منتجات</div><div class="si-n" id="sProds">0</div></div>
     <div class="si"><div class="si-l">📢 تم التبليغ</div><div class="si-n" id="sReported">0</div></div>
     <div class="si"><div class="si-l">🚫 ملغيات</div><div class="si-n" id="sCancels">0</div></div>
   </div>
@@ -513,11 +528,29 @@ h4{color:var(--muted);margin:8px 0 5px;font-size:12px;font-weight:600}
   <div class="sec">
     <div class="sec-t">🚫 الأوردرات الملغية</div>
     <div class="cang">
-      <div class="ccard"><span>📍 فرع</span><div class="cctrls"><button onclick="updCan('branch',1)">+</button><span id="cBranch">0</span><button onclick="updCan('branch',-1)" style="background:var(--red)">−</button></div></div>
-      <div class="ccard"><span>📱 طلبات</span><div class="cctrls"><button onclick="updCan('talabat',1)">+</button><span id="cTalabat">0</span><button onclick="updCan('talabat',-1)" style="background:var(--red)">−</button></div></div>
-      <div class="ccard"><span>🌐 انستا</span><div class="cctrls"><button onclick="updCan('insta',1)">+</button><span id="cInsta">0</span><button onclick="updCan('insta',-1)" style="background:var(--red)">−</button></div></div>
+      <div class="ccard"><span>📍 فرع</span><div class="cctrls">
+        <button onclick="addCancelWithReason('branch')">+</button>
+        <span id="cBranch">0</span>
+        <button onclick="updCan('branch',-1)" style="background:var(--red)">−</button>
+      </div></div>
+      <div class="ccard"><span>📱 طلبات</span><div class="cctrls">
+        <button onclick="updCan('talabat',1)">+</button>
+        <span id="cTalabat">0</span>
+        <button onclick="updCan('talabat',-1)" style="background:var(--red)">−</button>
+      </div></div>
+      <div class="ccard"><span>🌐 انستا</span><div class="cctrls">
+        <button onclick="updCan('insta',1)">+</button>
+        <span id="cInsta">0</span>
+        <button onclick="updCan('insta',-1)" style="background:var(--red)">−</button>
+      </div></div>
     </div>
-    <h4>أسباب الإلغاء:</h4>
+    <!-- Branch cancel reasons list -->
+    <div id="branchCancelList" style="margin-top:10px;display:none">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:700">📋 أسباب إلغاء الفرع:</div>
+      <div id="branchCancelItems"></div>
+    </div>
+    <div class="divider"></div>
+    <h4>أسباب الإلغاء العامة (طلبات/انستا):</h4>
     <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:7px" id="canTags">
       <button class="stag to" onclick="togCanTag(this,'نقص منتج')">نقص منتج</button>
       <button class="stag to" onclick="togCanTag(this,'نقص طيارين')">نقص طيارين</button>
@@ -528,24 +561,48 @@ h4{color:var(--muted);margin:8px 0 5px;font-size:12px;font-weight:600}
     <textarea id="canReason" placeholder="📝 ملاحظات إضافية..." oninput="autoSave()"></textarea>
   </div>
 
-  <div class="sec">
-    <div class="sec-t">➕ إضافة عميل جديد</div>
+  <!-- CANCEL REASON MODAL -->
+  <div class="moverlay" id="cancelReasonModal" style="z-index:4000">
+    <div class="mbox" style="max-width:400px">
+      <div class="mt">
+        <span>🚫 سبب الإلغاء</span>
+        <button class="mclose" onclick="closeCancelModal()">✕</button>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px">أدخل سبب إلغاء هذا الأوردر (اختياري)</p>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px">
+        <button class="stag to" onclick="setCancelQuick(this,'نقص منتج')">نقص منتج</button>
+        <button class="stag to" onclick="setCancelQuick(this,'نقص طيارين')">نقص طيارين</button>
+        <button class="stag to" onclick="setCancelQuick(this,'العميل لم يرد')">العميل لم يرد</button>
+        <button class="stag to" onclick="setCancelQuick(this,'خارج نطاق التوصيل')">خارج</button>
+        <button class="stag to" onclick="setCancelQuick(this,'ازدحام')">ازدحام</button>
+      </div>
+      <input type="text" id="cancelReasonInput" placeholder="أو اكتب سبباً مخصصاً..." style="margin-bottom:10px"
+             onkeydown="if(event.key==='Enter')confirmCancelReason()">
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-p" style="flex:1;margin:0" onclick="confirmCancelReason()">✅ تأكيد</button>
+        <button class="btn btn-n" style="flex:1;margin:0" onclick="skipCancelReason()">تخطي</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec" id="sec-addcust">
+    <div class="sec-t">➕ نواقص عميل جديد</div>
     <input type="text" id="newCustName" placeholder="اسم العميل" oninput="autoSave()">
     <input type="text" id="newCustPhone" placeholder="رقم الهاتف" oninput="autoSave()">
     <div class="divider"></div>
-    <h4>المنتجات الناقصة:</h4>
+    <h4>نواقص العميل:</h4>
     <div id="newCustProds"></div>
     <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:4px">
       <button class="addbtn" onclick="addProdInput()">+ يدوياً</button>
       <button class="addbtn" style="background:var(--blue);color:#fff" onclick="openScanner('cust-global')">📷 مسح باركود</button>
     </div>
-    <button class="btn btn-p" style="margin-top:10px" onclick="addCustomer()">💾 إضافة العميل</button>
+    <button class="btn btn-p" style="margin-top:10px" onclick="addCustomer()">💾 حفظ نواقص العميل</button>
   </div>
 
-  <div class="sec"><div class="sec-t">📋 سجل العملاء</div><div id="custRecords"></div></div>
+  <div class="sec" id="sec-custrecords"><div class="sec-t">📋 سجل العملاء</div><div id="custRecords"></div></div>
 
-  <div class="sec">
-    <div class="sec-t">🏢 نواقص الفرع</div>
+  <div class="sec" id="sec-branchshort">
+    <div class="sec-t" id="sec-branchshort-title">🏢 نواقص الفرع</div>
     <div id="branchProds"></div>
     <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:4px">
       <button class="addbtn" onclick="addBranchInput()">+ يدوياً</button>
@@ -553,11 +610,24 @@ h4{color:var(--muted);margin:8px 0 5px;font-size:12px;font-weight:600}
     </div>
     <button class="btn btn-s" style="margin-top:9px" onclick="saveBranch()">💾 حفظ نواقص الفرع</button>
   </div>
-  <div class="sec"><div class="sec-t">📋 سجل نواقص الفرع</div><div id="branchRecs"></div></div>
+  <div class="sec" id="sec-branchrecs"><div class="sec-t" id="sec-branchrecs-title">📋 سجل نواقص الفرع</div><div id="branchRecs"></div></div>
 
-  <div class="sec">
+  <div class="sec" id="sec-followup">
     <div class="sec-t">📞 متابعة العملاء</div>
-    <textarea id="followup" placeholder="ملاحظات المتابعة..." oninput="autoSave()"></textarea>
+    <!-- Past shortages reference -->
+    <div style="margin-bottom:10px">
+      <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:6px">📋 نواقص العملاء المسجلة — انقر لإضافة للملاحظات:</div>
+      <div id="pastShortagesSuggestions" style="display:flex;flex-wrap:wrap;gap:5px;max-height:120px;overflow-y:auto"></div>
+    </div>
+    <div style="position:relative">
+      <textarea id="followup" placeholder="اكتب ملاحظات المتابعة... (اكتب اسم المنتج للبحث في النواقص)" oninput="followupAC(this);autoSave()" style="margin-bottom:3px"></textarea>
+      <div id="followupACList" style="position:absolute;top:100%;right:0;left:0;background:var(--surface);border:1px solid var(--blue);border-radius:var(--rs);z-index:200;max-height:160px;overflow-y:auto;display:none"></div>
+    </div>
+  </div>
+
+  <div class="sec" id="sec-generalnotes">
+    <div class="sec-t">📝 ملاحظات عامة</div>
+    <textarea id="generalNotes" placeholder="ملاحظات عامة للشيفت..." oninput="autoSave()"></textarea>
   </div>
 
   <div class="abg">
@@ -709,6 +779,7 @@ h4{color:var(--muted);margin:8px 0 5px;font-size:12px;font-weight:600}
 let orders={branch:0,talabat:0,insta:0};
 let cancels={branch:0,talabat:0,insta:0};
 let customers=[], branchList=[], selCanTags=[];
+let branchCancelReasons=[]; // [{reason, time}] for branch team only
 let prodDB=JSON.parse(localStorage.getItem('productsDB'))||defProds();
 let checks=JSON.parse(localStorage.getItem('checklistItems'))||defChecks();
 let archive=[], editIdx=-1, prodFilter='all', currentTeam=null;
@@ -922,8 +993,8 @@ function scFlash(){
 // TEAM
 // ══════════════════════════════════════════════
 const TEAMS={
-  branch:{name:'فريق الفرع',icon:'🏪',badge:'tbadge-b',pfx:'branch_',show:['branch'],hide:['talabat','insta'],showC:['branch'],hideC:['talabat','insta']},
-  app:{name:'فريق التطبيقات',icon:'📱',badge:'tbadge-a',pfx:'app_',show:['talabat','insta'],hide:['branch'],showC:['talabat','insta'],hideC:['branch']},
+  branch:{name:'فريق الفرع',icon:'🏪',badge:'tbadge-b',pfx:'branch_',show:['branch','talabat','insta'],hide:[],showC:['branch','talabat','insta'],hideC:[]},
+  app:{name:'انستا شوب',icon:'📸',badge:'tbadge-a',pfx:'app_',show:['insta'],hide:['branch','talabat'],showC:['insta'],hideC:['branch','talabat']},
 };
 
 function selectTeam(t){
@@ -942,12 +1013,57 @@ function switchTeam(){
 
 function applyTeamUI(t){
   const cfg=TEAMS[t];
-  const cCards=document.querySelectorAll('.cg .cc'), ids=['branch','talabat','insta'];
+  const ids=['branch','talabat','insta'];
+
+  // Order counters
+  const cCards=document.querySelectorAll('.cg .cc');
   cCards.forEach((c,i)=>c.style.display=cfg.hide.includes(ids[i])?'none':'');
   document.querySelector('.cg').style.gridTemplateColumns='repeat('+cfg.show.length+',1fr)';
+
+  // Cancel counters
   const canCards=document.querySelectorAll('.cang .ccard');
   canCards.forEach((c,i)=>c.style.display=cfg.hideC.includes(ids[i])?'none':'');
   document.querySelector('.cang').style.gridTemplateColumns='repeat('+cfg.showC.length+',1fr)';
+
+  const isApp = t==='app';
+
+  // Sections only for branch team
+  const branchOnlySecs=['sec-addcust','sec-custrecords','sec-followup'];
+  branchOnlySecs.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.style.display=isApp?'none':'';
+  });
+
+  // Stats row — app shows only ملغيات (1 col)
+  const statsEl=document.getElementById('entry-stats');
+  if(statsEl){
+    if(isApp){
+      statsEl.style.gridTemplateColumns='1fr';
+      document.getElementById('sCustomers')?.closest('.si')?.style.setProperty('display','none');
+      document.getElementById('sReported')?.closest('.si')?.style.setProperty('display','none');
+      document.getElementById('sCancels')?.closest('.si')?.style.removeProperty('display');
+    } else {
+      statsEl.style.gridTemplateColumns='repeat(3,1fr)';
+      ['sCustomers','sReported','sCancels'].forEach(id=>{
+        document.getElementById(id)?.closest('.si')?.style.removeProperty('display');
+      });
+    }
+  }
+
+  // Branch shortages rename for app team
+  const bsTitle=document.getElementById('sec-branchshort-title');
+  const brTitle=document.getElementById('sec-branchrecs-title');
+  if(bsTitle) bsTitle.textContent=isApp?'📦 نواقص':'🏢 نواقص الفرع';
+  if(brTitle) brTitle.textContent=isApp?'📋 سجل النواقص':'📋 سجل نواقص الفرع';
+
+  // App team: show products+checklist quick links in dashboard
+  const appLinks=document.getElementById('app-quick-links');
+  if(appLinks) appLinks.style.display=isApp?'':'none';
+
+  // Cancel section title for app
+  const cancelTitle=document.querySelector('.sec-t');
+  // branch cancel with reason only for branch
+  // addCancelWithReason is already conditional on currentTeam==='branch'
 }
 
 function teamKey(k){return currentTeam?TEAMS[currentTeam].pfx+k:k;}
@@ -965,13 +1081,16 @@ function loadTeamData(t){
     cancels=sd.cancels||{branch:0,talabat:0,insta:0};
     customers=sd.customers||[]; branchList=sd.branchShortages||[];
     selCanTags=sd.cancelTags||[];
+    branchCancelReasons=sd.branchCancelReasons||[];
     document.getElementById('canReason').value=sd.notes||'';
     document.getElementById('followup').value=sd.followup||'';
+    if(document.getElementById('generalNotes')) document.getElementById('generalNotes').value=sd.generalNotes||'';
     restoreCanTags();
   }
   archive=JSON.parse(localStorage.getItem(pfx+'monthlyArchive'))||[];
   updateUI(); renderCustomers(); renderBranchRecs(); renderShort();
   renderArchive(); updateArchStats(); checkBlockedAlerts();
+  renderBranchCancelList(); renderPastShortages();
 }
 
 // ══════════════════════════════════════════════
@@ -994,13 +1113,14 @@ function autoSave(){
     orders,cancels,customers,branchShortages:branchList,
     notes:document.getElementById('canReason').value,
     followup:document.getElementById('followup').value,
-    cancelTags:selCanTags,lastUpdate:Date.now()
+    generalNotes:document.getElementById('generalNotes')?document.getElementById('generalNotes').value:'',
+    cancelTags:selCanTags,branchCancelReasons,lastUpdate:Date.now()
   }));
   localStorage.setItem('productsDB',JSON.stringify(prodDB));
   localStorage.setItem('checklistItems',JSON.stringify(checks));
 }
 
-function syncData(){autoSave();renderCustomers();renderBranchRecs();renderShort();checkBlockedAlerts();toast('✅ تمت المزامنة');}
+function syncData(){autoSave();renderCustomers();renderBranchRecs();renderShort();checkBlockedAlerts();renderPastShortages();renderBranchCancelList();toast('✅ تمت المزامنة');}
 
 // ══════════════════════════════════════════════
 // UI
@@ -1015,20 +1135,152 @@ function updateUI(){
 
 function updateStats(){
   document.getElementById('sCustomers').textContent=customers.length;
-  document.getElementById('sProds').textContent=customers.reduce((s,c)=>s+c.products.length,0);
   document.getElementById('sReported').textContent=customers.reduce((s,c)=>s+c.products.filter(p=>p.status==='reported').length,0);
   document.getElementById('sCancels').textContent=cancels.branch+cancels.talabat+cancels.insta;
 }
 
 function manUpd(t,v){let n=Math.max(0,parseInt(v)||0);orders[t]=n;document.getElementById(t).value=n;updateStats();autoSave();}
 function updCount(t,d){orders[t]=Math.max(0,orders[t]+d);document.getElementById(t).value=orders[t];updateStats();autoSave();}
-function updCan(t,d){cancels[t]=Math.max(0,cancels[t]+d);updateUI();autoSave();}
+function updCan(t,d){
+  cancels[t]=Math.max(0,cancels[t]+d);
+  updateUI();autoSave();
+  if(t==='branch') renderBranchCancelList();
+}
 
 function togCanTag(btn,tag){
   const i=selCanTags.indexOf(tag);
   if(i===-1){selCanTags.push(tag);btn.classList.add('on');}
   else{selCanTags.splice(i,1);btn.classList.remove('on');}
   autoSave();
+}
+
+// ── BRANCH CANCEL WITH REASON MODAL ──────────────────
+function addCancelWithReason(type){
+  if(type==='branch' && currentTeam==='branch'){
+    // open modal for branch team
+    document.getElementById('cancelReasonInput').value='';
+    document.querySelectorAll('#cancelReasonModal .stag').forEach(b=>b.classList.remove('on'));
+    document.getElementById('cancelReasonModal').classList.add('on');
+    setTimeout(()=>document.getElementById('cancelReasonInput').focus(),100);
+  } else {
+    updCan(type,1);
+  }
+}
+
+function setCancelQuick(btn,text){
+  document.querySelectorAll('#cancelReasonModal .stag').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('cancelReasonInput').value=text;
+}
+
+function confirmCancelReason(){
+  const reason=document.getElementById('cancelReasonInput').value.trim()||'غير محدد';
+  _addBranchCancel(reason);
+  closeCancelModal();
+}
+
+function skipCancelReason(){
+  _addBranchCancel('');
+  closeCancelModal();
+}
+
+function closeCancelModal(){
+  document.getElementById('cancelReasonModal').classList.remove('on');
+}
+
+function _addBranchCancel(reason){
+  cancels.branch=Math.max(0,cancels.branch+1);
+  if(reason) branchCancelReasons.push({reason,time:new Date().toLocaleTimeString()});
+  updateUI(); autoSave(); renderBranchCancelList();
+}
+
+function renderBranchCancelList(){
+  const wrap=document.getElementById('branchCancelList');
+  const container=document.getElementById('branchCancelItems');
+  if(!wrap||!container) return;
+  if(!branchCancelReasons.length){wrap.style.display='none';return;}
+  wrap.style.display='block';
+  container.innerHTML=branchCancelReasons.map((r,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 9px;background:rgba(255,79,106,.06);border:1px solid rgba(255,79,106,.15);border-radius:var(--rs);margin-bottom:5px;font-size:12px">
+      <span style="color:var(--red);font-weight:700;flex-shrink:0">#${i+1}</span>
+      <span style="flex:1">${esc(r.reason||'بدون سبب')}</span>
+      <span style="color:var(--muted);font-size:10px;flex-shrink:0">${r.time}</span>
+      <button onclick="removeBranchCancel(${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0;line-height:1">×</button>
+    </div>`).join('');
+}
+
+function removeBranchCancel(i){
+  branchCancelReasons.splice(i,1);
+  cancels.branch=Math.max(0,cancels.branch-1);
+  updateUI(); autoSave(); renderBranchCancelList();
+}
+
+// ── FOLLOWUP AUTOCOMPLETE (past shortages) ────────────
+function renderPastShortages(){
+  const container=document.getElementById('pastShortagesSuggestions');
+  if(!container) return;
+  // collect all unique product names from current customers
+  const allProds=[];
+  customers.forEach(cu=>{
+    cu.products.forEach(p=>{
+      const key=p.name.trim().toLowerCase();
+      if(key && !allProds.find(x=>x.key===key)){
+        allProds.push({key,name:p.name,company:p.company!=='-'?p.company:'',customer:cu.name});
+      }
+    });
+  });
+  if(!allProds.length){
+    container.innerHTML='<span style="font-size:11px;color:var(--muted)">لا توجد نواقص مسجلة بعد</span>';
+    return;
+  }
+  container.innerHTML=allProds.map(p=>`
+    <button onclick="appendToFollowup('${esc(p.name)}${p.company?' ('+esc(p.company)+')':''} — ${esc(p.customer)}')"
+      style="padding:4px 9px;background:rgba(79,172,254,.1);border:1px solid rgba(79,172,254,.2);border-radius:16px;font-size:11px;color:var(--blue);cursor:pointer;white-space:nowrap">
+      ${esc(p.name)}${p.company?' <span style=color:var(--muted)>('+esc(p.company)+')</span>':''}
+    </button>`).join('');
+}
+
+function appendToFollowup(text){
+  const ta=document.getElementById('followup');
+  if(!ta) return;
+  const cur=ta.value.trim();
+  ta.value=(cur?cur+'\n':'')+text;
+  ta.scrollTop=ta.scrollHeight;
+  autoSave();
+}
+
+function followupAC(ta){
+  const list=document.getElementById('followupACList');
+  if(!list) return;
+  const val=ta.value;
+  const lastLine=val.split('\n').pop().trim().toLowerCase();
+  if(!lastLine||lastLine.length<2){list.style.display='none';return;}
+  // search all products in customers
+  const allProds=[];
+  customers.forEach(cu=>{
+    cu.products.forEach(p=>{
+      if(p.name.toLowerCase().includes(lastLine)){
+        allProds.push({name:p.name,company:p.company,customer:cu.name});
+      }
+    });
+  });
+  if(!allProds.length){list.style.display='none';return;}
+  list.innerHTML=allProds.slice(0,6).map(p=>`
+    <div onclick="pickFollowupAC(this,'${esc(p.name)}${p.company&&p.company!=='-'?' ('+esc(p.company)+')':''} — ${esc(p.customer)}')"
+      style="padding:8px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid var(--border-s)">
+      📦 ${esc(p.name)}${p.company&&p.company!=='-'?` <span style='color:var(--muted)'>(${esc(p.company)})</span>`:''}
+      <span style="color:var(--muted);font-size:10px"> — ${esc(p.customer)}</span>
+    </div>`).join('');
+  list.style.display='block';
+}
+
+function pickFollowupAC(el,text){
+  const ta=document.getElementById('followup');
+  const lines=ta.value.split('\n');
+  lines[lines.length-1]=text;
+  ta.value=lines.join('\n');
+  document.getElementById('followupACList').style.display='none';
+  ta.focus(); autoSave();
 }
 
 function restoreCanTags(){
@@ -1146,8 +1398,8 @@ function addCustomer(){
   document.getElementById('newCustPhone').value='';
   document.getElementById('newCustProds').innerHTML='';
   addProdInput();
-  autoSave();renderCustomers();renderShort();updateStats();
-  toast('✅ تم إضافة العميل');
+  autoSave();renderCustomers();renderShort();updateStats();renderPastShortages();
+  toast('✅ تم حفظ نواقص العميل');
 }
 
 function renderCustomers(){
@@ -1176,7 +1428,7 @@ function reportProd(ci,pi){
 }
 
 function delCust(i){
-  if(confirm('حذف هذا العميل؟')){customers.splice(i,1);autoSave();renderCustomers();renderShort();updateStats();toast('✅ تم الحذف');}
+  if(confirm('حذف هذا العميل؟')){customers.splice(i,1);autoSave();renderCustomers();renderShort();updateStats();renderPastShortages();toast('✅ تم الحذف');}
 }
 
 function addProdToCust(id){
@@ -1426,15 +1678,27 @@ function buildReport(){
   const shift=document.getElementById('rShift').value==='auto'?getShift():document.getElementById('rShift').value;
   let r=`📊 *تقرير شيفت ${shift}*\n⏱️ ${getShiftRange()}\n📅 ${new Date().toLocaleDateString('ar-EG')}\n${'─'.repeat(28)}\n\n`;
   if(document.getElementById('i1').checked){
-    const t=orders.branch+orders.talabat+orders.insta;
-    r+=`📦 *إحصائيات الأوردرات:*\n▪️ فرع: ${orders.branch}\n▪️ برنامج طلبات: ${orders.talabat}\n▪️ انستا: ${orders.insta}\n💰 *الإجمالي: ${t}*\n\n`;
+    if(currentTeam==='branch'){
+      const t=orders.branch+orders.talabat+orders.insta;
+      r+=`📦 *إحصائيات الأوردرات:*\n▪️ فرع: ${orders.branch}\n▪️ برنامج طلبات: ${orders.talabat}\n▪️ انستا: ${orders.insta}\n💰 *الإجمالي: ${t}*\n\n`;
+    } else {
+      r+=`📦 *إحصائيات الأوردرات (انستا شوب):*\n▪️ انستا: ${orders.insta}\n\n`;
+    }
   }
   if(document.getElementById('i2').checked){
-    const t=cancels.branch+cancels.talabat+cancels.insta;
-    r+=`🚫 *الملغيات:*\n▪️ فرع: ${cancels.branch}\n▪️ طلبات: ${cancels.talabat}\n▪️ انستا: ${cancels.insta}\n📉 *إجمالي: ${t}*\n`;
+    if(currentTeam==='branch'){
+      const t=cancels.branch+cancels.talabat+cancels.insta;
+      r+=`🚫 *الملغيات:*\n▪️ فرع: ${cancels.branch}\n▪️ طلبات: ${cancels.talabat}\n▪️ انستا: ${cancels.insta}\n📉 *إجمالي: ${t}*\n`;
+    } else {
+      r+=`🚫 *الملغيات (انستا):* ${cancels.insta}\n`;
+    }
     if(selCanTags.length)r+=`🏷️ الأسباب: ${selCanTags.join('، ')}\n`;
     const cn=document.getElementById('canReason').value.trim();
     if(cn)r+=`📝 ${cn}\n`;
+    if(branchCancelReasons.length){
+      r+=`\n📋 أسباب إلغاء الفرع (${branchCancelReasons.length}):\n`;
+      branchCancelReasons.forEach((x,i)=>r+=`  ${i+1}. ${x.reason||'غير محدد'} (${x.time})\n`);
+    }
     r+='\n';
   }
   if(document.getElementById('i3').checked&&branchList.length){
@@ -1469,6 +1733,8 @@ function buildReport(){
     if(f)r+=`📞 *متابعة العملاء:*\n${f}\n\n`;
     const sn=document.getElementById('supportNotes').value.trim();
     if(sn)r+=`🤝 *تواصل مع الدعم:*\n${sn}\n\n`;
+    const gn=document.getElementById('generalNotes')?document.getElementById('generalNotes').value.trim():'';
+    if(gn)r+=`📝 *ملاحظات عامة:*\n${gn}\n\n`;
   }
   r+=`${'─'.repeat(28)}\n📅 ${new Date().toLocaleString('ar-EG')}`;
   document.getElementById('rPrev').textContent=r;
@@ -1490,10 +1756,12 @@ function archiveShift(){
     canBranch:cancels.branch,canTalabat:cancels.talabat,canInsta:cancels.insta,cancelTotal:canTot,
     cancelReason:document.getElementById('canReason').value||'-',
     cancelTags:selCanTags.join('، '),
+    branchCancelReasons:branchCancelReasons,
+    generalNotes:document.getElementById('generalNotes')?document.getElementById('generalNotes').value:'-',
     branchShortage:branchList.length?branchList[branchList.length-1]?.items:'-',
     followup:document.getElementById('followup').value||'-',
-    customersCount:customers.length,
-    productsCount:customers.reduce((s,c)=>s+c.products.length,0),
+    customersCount:currentTeam==='branch'?customers.length:0,
+    productsCount:currentTeam==='branch'?customers.reduce((s,c)=>s+c.products.length,0):0,
     checklistDone:checks.filter(c=>c.done).length,checklistTotal:checks.length,
     timestamp:new Date().toISOString()};
   let ar=JSON.parse(localStorage.getItem(teamKey('monthlyArchive')))||[];
@@ -1502,8 +1770,9 @@ function archiveShift(){
     ar.push(entry);
     if(confirm('✅ تم الأرشفة. هل تريد تصفير بيانات اليوم؟')){
       orders={branch:0,talabat:0,insta:0};cancels={branch:0,talabat:0,insta:0};
-      customers=[];branchList=[];selCanTags=[];
+      customers=[];branchList=[];selCanTags=[];branchCancelReasons=[];
       document.getElementById('canReason').value=''; document.getElementById('followup').value='';
+      if(document.getElementById('generalNotes')) document.getElementById('generalNotes').value='';
       document.querySelectorAll('#canTags .stag').forEach(b=>b.classList.remove('on'));
       localStorage.removeItem(teamKey('activeShiftData'));
       resetChecks();renderCustomers();renderBranchRecs();renderShort();updateUI();
@@ -1606,6 +1875,11 @@ function toast(msg){
 // CLOSE MODALS ON OUTSIDE CLICK
 document.getElementById('reportModal').addEventListener('click',function(e){if(e.target===this)closeReport();});
 document.getElementById('scModal').addEventListener('click',function(e){if(e.target===this)closeScanner();});
+document.getElementById('cancelReasonModal').addEventListener('click',function(e){if(e.target===this)closeCancelModal();});
+document.addEventListener('click',function(e){
+  const list=document.getElementById('followupACList');
+  if(list&&!list.contains(e.target)&&e.target.id!=='followup') list.style.display='none';
+});
 </script>
 </body>
 </html>
