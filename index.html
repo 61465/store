@@ -291,21 +291,21 @@ body::before{
 }
 
 /* ── COUNTER CARDS ── */
-.cg{display:grid;gap:10px;padding:12px}
+.cg{display:grid;gap:8px;padding:10px}
 .cc{
   background:linear-gradient(160deg,#0f1c2e,#0b1625);
   border-radius:12px;border:1px solid rgba(0,0,0,0.5);
   box-shadow:0 4px 10px rgba(0,0,0,0.4),0 1px 0 rgba(255,255,255,0.04) inset;
-  padding:14px 12px;text-align:center;
+  padding:10px 8px;text-align:center;
 }
-.cc h3{font-size:11px;color:var(--muted);margin-bottom:10px;font-weight:600;letter-spacing:.5px}
+.cc h3{font-size:10px;color:var(--muted);margin-bottom:8px;font-weight:600;letter-spacing:.5px}
 .ctr{display:flex;align-items:center;justify-content:center;gap:10px}
 .cinp{
-  width:62px;height:44px;text-align:center;
+  width:52px;height:36px;text-align:center;
   background:linear-gradient(180deg,#07101e,#0b1626);
   border:1px solid rgba(59,130,246,0.2);
-  color:var(--text);font-size:20px;font-weight:700;
-  border-radius:10px;padding:4px;font-family:'Cairo',sans-serif;
+  color:var(--text);font-size:17px;font-weight:700;
+  border-radius:9px;padding:2px;font-family:'Cairo',sans-serif;
   box-shadow:0 3px 8px rgba(0,0,0,0.4) inset;
 }
 .cinp::-webkit-inner-spin-button,.cinp::-webkit-outer-spin-button{-webkit-appearance:none}
@@ -313,10 +313,10 @@ body::before{
 
 /* POS Keys */
 .k{
-  width:44px;height:44px;border-radius:10px;border:none;cursor:pointer;
-  font-size:22px;font-weight:700;display:flex;align-items:center;justify-content:center;
+  width:36px;height:36px;border-radius:9px;border:none;cursor:pointer;
+  font-size:18px;font-weight:700;display:flex;align-items:center;justify-content:center;
   position:relative;transition:all 0.08s;font-family:'Cairo',sans-serif;
-  box-shadow:0 4px 0 rgba(0,0,0,0.5),0 1px 0 rgba(255,255,255,0.1) inset;
+  box-shadow:0 3px 0 rgba(0,0,0,0.5),0 1px 0 rgba(255,255,255,0.1) inset;
   touch-action:manipulation;
 }
 .k:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,0.5)}
@@ -330,20 +330,20 @@ body::before{
   background:linear-gradient(160deg,#0f1c2e,#0b1625);
   border-radius:12px;border:1px solid rgba(0,0,0,0.5);
   box-shadow:0 4px 10px rgba(0,0,0,0.4),0 1px 0 rgba(255,255,255,0.04) inset;
-  padding:12px;text-align:center;
+  padding:9px 8px;text-align:center;
 }
 .ccard>span{font-size:11px;color:var(--muted);display:block;margin-bottom:8px;letter-spacing:.5px}
 .cctrls{display:flex;align-items:center;justify-content:center;gap:10px}
 .cctrls button{
-  width:44px;height:44px;border:none;border-radius:10px;
-  font-size:20px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;
-  box-shadow:0 4px 0 rgba(0,0,0,0.5),0 1px 0 rgba(255,255,255,0.08) inset;
+  width:36px;height:36px;border:none;border-radius:9px;
+  font-size:17px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;
+  box-shadow:0 3px 0 rgba(0,0,0,0.5),0 1px 0 rgba(255,255,255,0.08) inset;
   transition:all 0.08s;touch-action:manipulation;
 }
 .cctrls button:first-child{background:linear-gradient(180deg,#14532d,#0f3d22);color:#86efac}
 .cctrls button:last-child{background:linear-gradient(180deg,#7f1d1d,#5f1616);color:#fca5a5}
 .cctrls button:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,0.5)}
-.cctrls span{font-size:22px;font-weight:700;min-width:30px;text-align:center;color:var(--text);font-variant-numeric:tabular-nums}
+.cctrls span{font-size:18px;font-weight:700;min-width:26px;text-align:center;color:var(--text);font-variant-numeric:tabular-nums}
 
 /* ── GLASS INPUTS ── */
 input,textarea,select{
@@ -896,25 +896,25 @@ h4{color:var(--muted);margin:8px 0 5px;font-size:12px;font-weight:600}
       <div class="cc">
         <h3>📍 BRANCH · فرع</h3>
         <div class="ctr">
-          <button class="k km" onclick="updCount('branch',-1)">−</button>
-          <input type="number" id="branch" class="cinp" value="0" onchange="manUpd('branch',this.value)" min="0">
           <button class="k kp" onclick="updCount('branch',1)">+</button>
+          <input type="number" id="branch" class="cinp" value="0" onchange="manUpd('branch',this.value)" min="0">
+          <button class="k km" onclick="updCount('branch',-1)">−</button>
         </div>
       </div>
       <div class="cc">
         <h3>📱 TALABAT · طلبات</h3>
         <div class="ctr">
-          <button class="k km" onclick="updCount('talabat',-1)">−</button>
-          <input type="number" id="talabat" class="cinp" value="0" onchange="manUpd('talabat',this.value)" min="0">
           <button class="k kp" onclick="updCount('talabat',1)">+</button>
+          <input type="number" id="talabat" class="cinp" value="0" onchange="manUpd('talabat',this.value)" min="0">
+          <button class="k km" onclick="updCount('talabat',-1)">−</button>
         </div>
       </div>
       <div class="cc" style="display:none">
         <h3>🌐 INSTA</h3>
         <div class="ctr">
-          <button class="k km" onclick="updCount('insta',-1)">−</button>
-          <input type="number" id="insta" class="cinp" value="0" onchange="manUpd('insta',this.value)" min="0">
           <button class="k kp" onclick="updCount('insta',1)">+</button>
+          <input type="number" id="insta" class="cinp" value="0" onchange="manUpd('insta',this.value)" min="0">
+          <button class="k km" onclick="updCount('insta',-1)">−</button>
         </div>
       </div>
     </div>
