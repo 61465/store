@@ -418,7 +418,7 @@ h4{color:var(--muted);margin:8px 0 5px;font-size:12px;font-weight:600}
     <p>اختر الفريق للدخول</p>
     <div class="tcards">
       <div class="tcard bc" onclick="selectTeam('branch')">
-        <div class="ti">🏪</div><div class="tn">فريق الفرع</div><div class="td">فرع + برنامج طلبات + انستا</div>
+        <div class="ti">🏪</div><div class="tn">فريق الفرع</div><div class="td">فرع + برنامج طلبات</div>
       </div>
       <div class="tcard ac" onclick="selectTeam('app')">
         <div class="ti">📸</div><div class="tn">انستا شوب</div><div class="td">إدارة طلبات الانستا</div>
@@ -530,9 +530,10 @@ h4{color:var(--muted);margin:8px 0 5px;font-size:12px;font-weight:600}
     <div class="cc"><h3>🌐 انستا</h3><div class="ctr"><button class="cbtn m" onclick="updCount('insta',-1)">−</button><input type="number" id="insta" class="cinp" value="0" onchange="manUpd('insta',this.value)"><button class="cbtn" onclick="updCount('insta',1)">+</button></div></div>
   </div>
 
-  <div class="sec">
+  <!-- ══ BRANCH TEAM CANCEL SECTION ══ -->
+  <div class="sec" id="sec-cancel-branch">
     <div class="sec-t">🚫 الأوردرات الملغية</div>
-    <div class="cang">
+    <div class="cang" id="cang-branch" style="grid-template-columns:repeat(2,1fr)">
       <div class="ccard"><span>📍 فرع</span><div class="cctrls">
         <button onclick="addCancelWithReason('branch')">+</button>
         <span id="cBranch">0</span>
@@ -543,27 +544,35 @@ h4{color:var(--muted);margin:8px 0 5px;font-size:12px;font-weight:600}
         <span id="cTalabat">0</span>
         <button onclick="updCan('talabat',-1)" style="background:var(--red)">−</button>
       </div></div>
-      <div class="ccard"><span>🌐 انستا</span><div class="cctrls">
-        <button onclick="updCan('insta',1)">+</button>
-        <span id="cInsta">0</span>
-        <button onclick="updCan('insta',-1)" style="background:var(--red)">−</button>
-      </div></div>
     </div>
-    <!-- Branch cancel reasons list -->
     <div id="branchCancelList" style="margin-top:10px;display:none">
       <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:700">📋 أسباب إلغاء الفرع:</div>
       <div id="branchCancelItems"></div>
     </div>
     <div class="divider"></div>
-    <h4>أسباب الإلغاء العامة (طلبات/انستا):</h4>
+    <h4>أسباب الإلغاء العامة:</h4>
     <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:7px" id="canTags">
       <button class="stag to" onclick="togCanTag(this,'نقص منتج')">نقص منتج</button>
       <button class="stag to" onclick="togCanTag(this,'نقص طيارين')">نقص طيارين</button>
       <button class="stag to" onclick="togCanTag(this,'العميل لم يرد')">العميل لم يرد</button>
-      <button class="stag to" onclick="togCanTag(this,'خارج نطاق التوصيل')">خارج نطاق التوصيل</button>
+      <button class="stag to" onclick="togCanTag(this,'خارج نطاق التوصيل')">خارج</button>
       <button class="stag to" onclick="togCanTag(this,'ازدحام')">ازدحام</button>
     </div>
     <textarea id="canReason" placeholder="📝 ملاحظات إضافية..." oninput="autoSave()"></textarea>
+  </div>
+
+  <!-- ══ APP TEAM CANCEL SECTION (انستا شوب فقط) ══ -->
+  <div class="sec" id="sec-cancel-app" style="display:none">
+    <div class="sec-t">🚫 الملغيات</div>
+    <div style="display:flex;align-items:center;gap:14px;padding:10px 0">
+      <span style="font-size:13px;color:var(--muted)">🌐 انستا شوب</span>
+      <div class="cctrls">
+        <button onclick="updCan('insta',1)">+</button>
+        <span id="cInstaApp">0</span>
+        <button onclick="updCan('insta',-1)" style="background:var(--red)">−</button>
+      </div>
+    </div>
+    <textarea id="canReasonApp" placeholder="📝 سبب الإلغاء..." oninput="syncCanReasonApp()" style="margin-top:6px"></textarea>
   </div>
 
   <!-- CANCEL REASON MODAL -->
@@ -924,7 +933,7 @@ function scLookup(code){
     },700);
   }else{
     document.getElementById('scNF').classList.add('on');
-    document.getElementById('scNFCode').textContent=code;
+    const _nfc=document.getElementById('scNFCode');if(_nfc)_nfc.textContent=code;
     setScStatus('nf','⚠️ باركود غير موجود في القاعدة');
     setTimeout(()=>{
       scStopCam();
@@ -967,9 +976,9 @@ function fillBCSearch(code){
 function showScResult(p,code){
   const sm={available:{cls:'',label:'✅ متاح',bg:'rgba(56,217,169,.15)',c:'#38d9a9'},'out-of-stock':{cls:'',label:'⚠️ ناقص',bg:'rgba(246,166,35,.15)',c:'#f6a623'},blocked:{cls:'',label:'🚫 مغلق',bg:'rgba(255,79,106,.15)',c:'#ff4f6a'},'not-listed':{cls:'',label:'❌ غير مدرج',bg:'rgba(78,106,138,.15)',c:'#4e6a8a'}};
   const s=sm[p.status]||sm['not-listed'];
-  document.getElementById('scPName').textContent=p.name;
-  document.getElementById('scPMeta').textContent='🏢 '+p.company;
-  document.getElementById('scPBC').textContent=code;
+  const _spn=document.getElementById('scPName');if(_spn)_spn.textContent=p.name;
+  const _spm=document.getElementById('scPMeta');if(_spm)_spm.textContent='🏢 '+p.company;
+  const _spb=document.getElementById('scPBC');if(_spb)_spb.textContent=code;
   const badge=document.getElementById('scPBadge');
   badge.textContent=s.label;
   badge.style.cssText=`background:${s.bg};color:${s.c};border:1px solid ${s.c}40`;
@@ -1001,7 +1010,7 @@ function scFlash(){
 // TEAM
 // ══════════════════════════════════════════════
 const TEAMS={
-  branch:{name:'فريق الفرع',icon:'🏪',badge:'tbadge-b',pfx:'branch_',show:['branch','talabat','insta'],hide:[],showC:['branch','talabat','insta'],hideC:[]},
+  branch:{name:'فريق الفرع',icon:'🏪',badge:'tbadge-b',pfx:'branch_',show:['branch','talabat'],hide:['insta'],showC:['branch','talabat'],hideC:['insta']},
   app:{name:'انستا شوب',icon:'📸',badge:'tbadge-a',pfx:'app_',show:['insta'],hide:['branch','talabat'],showC:['insta'],hideC:['branch','talabat']},
 };
 
@@ -1028,18 +1037,21 @@ function applyTeamUI(t){
   cCards.forEach((c,i)=>c.style.display=cfg.hide.includes(ids[i])?'none':'');
   document.querySelector('.cg').style.gridTemplateColumns='repeat('+cfg.show.length+',1fr)';
 
-  // Cancel counters
-  const canCards=document.querySelectorAll('.cang .ccard');
-  canCards.forEach((c,i)=>c.style.display=cfg.hideC.includes(ids[i])?'none':'');
-  document.querySelector('.cang').style.gridTemplateColumns='repeat('+cfg.showC.length+',1fr)';
+  // Cancel counters — handled by separate branch/app sections above
 
   const isApp = t==='app';
 
   // Sections only for branch team
-  const branchOnlySecs=['sec-addcust','sec-custrecords','sec-followup'];
+  const branchOnlySecs=['sec-addcust','sec-custrecords','sec-followup','sec-cancel-branch'];
   branchOnlySecs.forEach(id=>{
     const el=document.getElementById(id);
     if(el) el.style.display=isApp?'none':'';
+  });
+  // App-only sections
+  const appOnlySecs=['sec-cancel-app'];
+  appOnlySecs.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.style.display=isApp?'':'none';
   });
 
   // Stats row — app: hide entire branch stats row; branch: show 3 cols
@@ -1086,6 +1098,8 @@ function loadTeamData(t){
     selCanTags=sd.cancelTags||[];
     branchCancelReasons=sd.branchCancelReasons||[];
     document.getElementById('canReason').value=sd.notes||'';
+    const cra=document.getElementById('canReasonApp');
+    if(cra) cra.value=sd.notes||'';
     document.getElementById('followup').value=sd.followup||'';
     if(document.getElementById('generalNotes')) document.getElementById('generalNotes').value=sd.generalNotes||'';
     restoreCanTags();
@@ -1110,6 +1124,14 @@ window.onload=()=>{
   setInterval(()=>{if(document.getElementById('reportModal').classList.contains('on'))buildReport();},3000);
 };
 
+
+function syncCanReasonApp(){
+  // Mirror app cancel reason to the shared canReason field
+  const appReason=document.getElementById('canReasonApp');
+  const mainReason=document.getElementById('canReason');
+  if(appReason&&mainReason) mainReason.value=appReason.value;
+  autoSave();
+}
 function autoSave(){
   if(!currentTeam)return;
   localStorage.setItem(teamKey('activeShiftData'),JSON.stringify({
@@ -1129,18 +1151,25 @@ function syncData(){autoSave();renderCustomers();renderBranchRecs();renderShort(
 // UI
 // ══════════════════════════════════════════════
 function updateUI(){
-  ['branch','talabat','insta'].forEach(k=>document.getElementById(k).value=orders[k]);
-  document.getElementById('cBranch').textContent=cancels.branch;
-  document.getElementById('cTalabat').textContent=cancels.talabat;
-  document.getElementById('cInsta').textContent=cancels.insta;
+  // Orders counters — only update visible ones per team
+  ['branch','talabat','insta'].forEach(k=>{
+    const el=document.getElementById(k);
+    if(el) el.value=orders[k];
+  });
+  // Cancel counters — null-guarded (some don't exist for certain teams)
+  const _cb=document.getElementById('cBranch');   if(_cb) _cb.textContent=cancels.branch;
+  const _ct=document.getElementById('cTalabat'); if(_ct) _ct.textContent=cancels.talabat;
+  const _ci=document.getElementById('cInsta');   if(_ci) _ci.textContent=cancels.insta;
+  const _ca=document.getElementById('cInstaApp');if(_ca) _ca.textContent=cancels.insta;
   updateStats();
 }
 
 function updateStats(){
-  document.getElementById('sCustomers').textContent=customers.length;
-  document.getElementById('sReported').textContent=customers.reduce((s,c)=>s+c.products.filter(p=>p.status==='reported').length,0);
+  const _sc=document.getElementById('sCustomers'); if(_sc) _sc.textContent=customers.length;
+  const _sr=document.getElementById('sReported');  if(_sr) _sr.textContent=customers.reduce((s,c)=>s+c.products.filter(p=>p.status==='reported').length,0);
   updateAppStats();
-  document.getElementById('sCancels').textContent=cancels.branch+cancels.talabat+cancels.insta;
+  const totalCancels=currentTeam==='app'?cancels.insta:(cancels.branch+cancels.talabat);
+  const _scc=document.getElementById('sCancels');  if(_scc) _scc.textContent=totalCancels;
 }
 
 function updateAppStats(){
@@ -1161,8 +1190,16 @@ function updateAppStats(){
   if(sdct) sdct.textContent=tot;
 }
 
-function manUpd(t,v){let n=Math.max(0,parseInt(v)||0);orders[t]=n;document.getElementById(t).value=n;updateStats();autoSave();}
-function updCount(t,d){orders[t]=Math.max(0,orders[t]+d);document.getElementById(t).value=orders[t];updateStats();autoSave();}
+function manUpd(t,v){
+  let n=Math.max(0,parseInt(v)||0);orders[t]=n;
+  const el=document.getElementById(t);if(el)el.value=n;
+  updateStats();autoSave();
+}
+function updCount(t,d){
+  orders[t]=Math.max(0,orders[t]+d);
+  const el=document.getElementById(t);if(el)el.value=orders[t];
+  updateStats();autoSave();
+}
 function updCan(t,d){
   cancels[t]=Math.max(0,cancels[t]+d);
   updateUI();autoSave();
@@ -1706,16 +1743,16 @@ function buildReport(){
   let r=`📊 *تقرير شيفت ${shift}*\n⏱️ ${getShiftRange()}\n📅 ${new Date().toLocaleDateString('ar-EG')}\n${'─'.repeat(28)}\n\n`;
   if(document.getElementById('i1').checked){
     if(currentTeam==='branch'){
-      const t=orders.branch+orders.talabat+orders.insta;
-      r+=`📦 *إحصائيات الأوردرات:*\n▪️ فرع: ${orders.branch}\n▪️ برنامج طلبات: ${orders.talabat}\n▪️ انستا: ${orders.insta}\n💰 *الإجمالي: ${t}*\n\n`;
+      const t=orders.branch+orders.talabat;
+      r+=`📦 *إحصائيات الأوردرات:*\n▪️ فرع: ${orders.branch}\n▪️ برنامج طلبات: ${orders.talabat}\n💰 *الإجمالي: ${t}*\n\n`;
     } else {
       r+=`📦 *إحصائيات الأوردرات (انستا شوب):*\n▪️ انستا: ${orders.insta}\n\n`;
     }
   }
   if(document.getElementById('i2').checked){
     if(currentTeam==='branch'){
-      const t=cancels.branch+cancels.talabat+cancels.insta;
-      r+=`🚫 *الملغيات:*\n▪️ فرع: ${cancels.branch}\n▪️ طلبات: ${cancels.talabat}\n▪️ انستا: ${cancels.insta}\n📉 *إجمالي: ${t}*\n`;
+      const t=cancels.branch+cancels.talabat;
+      r+=`🚫 *الملغيات:*\n▪️ فرع: ${cancels.branch}\n▪️ طلبات: ${cancels.talabat}\n📉 *إجمالي: ${t}*\n`;
     } else {
       r+=`🚫 *الملغيات (انستا):* ${cancels.insta}\n`;
     }
@@ -1764,7 +1801,7 @@ function buildReport(){
     if(gn)r+=`📝 *ملاحظات عامة:*\n${gn}\n\n`;
   }
   r+=`${'─'.repeat(28)}\n📅 ${new Date().toLocaleString('ar-EG')}`;
-  document.getElementById('rPrev').textContent=r;
+  const _rp=document.getElementById('rPrev');if(_rp)_rp.textContent=r;
 }
 
 function copyReport(){
@@ -1776,11 +1813,12 @@ function copyReport(){
 // ARCHIVE
 // ══════════════════════════════════════════════
 function archiveShift(){
-  const tot=orders.branch+orders.talabat+orders.insta;
-  const canTot=cancels.branch+cancels.talabat+cancels.insta;
+  const isApp=currentTeam==='app';
+  const tot=isApp?orders.insta:(orders.branch+orders.talabat);
+  const canTot=isApp?cancels.insta:(cancels.branch+cancels.talabat);
   const entry={id:Date.now(),date:new Date().toLocaleDateString('ar-EG'),shift:getShift(),
-    branch:orders.branch,talabat:orders.talabat,insta:orders.insta,total:tot,
-    canBranch:cancels.branch,canTalabat:cancels.talabat,canInsta:cancels.insta,cancelTotal:canTot,
+    branch:isApp?0:orders.branch,talabat:isApp?0:orders.talabat,insta:isApp?orders.insta:0,total:tot,
+    canBranch:isApp?0:cancels.branch,canTalabat:isApp?0:cancels.talabat,canInsta:isApp?cancels.insta:0,cancelTotal:canTot,
     cancelReason:document.getElementById('canReason').value||'-',
     cancelTags:selCanTags.join('، '),
     branchCancelReasons:branchCancelReasons,
@@ -1800,6 +1838,7 @@ function archiveShift(){
       customers=[];branchList=[];selCanTags=[];branchCancelReasons=[];
       document.getElementById('canReason').value=''; document.getElementById('followup').value='';
       if(document.getElementById('generalNotes')) document.getElementById('generalNotes').value='';
+      const _cra=document.getElementById('canReasonApp'); if(_cra) _cra.value='';
       document.querySelectorAll('#canTags .stag').forEach(b=>b.classList.remove('on'));
       localStorage.removeItem(teamKey('activeShiftData'));
       resetChecks();renderCustomers();renderBranchRecs();renderShort();updateUI();
