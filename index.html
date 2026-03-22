@@ -511,8 +511,8 @@ h4{color:var(--muted);margin:8px 0 5px;font-size:12px;font-weight:600}
 <div class="tabs">
   <button class="tab on" onclick="showTab('entry')">🏠 لوحة التحكم</button>
   <button class="tab" onclick="showTab('short')">🔔 النواقص</button>
-  <button class="tab" onclick="showTab('prods')">📦 المنتجات</button>
-  <button class="tab" onclick="showTab('checks')">✅ المراجعات</button>
+  <button class="tab" id="tab-prods" onclick="showTab('prods')">📦 المنتجات</button>
+  <button class="tab" id="tab-checks" onclick="showTab('checks')">✅ المراجعات</button>
   <button class="tab" onclick="showTab('arch')">📊 الأرشيف</button>
 </div>
 
@@ -533,71 +533,109 @@ h4{color:var(--muted);margin:8px 0 5px;font-size:12px;font-weight:600}
   <!-- ══ BRANCH TEAM CANCEL SECTION ══ -->
   <div class="sec" id="sec-cancel-branch">
     <div class="sec-t">🚫 الأوردرات الملغية</div>
-    <div class="cang" id="cang-branch" style="grid-template-columns:repeat(2,1fr)">
-      <div class="ccard"><span>📍 فرع</span><div class="cctrls">
-        <button onclick="addCancelWithReason('branch')">+</button>
-        <span id="cBranch">0</span>
-        <button onclick="updCan('branch',-1)" style="background:var(--red)">−</button>
-      </div></div>
-      <div class="ccard"><span>📱 طلبات</span><div class="cctrls">
-        <button onclick="updCan('talabat',1)">+</button>
-        <span id="cTalabat">0</span>
-        <button onclick="updCan('talabat',-1)" style="background:var(--red)">−</button>
-      </div></div>
+
+    <!-- Counters row -->
+    <div class="cang" id="cang-branch" style="grid-template-columns:repeat(2,1fr);margin-bottom:14px">
+      <div class="ccard">
+        <span>📍 فرع</span>
+        <div class="cctrls"><button onclick="updCan('branch',-1)" style="background:var(--red)">−</button><span id="cBranch">0</span><button onclick="updCan('branch',1)">+</button></div>
+      </div>
+      <div class="ccard">
+        <span>📱 طلبات</span>
+        <div class="cctrls"><button onclick="updCan('talabat',-1)" style="background:var(--red)">−</button><span id="cTalabat">0</span><button onclick="updCan('talabat',1)">+</button></div>
+      </div>
     </div>
-    <div id="branchCancelList" style="margin-top:10px;display:none">
-      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:700">📋 أسباب إلغاء الفرع:</div>
-      <div id="branchCancelItems"></div>
+
+    <!-- Add cancel form -->
+    <div style="background:var(--raised);border:1px solid var(--border-s);border-radius:var(--rs);padding:12px;margin-bottom:10px">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px">➕ إضافة أوردر ملغي</div>
+
+      <!-- Customer name -->
+      <input type="text" id="cancelOrderNum" placeholder="رقم الأوردر" inputmode="numeric"
+             style="margin-bottom:8px" onkeydown="if(event.key==='Enter')submitCancelEntry()">
+
+      <!-- Source -->
+      <div style="display:flex;gap:6px;margin-bottom:8px" id="cancelSourceBtns">
+        <button class="stag ta" onclick="setCancelSource(this,'فرع')" style="flex:1;text-align:center">📍 فرع</button>
+        <button class="stag ta" onclick="setCancelSource(this,'طلبات')" style="flex:1;text-align:center">📱 طلبات</button>
+      </div>
+      <input type="hidden" id="cancelSource" value="فرع">
+
+      <!-- Quick reasons -->
+      <div style="font-size:11px;color:var(--muted);margin-bottom:5px">سبب الإلغاء:</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:7px" id="cancelQuickBtns">
+        <button class="stag to" onclick="setCancelQuickReason(this,'نقص منتج')">نقص منتج</button>
+        <button class="stag to" onclick="setCancelQuickReason(this,'نقص طيارين')">نقص طيارين</button>
+        <button class="stag to" onclick="setCancelQuickReason(this,'العميل لم يرد')">العميل لم يرد</button>
+        <button class="stag to" onclick="setCancelQuickReason(this,'خارج نطاق')">خارج نطاق</button>
+        <button class="stag to" onclick="setCancelQuickReason(this,'ازدحام')">ازدحام</button>
+        <button class="stag to" onclick="setCancelQuickReason(this,'طلب مكرر')">طلب مكرر</button>
+      </div>
+      <input type="text" id="cancelReasonFree" placeholder="أو اكتب سبباً مخصصاً..."
+             style="margin-bottom:8px" onkeydown="if(event.key==='Enter')submitCancelEntry()">
+
+      <button class="btn btn-d" style="margin:0" onclick="submitCancelEntry()">🚫 إضافة للقائمة</button>
     </div>
-    <div class="divider"></div>
-    <h4>أسباب الإلغاء العامة:</h4>
-    <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:7px" id="canTags">
-      <button class="stag to" onclick="togCanTag(this,'نقص منتج')">نقص منتج</button>
-      <button class="stag to" onclick="togCanTag(this,'نقص طيارين')">نقص طيارين</button>
-      <button class="stag to" onclick="togCanTag(this,'العميل لم يرد')">العميل لم يرد</button>
-      <button class="stag to" onclick="togCanTag(this,'خارج نطاق التوصيل')">خارج</button>
-      <button class="stag to" onclick="togCanTag(this,'ازدحام')">ازدحام</button>
+
+    <!-- Cancel records list -->
+    <div id="cancelRecordsList" style="display:none">
+      <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:6px">📋 سجل الملغيات:</div>
+      <div id="cancelRecordsItems"></div>
     </div>
-    <textarea id="canReason" placeholder="📝 ملاحظات إضافية..." oninput="autoSave()"></textarea>
+
+    <!-- Hidden fields for backward compat -->
+    <textarea id="canReason" style="display:none" oninput="autoSave()"></textarea>
+    <div id="canTags" style="display:none"></div>
   </div>
 
   <!-- ══ APP TEAM CANCEL SECTION (انستا شوب فقط) ══ -->
   <div class="sec" id="sec-cancel-app" style="display:none">
     <div class="sec-t">🚫 الملغيات</div>
-    <div style="display:flex;align-items:center;gap:14px;padding:10px 0">
-      <span style="font-size:13px;color:var(--muted)">🌐 انستا شوب</span>
+
+    <!-- Counter -->
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0 14px">
+      <span style="font-size:13px;color:var(--muted);font-weight:700">🌐 انستا شوب</span>
       <div class="cctrls">
-        <button onclick="updCan('insta',1)">+</button>
-        <span id="cInstaApp">0</span>
         <button onclick="updCan('insta',-1)" style="background:var(--red)">−</button>
+        <span id="cInstaApp">0</span>
+        <button onclick="updCan('insta',1)">+</button>
       </div>
     </div>
-    <textarea id="canReasonApp" placeholder="📝 سبب الإلغاء..." oninput="syncCanReasonApp()" style="margin-top:6px"></textarea>
+
+    <!-- Add cancel form -->
+    <div style="background:var(--raised);border:1px solid var(--border-s);border-radius:var(--rs);padding:12px;margin-bottom:10px">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px">➕ إضافة أوردر ملغي</div>
+
+      <input type="tel" id="cancelOrderNumApp" placeholder="رقم الأوردر" inputmode="numeric"
+             style="margin-bottom:8px" onkeydown="if(event.key==='Enter')submitCancelEntryApp()">
+
+      <div style="font-size:11px;color:var(--muted);margin-bottom:5px">سبب الإلغاء:</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:7px" id="cancelQuickBtnsApp">
+        <button class="stag to" onclick="setCancelQuickReasonApp(this,'نقص منتج')">نقص منتج</button>
+        <button class="stag to" onclick="setCancelQuickReasonApp(this,'العميل لم يرد')">العميل لم يرد</button>
+        <button class="stag to" onclick="setCancelQuickReasonApp(this,'طلب مكرر')">طلب مكرر</button>
+        <button class="stag to" onclick="setCancelQuickReasonApp(this,'خارج نطاق')">خارج نطاق</button>
+        <button class="stag to" onclick="setCancelQuickReasonApp(this,'منتج غير متاح')">منتج غير متاح</button>
+        <button class="stag to" onclick="setCancelQuickReasonApp(this,'ازدحام')">ازدحام</button>
+      </div>
+      <input type="text" id="cancelReasonFreeApp" placeholder="أو اكتب سبباً مخصصاً..."
+             style="margin-bottom:8px" onkeydown="if(event.key==='Enter')submitCancelEntryApp()">
+
+      <button class="btn btn-d" style="margin:0" onclick="submitCancelEntryApp()">🚫 إضافة للقائمة</button>
+    </div>
+
+    <!-- Records list -->
+    <div id="cancelRecordsListApp" style="display:none">
+      <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:6px">📋 سجل الملغيات:</div>
+      <div id="cancelRecordsItemsApp"></div>
+    </div>
+
+    <!-- Hidden compat fields -->
+    <textarea id="canReasonApp" style="display:none" oninput="syncCanReasonApp()"></textarea>
   </div>
 
-  <!-- CANCEL REASON MODAL -->
-  <div class="moverlay" id="cancelReasonModal" style="z-index:4000">
-    <div class="mbox" style="max-width:400px">
-      <div class="mt">
-        <span>🚫 سبب الإلغاء</span>
-        <button class="mclose" onclick="closeCancelModal()">✕</button>
-      </div>
-      <p style="font-size:12px;color:var(--muted);margin-bottom:12px">أدخل سبب إلغاء هذا الأوردر (اختياري)</p>
-      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px">
-        <button class="stag to" onclick="setCancelQuick(this,'نقص منتج')">نقص منتج</button>
-        <button class="stag to" onclick="setCancelQuick(this,'نقص طيارين')">نقص طيارين</button>
-        <button class="stag to" onclick="setCancelQuick(this,'العميل لم يرد')">العميل لم يرد</button>
-        <button class="stag to" onclick="setCancelQuick(this,'خارج نطاق التوصيل')">خارج</button>
-        <button class="stag to" onclick="setCancelQuick(this,'ازدحام')">ازدحام</button>
-      </div>
-      <input type="text" id="cancelReasonInput" placeholder="أو اكتب سبباً مخصصاً..." style="margin-bottom:10px"
-             onkeydown="if(event.key==='Enter')confirmCancelReason()">
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-p" style="flex:1;margin:0" onclick="confirmCancelReason()">✅ تأكيد</button>
-        <button class="btn btn-n" style="flex:1;margin:0" onclick="skipCancelReason()">تخطي</button>
-      </div>
-    </div>
-  </div>
+  <!-- Cancel modal stub (replaced by inline form) -->
+  <div id="cancelReasonModal" style="display:none"><input type="hidden" id="cancelReasonInput"></div>
 
   <div class="sec" id="sec-addcust">
     <div class="sec-t">➕ نواقص عميل جديد</div>
@@ -1053,6 +1091,11 @@ function applyTeamUI(t){
     const el=document.getElementById(id);
     if(el) el.style.display=isApp?'':'none';
   });
+  // Tabs: hide المنتجات & المراجعات for branch, show for app
+  const tabProds=document.getElementById('tab-prods');
+  const tabChecks=document.getElementById('tab-checks');
+  if(tabProds)  tabProds.style.display=isApp?'':'none';
+  if(tabChecks) tabChecks.style.display=isApp?'':'none';
 
   // Stats row — app: hide entire branch stats row; branch: show 3 cols
   const statsEl=document.getElementById('entry-stats');
@@ -1097,6 +1140,8 @@ function loadTeamData(t){
     customers=sd.customers||[]; branchList=sd.branchShortages||[];
     selCanTags=sd.cancelTags||[];
     branchCancelReasons=sd.branchCancelReasons||[];
+    window.cancelEntries=sd.cancelEntries||[];
+    window.cancelEntriesApp=sd.cancelEntriesApp||[];
     document.getElementById('canReason').value=sd.notes||'';
     const cra=document.getElementById('canReasonApp');
     if(cra) cra.value=sd.notes||'';
@@ -1107,7 +1152,7 @@ function loadTeamData(t){
   archive=JSON.parse(localStorage.getItem(pfx+'monthlyArchive'))||[];
   updateUI(); renderCustomers(); renderBranchRecs(); renderShort();
   renderArchive(); updateArchStats(); checkBlockedAlerts();
-  renderBranchCancelList(); renderPastShortages(); updateAppStats();
+  renderCancelRecords(); renderCancelRecordsApp(); renderPastShortages(); updateAppStats();
 }
 
 // ══════════════════════════════════════════════
@@ -1136,10 +1181,13 @@ function autoSave(){
   if(!currentTeam)return;
   localStorage.setItem(teamKey('activeShiftData'),JSON.stringify({
     orders,cancels,customers,branchShortages:branchList,
-    notes:document.getElementById('canReason').value,
-    followup:document.getElementById('followup').value,
-    generalNotes:document.getElementById('generalNotes')?document.getElementById('generalNotes').value:'',
-    cancelTags:selCanTags,branchCancelReasons,lastUpdate:Date.now()
+    notes:document.getElementById('canReason')?.value||'',
+    followup:document.getElementById('followup')?.value||'',
+    generalNotes:document.getElementById('generalNotes')?.value||'',
+    cancelTags:selCanTags,branchCancelReasons,
+    cancelEntries:window.cancelEntries||[],
+    cancelEntriesApp:window.cancelEntriesApp||[],
+    lastUpdate:Date.now()
   }));
   localStorage.setItem('productsDB',JSON.stringify(prodDB));
   localStorage.setItem('checklistItems',JSON.stringify(checks));
@@ -1213,69 +1261,141 @@ function togCanTag(btn,tag){
   autoSave();
 }
 
-// ── BRANCH CANCEL WITH REASON MODAL ──────────────────
-function addCancelWithReason(type){
-  if(type==='branch' && currentTeam==='branch'){
-    // open modal for branch team
-    document.getElementById('cancelReasonInput').value='';
-    document.querySelectorAll('#cancelReasonModal .stag').forEach(b=>b.classList.remove('on'));
-    document.getElementById('cancelReasonModal').classList.add('on');
-    setTimeout(()=>{
-      const inp=document.getElementById('cancelReasonInput');
-      inp.focus();
-      inp.scrollIntoView({behavior:'smooth',block:'center'});
-    },200);
-  } else {
-    updCan(type,1);
-  }
-}
+// ── BRANCH CANCEL NEW SYSTEM ─────────────────────────
+// cancelEntries: [{custName, source, reason, time}]
+// branchCancelReasons kept for backward compat with autoSave
 
-function setCancelQuick(btn,text){
-  document.querySelectorAll('#cancelReasonModal .stag').forEach(b=>b.classList.remove('on'));
+function setCancelSource(btn,src){
+  document.querySelectorAll('#cancelSourceBtns .stag').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
-  document.getElementById('cancelReasonInput').value=text;
+  const el=document.getElementById('cancelSource');if(el)el.value=src;
 }
 
-function confirmCancelReason(){
-  const reason=document.getElementById('cancelReasonInput').value.trim()||'غير محدد';
-  _addBranchCancel(reason);
-  closeCancelModal();
+function setCancelQuickReason(btn,text){
+  document.querySelectorAll('#cancelQuickBtns .stag').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const el=document.getElementById('cancelReasonFree');if(el)el.value=text;
 }
 
-function skipCancelReason(){
-  _addBranchCancel('');
-  closeCancelModal();
+function submitCancelEntry(){
+  const orderNum=(document.getElementById('cancelOrderNum')?.value||'').trim();
+  const source=document.getElementById('cancelSource')?.value||'فرع';
+  const quickReason=document.querySelector('#cancelQuickBtns .stag.on')?.textContent.trim()||'';
+  const freeReason=(document.getElementById('cancelReasonFree')?.value||'').trim();
+  const reason=freeReason||quickReason||'غير محدد';
+
+  // increment correct counter
+  if(source==='فرع') cancels.branch=Math.max(0,cancels.branch+1);
+  else cancels.talabat=Math.max(0,cancels.talabat+1);
+
+  const entry={orderNum,source,reason,time:new Date().toLocaleTimeString()};
+  branchCancelReasons.push({reason:`${source}${orderNum?' #'+orderNum:''}: ${reason}`,time:entry.time});
+  if(!window.cancelEntries) window.cancelEntries=[];
+  window.cancelEntries.push(entry);
+
+  // reset form
+  const onum=document.getElementById('cancelOrderNum');if(onum)onum.value='';
+  const cfree=document.getElementById('cancelReasonFree');if(cfree)cfree.value='';
+  document.querySelectorAll('#cancelQuickBtns .stag').forEach(b=>b.classList.remove('on'));
+
+  updateUI(); autoSave(); renderCancelRecords();
 }
 
-function closeCancelModal(){
-  document.getElementById('cancelReasonModal').classList.remove('on');
-}
-
-function _addBranchCancel(reason){
-  cancels.branch=Math.max(0,cancels.branch+1);
-  if(reason) branchCancelReasons.push({reason,time:new Date().toLocaleTimeString()});
-  updateUI(); autoSave(); renderBranchCancelList();
-}
-
-function renderBranchCancelList(){
-  const wrap=document.getElementById('branchCancelList');
-  const container=document.getElementById('branchCancelItems');
+function renderCancelRecords(){
+  const wrap=document.getElementById('cancelRecordsList');
+  const container=document.getElementById('cancelRecordsItems');
   if(!wrap||!container) return;
-  if(!branchCancelReasons.length){wrap.style.display='none';return;}
+  const entries=window.cancelEntries||[];
+  if(!entries.length){wrap.style.display='none';return;}
   wrap.style.display='block';
-  container.innerHTML=branchCancelReasons.map((r,i)=>`
-    <div style="display:flex;align-items:center;gap:8px;padding:6px 9px;background:rgba(255,79,106,.06);border:1px solid rgba(255,79,106,.15);border-radius:var(--rs);margin-bottom:5px;font-size:12px">
-      <span style="color:var(--red);font-weight:700;flex-shrink:0">#${i+1}</span>
-      <span style="flex:1">${esc(r.reason||'بدون سبب')}</span>
-      <span style="color:var(--muted);font-size:10px;flex-shrink:0">${r.time}</span>
-      <button onclick="removeBranchCancel(${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0;line-height:1">×</button>
+  const srcIcon={'فرع':'📍','طلبات':'📱'};
+  container.innerHTML=entries.map((e,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:9px 11px;
+      background:rgba(255,79,106,.06);border:1px solid rgba(255,79,106,.15);
+      border-radius:var(--rs);margin-bottom:5px;font-size:12px">
+      <span style="color:var(--red);font-weight:900;flex-shrink:0;min-width:22px">#${i+1}</span>
+      <span style="flex-shrink:0;font-size:11px;color:var(--muted)">${srcIcon[e.source]||''}${e.source}</span>
+      ${e.orderNum?`<span style="background:var(--raised);border:1px solid var(--border-s);border-radius:4px;padding:1px 6px;font-weight:700;font-size:11px;flex-shrink:0;direction:ltr">${esc(e.orderNum)}</span>`:''}
+      <span style="flex:1;color:var(--text)">${esc(e.reason)}</span>
+      <span style="color:var(--muted);font-size:10px;flex-shrink:0">${e.time}</span>
+      <button onclick="removeCancelEntry(${i})"
+        style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:0 2px;line-height:1;flex-shrink:0;touch-action:manipulation">×</button>
     </div>`).join('');
 }
 
-function removeBranchCancel(i){
+function removeCancelEntry(i){
+  const entries=window.cancelEntries||[];
+  const e=entries[i];
+  if(e){
+    if(e.source==='فرع') cancels.branch=Math.max(0,cancels.branch-1);
+    else cancels.talabat=Math.max(0,cancels.talabat-1);
+  }
+  entries.splice(i,1);
   branchCancelReasons.splice(i,1);
-  cancels.branch=Math.max(0,cancels.branch-1);
-  updateUI(); autoSave(); renderBranchCancelList();
+  updateUI(); autoSave(); renderCancelRecords();
+}
+
+
+// ── APP TEAM CANCEL SYSTEM (انستا شوب) ──────────────
+function setCancelQuickReasonApp(btn,text){
+  document.querySelectorAll('#cancelQuickBtnsApp .stag').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const el=document.getElementById('cancelReasonFreeApp');if(el)el.value=text;
+}
+
+function submitCancelEntryApp(){
+  const orderNum=(document.getElementById('cancelOrderNumApp')?.value||'').trim();
+  const quickReason=document.querySelector('#cancelQuickBtnsApp .stag.on')?.textContent.trim()||'';
+  const freeReason=(document.getElementById('cancelReasonFreeApp')?.value||'').trim();
+  const reason=freeReason||quickReason||'غير محدد';
+
+  cancels.insta=Math.max(0,cancels.insta+1);
+
+  const entry={orderNum,source:'انستا',reason,time:new Date().toLocaleTimeString()};
+  if(!window.cancelEntriesApp) window.cancelEntriesApp=[];
+  window.cancelEntriesApp.push(entry);
+
+  // reset form
+  const on=document.getElementById('cancelOrderNumApp');if(on)on.value='';
+  const rf=document.getElementById('cancelReasonFreeApp');if(rf)rf.value='';
+  document.querySelectorAll('#cancelQuickBtnsApp .stag').forEach(b=>b.classList.remove('on'));
+
+  updateUI(); autoSave(); renderCancelRecordsApp();
+}
+
+function renderCancelRecordsApp(){
+  const wrap=document.getElementById('cancelRecordsListApp');
+  const container=document.getElementById('cancelRecordsItemsApp');
+  if(!wrap||!container) return;
+  const entries=window.cancelEntriesApp||[];
+  if(!entries.length){wrap.style.display='none';return;}
+  wrap.style.display='block';
+  container.innerHTML=entries.map((e,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:9px 11px;
+      background:rgba(255,79,106,.06);border:1px solid rgba(255,79,106,.15);
+      border-radius:var(--rs);margin-bottom:5px;font-size:12px">
+      <span style="color:var(--red);font-weight:900;flex-shrink:0;min-width:22px">#${i+1}</span>
+      <span style="font-size:11px;color:var(--muted);flex-shrink:0">🌐 انستا</span>
+      ${e.orderNum?`<span style="background:var(--raised);border:1px solid var(--border-s);border-radius:4px;padding:1px 6px;font-weight:700;font-size:11px;flex-shrink:0;direction:ltr">${esc(e.orderNum)}</span>`:''}
+      <span style="flex:1;color:var(--text)">${esc(e.reason)}</span>
+      <span style="color:var(--muted);font-size:10px;flex-shrink:0">${e.time}</span>
+      <button onclick="removeCancelEntryApp(${i})"
+        style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:0 2px;line-height:1;flex-shrink:0;touch-action:manipulation">×</button>
+    </div>`).join('');
+}
+
+function removeCancelEntryApp(i){
+  const entries=window.cancelEntriesApp||[];
+  entries.splice(i,1);
+  cancels.insta=Math.max(0,cancels.insta-1);
+  updateUI(); autoSave(); renderCancelRecordsApp();
+}
+
+// backward compat stubs
+function addCancelWithReason(type){ updCan(type,1); }
+function renderBranchCancelList(){ renderCancelRecords(); }
+function closeCancelModal(){
+  const m=document.getElementById('cancelReasonModal');if(m)m.classList.remove('on');
 }
 
 // ── FOLLOWUP AUTOCOMPLETE (past shortages) ────────────
@@ -1753,15 +1873,23 @@ function buildReport(){
     if(currentTeam==='branch'){
       const t=cancels.branch+cancels.talabat;
       r+=`🚫 *الملغيات:*\n▪️ فرع: ${cancels.branch}\n▪️ طلبات: ${cancels.talabat}\n📉 *إجمالي: ${t}*\n`;
+      const entries=window.cancelEntries||[];
+      if(entries.length){
+        r+=`\n📋 تفاصيل الملغيات:\n`;
+        entries.forEach((e,i)=>{
+          const src={'فرع':'📍','طلبات':'📱'}[e.source]||'';
+          r+=`  ${i+1}. ${src}${e.source}${e.orderNum?' #'+e.orderNum:''}: ${e.reason} (${e.time})\n`;
+        });
+      }
     } else {
       r+=`🚫 *الملغيات (انستا):* ${cancels.insta}\n`;
-    }
-    if(selCanTags.length)r+=`🏷️ الأسباب: ${selCanTags.join('، ')}\n`;
-    const cn=document.getElementById('canReason').value.trim();
-    if(cn)r+=`📝 ${cn}\n`;
-    if(branchCancelReasons.length){
-      r+=`\n📋 أسباب إلغاء الفرع (${branchCancelReasons.length}):\n`;
-      branchCancelReasons.forEach((x,i)=>r+=`  ${i+1}. ${x.reason||'غير محدد'} (${x.time})\n`);
+      const appEntries=window.cancelEntriesApp||[];
+      if(appEntries.length){
+        r+=`\n📋 تفاصيل الملغيات:\n`;
+        appEntries.forEach((e,i)=>{
+          r+=`  ${i+1}. 🌐انستا${e.orderNum?' #'+e.orderNum:''}: ${e.reason} (${e.time})\n`;
+        });
+      }
     }
     r+='\n';
   }
@@ -1945,6 +2073,7 @@ document.getElementById('cancelReasonModal').addEventListener('click',function(e
 document.addEventListener('click',function(e){
   const list=document.getElementById('followupACList');
   if(list&&!list.contains(e.target)&&e.target.id!=='followup') list.style.display='none';
+
 });
 </script>
 </body>
