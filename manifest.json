@@ -1,0 +1,11 @@
+{
+  "name": "نظام إدارة العمليات V20",
+  "short_name": "Operations V20",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "dir": "rtl",
+  "lang": "ar",
+  "background_color": "#070605",
+  "theme_color": "#d4af37",
+  "icons": []
+}
