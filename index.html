@@ -1,0 +1,769 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#d4af37">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>نظام إدارة العمليات V24</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+
+<div class="wrap">
+
+<!-- TEAM OVERLAY -->
+<div class="toverlay" id="toverlay">
+  <div class="tbox">
+    <div style="font-size:48px;margin-bottom:14px;filter:drop-shadow(0 4px 12px rgba(59,130,246,0.4))">📊</div>
+    <h2 style="font-size:22px;font-weight:900;color:var(--text);margin-bottom:6px;text-shadow:0 2px 8px rgba(0,0,0,0.5)">نظام إدارة العمليات</h2>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:28px;letter-spacing:.5px">اختر الفريق للدخول</p>
+    <div class="tcards">
+      <div class="tcard bc" onclick="selectTeam('branch')">
+        <div class="ti" style="font-size:40px;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.4))">🏪</div>
+        <div class="tn">فريق الفرع</div>
+        <div class="td">إدارة طلبات الفرع فقط</div>
+        <div style="margin-top:12px;height:2px;background:linear-gradient(90deg,transparent,rgba(59,130,246,0.5),transparent);border-radius:1px"></div>
+      </div>
+      <div class="tcard ac" onclick="selectTeam('app')">
+        <div class="ti" style="font-size:40px;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.4))">📸</div>
+        <div class="tn">انستا شوب</div>
+        <div class="td">انستا شوب + طلبات</div>
+        <div style="margin-top:12px;height:2px;background:linear-gradient(90deg,transparent,rgba(34,197,94,0.5),transparent);border-radius:1px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BARCODE SCANNER MODAL -->
+<div class="sc-overlay" id="scModal">
+  <div class="sc-box">
+    <div class="sc-hdr">
+      <div class="sc-title">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <rect x="3" y="3" width="4" height="4" rx="0.5"/><rect x="17" y="3" width="4" height="4" rx="0.5"/>
+          <rect x="3" y="17" width="4" height="4" rx="0.5"/>
+          <line x1="10" y1="3" x2="10" y2="7"/><line x1="14" y1="3" x2="14" y2="7"/>
+          <line x1="10" y1="17" x2="10" y2="21"/><line x1="14" y1="17" x2="14" y2="21"/>
+          <line x1="17" y1="10" x2="21" y2="10"/><line x1="17" y1="14" x2="21" y2="14"/>
+          <line x1="3" y1="10" x2="7" y2="10"/><line x1="3" y1="14" x2="7" y2="14"/>
+          <line x1="12" y1="10" x2="12" y2="14"/>
+        </svg>
+        ماسح الباركود
+      </div>
+      <button class="mclose" onclick="closeScanner()">✕</button>
+    </div>
+    <div class="sc-vp" id="scVP">
+      <video id="scVideo" autoplay playsinline muted></video>
+      <div class="sc-frame"></div>
+      <div class="sc-c c-tl"><svg viewBox="0 0 20 20" fill="none"><path d="M1 9V1h8" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="sc-c c-tr"><svg viewBox="0 0 20 20" fill="none"><path d="M1 9V1h8" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="sc-c c-bl"><svg viewBox="0 0 20 20" fill="none"><path d="M1 9V1h8" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="sc-c c-br"><svg viewBox="0 0 20 20" fill="none"><path d="M1 9V1h8" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="sc-laser" id="scLaser" style="display:none"></div>
+      <div class="sc-flash" id="scFlash"></div>
+      <div class="sc-off" id="scOff">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.2">
+          <path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/>
+        </svg>
+        اضغط "تشغيل الكاميرا"
+      </div>
+    </div>
+    <div class="sc-status idle" id="scStatus">
+      <div class="sdot sd-b"></div><span id="scStatusTxt">جاهز</span>
+    </div>
+    <div class="sc-result" id="scResult">
+      <div class="sc-pname" id="scPName"></div>
+      <div class="sc-pmeta" id="scPMeta"></div>
+      <div class="sc-pbc" id="scPBC"></div>
+      <div class="sc-pbadge" id="scPBadge"></div>
+    </div>
+    <div class="sc-nf" id="scNF">
+      <div class="sc-nfcode" id="scNFCode"></div>
+      <div class="sc-nfhint">غير موجود في قاعدة البيانات</div>
+    </div>
+    <div class="sc-bottom">
+      <div class="sc-manrow">
+        <input class="sc-maninp" id="scManInp" type="tel" placeholder="أدخل الباركود يدوياً..."
+               onkeydown="if(event.key==='Enter')scManualLookup()">
+        <button class="sc-searchbtn" onclick="scManualLookup()">بحث</button>
+      </div>
+      <button class="sc-cambtn" id="scCamBtn" onclick="scToggleCam()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        تشغيل الكاميرا
+      </button>
+
+      <button class="sc-cambtn" id="scContBtn" onclick="toggleContinuousScan()" style="margin-top:7px;background:linear-gradient(180deg,#211d16,#11100e);color:#d8bd69;border-color:rgba(212,175,55,.25)">🔁 المسح المستمر: متوقف</button>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="hdr" style="padding:10px 16px">
+  <div>
+    <div class="hdr-brand" style="font-size:13px">⚡ نظام العمليات V24</div>
+    <div id="hdrShiftTime" style="font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:.5px"></div>
+    <div class="v201-badge">V24 · Shift Only · Pro Excel · AI</div>
+  </div>
+  <div class="hdr-right">
+    <div class="hdr-dot"></div>
+  </div>
+</div>
+
+<div id="teamBar">
+  <span id="tBadge" class="tbadge tbadge-b">🏪 فريق الفرع</span>
+  <span id="branchBadge" class="tbadge" style="border:1px solid rgba(212,175,55,.22);color:#d8bd69;background:rgba(212,175,55,.08)">فرع غير محدد</span>
+  <span id="userBadge" class="tbadge" style="border:1px solid rgba(212,175,55,.22);color:#d8bd69;background:rgba(212,175,55,.08)">مستخدم محلي</span>
+  <button class="switch-btn" onclick="quickUserLogin()">👤 موظف</button>
+  <button class="switch-btn" onclick="switchTeam()">🚪 تغيير الفريق</button>
+</div>
+<div id="editNotice" class="enotice">⚠️ وضع التعديل — اضغط "أرشفة الوردية" لحفظ التعديل</div>
+<div id="blockedAlerts"></div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab on" onclick="showTab('entry')">🏠 لوحة</button>
+  <button class="tab" onclick="showTab('short')">🔔 نواقص</button>
+  <button class="tab" id="tab-prods" onclick="showTab('prods')">📦 منتجات</button>
+  <button class="tab" id="tab-checks" onclick="showTab('checks')">✅ مراجعات</button>
+  <button class="tab" onclick="showTab('arch')">📊 أرشيف</button>
+
+  <button class="tab" id="tab-admin" onclick="openAdminTab()">👑 إدارة</button>
+</div>
+
+<!-- ══ TAB: ENTRY ══ -->
+<div id="entry" class="view on">
+
+  <!-- Shift Screen -->
+  <div class="screen">
+    <div class="timer" id="liveTime2">الشيفت</div>
+    <div class="timer-label">CURRENT SHIFT · الشيفت الحالي</div>
+    <div class="prog" style="margin-bottom:14px"><div class="prog-fill" id="pFill2" style="width:100%"></div></div>
+    <div class="screen-stats">
+      <div class="sstat"><div class="sstat-n cn-w" id="sCustomers">0</div><div class="sstat-l">عملاء</div></div>
+      <div class="sstat"><div class="sstat-n cn-g" id="sReported">0</div><div class="sstat-l">تبليغ</div></div>
+      <div class="sstat"><div class="sstat-n cn-r" id="sCancels">0</div><div class="sstat-l">ملغيات</div></div>
+    </div>
+  </div>
+
+  <!-- App quick links (انستا شوب) -->
+  <div id="app-quick-links" style="display:none;margin-bottom:10px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div class="si" onclick="showTab('prods')" style="padding:16px 10px">
+        <div class="si-l">📦 غير المتاحة</div>
+        <div class="si-n" id="sProdsBlocked" style="color:var(--amber)">0</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px">من <span id="sProdsTotal">0</span></div>
+      </div>
+      <div class="si" onclick="showTab('checks')" style="padding:16px 10px">
+        <div class="si-l">✅ المراجعات</div>
+        <div class="si-n" id="sChecksDone" style="color:var(--green)">0</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px">من <span id="sChecksTotal">0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats row (branch) -->
+  <div id="entry-stats" style="margin-bottom:10px">
+    <div class="screen-stats" style="border-radius:14px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.4)">
+      <div class="sstat"><div class="sstat-n cn-w" id="sCustomers2">0</div><div class="sstat-l">👥 عملاء</div></div>
+      <div class="sstat"><div class="sstat-n cn-g" id="sReported2">0</div><div class="sstat-l">📢 تبليغ</div></div>
+      <div class="sstat"><div class="sstat-n cn-r" id="sCancels2">0</div><div class="sstat-l">🚫 ملغيات</div></div>
+    </div>
+  </div>
+
+  <!-- ORDER COUNTERS -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-title">ORDERS · الأوردرات</div>
+      <div class="sec-badge" id="ordersTotal">0</div>
+    </div>
+    <div class="cg" style="grid-template-columns:1fr 1fr">
+      <div class="cc">
+        <h3>📍 BRANCH · فرع</h3>
+        <div class="ctr">
+          <button class="k kp" onclick="updCount('branch',1)">+</button>
+          <input type="number" id="branch" class="cinp" value="0" onchange="manUpd('branch',this.value)" min="0">
+          <button class="k km" onclick="updCount('branch',-1)">−</button>
+        </div>
+      </div>
+      <div class="cc">
+        <h3>📱 TALABAT · طلبات</h3>
+        <div class="ctr">
+          <button class="k kp" onclick="updCount('talabat',1)">+</button>
+          <input type="number" id="talabat" class="cinp" value="0" onchange="manUpd('talabat',this.value)" min="0">
+          <button class="k km" onclick="updCount('talabat',-1)">−</button>
+        </div>
+      </div>
+      <div class="cc">
+        <h3>🌐 INSTA · انستا شوب</h3>
+        <div class="ctr">
+          <button class="k kp" onclick="updCount('insta',1)">+</button>
+          <input type="number" id="insta" class="cinp" value="0" onchange="manUpd('insta',this.value)" min="0">
+          <button class="k km" onclick="updCount('insta',-1)">−</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BRANCH CANCEL SECTION -->
+  <div class="sec" id="sec-cancel-branch">
+    <div class="sec-head">
+      <div class="sec-title">CANCELLED · الملغيات</div>
+      <div class="sec-badge" id="branchCanTotal" style="color:var(--red)">0</div>
+    </div>
+    <div class="cang" style="grid-template-columns:1fr;padding:12px">
+      <div class="ccard">
+        <span>📍 فرع</span>
+        <div class="cctrls">
+          <button onclick="updCan('branch',1)">+</button>
+          <span id="cBranch">0</span>
+          <button onclick="updCan('branch',-1)">−</button>
+        </div>
+      </div>
+      <div class="ccard" style="display:none">
+        <span>📱 طلبات</span>
+        <div class="cctrls">
+          <button onclick="updCan('talabat',1)">+</button>
+          <span id="cTalabat">0</span>
+          <button onclick="updCan('talabat',-1)">−</button>
+        </div>
+      </div>
+    </div>
+    <div class="cancel-form">
+      <div class="cf-row">
+        <input type="tel" id="cancelOrderNum" placeholder="رقم الأوردر" inputmode="numeric"
+               style="margin:0" onkeydown="if(event.key==='Enter')submitCancelEntry()">
+        <select id="cancelSource" style="margin:0;min-width:90px">
+          <option value="فرع">📍 فرع</option>
+        </select>
+      </div>
+      <div class="reason-chips" id="cancelQuickBtns">
+        <button class="stag to" onclick="setCancelQuickReason(this,'نقص منتج')">نقص منتج</button>
+        <button class="stag to" onclick="setCancelQuickReason(this,'نقص طيارين')">نقص طيارين</button>
+        <button class="stag to" onclick="setCancelQuickReason(this,'لم يرد')">لم يرد</button>
+        <button class="stag to" onclick="setCancelQuickReason(this,'خارج نطاق')">خارج نطاق</button>
+        <button class="stag to" onclick="setCancelQuickReason(this,'ازدحام')">ازدحام</button>
+        <button class="stag to" onclick="setCancelQuickReason(this,'طلب مكرر')">طلب مكرر</button>
+      </div>
+      <input type="text" id="cancelReasonFree" placeholder="أو اكتب سبباً مخصصاً..."
+             style="margin-bottom:8px" onkeydown="if(event.key==='Enter')submitCancelEntry()">
+      <button class="add-btn-r" onclick="submitCancelEntry()">✕ إضافة للقائمة</button>
+    </div>
+    <div id="cancelRecordsList" style="display:none;padding:0 12px 10px">
+      <div style="font-size:10px;color:var(--muted);font-weight:700;margin-bottom:6px;letter-spacing:1px">RECORDS · السجل</div>
+      <div id="cancelRecordsItems"></div>
+    </div>
+    <textarea id="canReason" style="display:none" oninput="autoSave()"></textarea>
+    <div id="canTags" style="display:none"></div>
+  </div>
+
+  <!-- APP CANCEL SECTION -->
+  <div class="sec" id="sec-cancel-app" style="display:none">
+    <div class="sec-head">
+      <div class="sec-title">CANCELLED · الملغيات</div>
+      <div class="sec-badge" style="color:var(--red)" id="appCanTotal">0</div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:16px;padding:12px 16px 8px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="font-size:13px;color:var(--muted);font-weight:700">🌐 انستا</span>
+        <div class="cctrls">
+          <button onclick="updCan('insta',1)">+</button>
+          <span id="cInstaApp">0</span>
+          <button onclick="updCan('insta',-1)">−</button>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="font-size:13px;color:var(--muted);font-weight:700">📱 طلبات</span>
+        <div class="cctrls">
+          <button onclick="updCan('talabat',1)">+</button>
+          <span id="cTalabatApp">0</span>
+          <button onclick="updCan('talabat',-1)">−</button>
+        </div>
+      </div>
+    </div>
+    <div class="cancel-form">
+      <div class="cf-row" style="margin-bottom:8px">
+        <input type="tel" id="cancelOrderNumApp" placeholder="رقم الأوردر" inputmode="numeric"
+               style="margin:0" onkeydown="if(event.key==='Enter')submitCancelEntryApp()">
+        <select id="cancelSourceApp" style="margin:0;min-width:90px">
+          <option value="انستا شوب">🌐 انستا</option>
+          <option value="طلبات">📱 طلبات</option>
+        </select>
+      </div>
+      <div class="reason-chips" id="cancelQuickBtnsApp">
+        <button class="stag to" onclick="setCancelQuickReasonApp(this,'نقص منتج')">نقص منتج</button>
+        <button class="stag to" onclick="setCancelQuickReasonApp(this,'لم يرد')">لم يرد</button>
+        <button class="stag to" onclick="setCancelQuickReasonApp(this,'طلب مكرر')">طلب مكرر</button>
+        <button class="stag to" onclick="setCancelQuickReasonApp(this,'خارج نطاق')">خارج نطاق</button>
+        <button class="stag to" onclick="setCancelQuickReasonApp(this,'منتج غير متاح')">غير متاح</button>
+        <button class="stag to" onclick="setCancelQuickReasonApp(this,'ازدحام')">ازدحام</button>
+      </div>
+      <input type="text" id="cancelReasonFreeApp" placeholder="أو اكتب سبباً مخصصاً..."
+             style="margin-bottom:8px" onkeydown="if(event.key==='Enter')submitCancelEntryApp()">
+      <button class="add-btn-r" onclick="submitCancelEntryApp()">✕ إضافة للقائمة</button>
+    </div>
+    <div id="cancelRecordsListApp" style="display:none;padding:0 12px 10px">
+      <div style="font-size:10px;color:var(--muted);font-weight:700;margin-bottom:6px;letter-spacing:1px">RECORDS · السجل</div>
+      <div id="cancelRecordsItemsApp"></div>
+    </div>
+    <textarea id="canReasonApp" style="display:none" oninput="syncCanReasonApp()"></textarea>
+  </div>
+
+  <!-- Cancel modal stub -->
+  <div id="cancelReasonModal" style="display:none"><input type="hidden" id="cancelReasonInput"></div>
+
+  <!-- ADD CUSTOMER -->
+  <div class="sec" id="sec-addcust">
+    <div class="sec-head"><div class="sec-title">SHORTAGES · نواقص عميل جديد</div></div>
+    <div style="padding:12px">
+      <input type="text" id="newCustName" placeholder="اسم العميل" oninput="autoSave()">
+      <input type="text" id="newCustPhone" placeholder="رقم الهاتف" oninput="autoSave()">
+      <div class="divider"></div>
+      <h4>نواقص العميل:</h4>
+      <div id="newCustProds"></div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:6px">
+        <button class="addbtn" onclick="addProdInput()">+ يدوياً</button>
+        <button class="addbtn" style="background:linear-gradient(180deg,#1a3050,#122240);border-color:rgba(59,130,246,0.2);color:#60a5fa" onclick="openScanner('cust-global')">📷 باركود</button>
+      </div>
+      <button class="btn btn-p" style="margin-top:10px" onclick="addCustomer()">💾 حفظ نواقص العميل</button>
+    </div>
+  </div>
+
+  <!-- CUSTOMER RECORDS -->
+  <div class="sec" id="sec-custrecords">
+    <div class="sec-head"><div class="sec-title">RECORDS · سجل العملاء</div></div>
+    <div id="custRecords" style="padding:8px"></div>
+  </div>
+
+  <!-- BRANCH SHORTAGES -->
+  <div class="sec" id="sec-branchshort">
+    <div class="sec-head"><div class="sec-title" id="sec-branchshort-title">STOCK · نواقص الفرع</div></div>
+    <div style="padding:8px 12px 4px">
+      <div id="branchProds"></div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:6px">
+        <button class="addbtn" onclick="addBranchInput()">+ يدوياً</button>
+        <button class="addbtn" style="background:linear-gradient(180deg,#1a3050,#122240);border-color:rgba(59,130,246,0.2);color:#60a5fa" onclick="openScanner('branch-global')">📷 باركود</button>
+      </div>
+      <button class="btn btn-s" style="margin-top:9px" onclick="saveBranch()">💾 حفظ</button>
+    </div>
+  </div>
+
+  <!-- BRANCH RECORDS -->
+  <div class="sec" id="sec-branchrecs">
+    <div class="sec-head"><div class="sec-title" id="sec-branchrecs-title">LOG · سجل نواقص الفرع</div></div>
+    <div id="branchRecs" style="padding:8px"></div>
+  </div>
+
+  <!-- FOLLOWUP -->
+  <div class="sec" id="sec-followup">
+    <div class="sec-head"><div class="sec-title">FOLLOWUP · متابعة العملاء</div></div>
+    <div style="padding:10px 12px">
+      <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">نواقص مسجلة — انقر للإضافة</div>
+      <div id="pastShortagesSuggestions" style="display:flex;flex-wrap:wrap;gap:5px;max-height:110px;overflow-y:auto;margin-bottom:10px"></div>
+      <div style="position:relative">
+        <textarea id="followup" placeholder="ملاحظات المتابعة..." oninput="followupAC(this);autoSave()" style="margin-bottom:3px"></textarea>
+        <div id="followupACList" style="position:absolute;top:100%;right:0;left:0;background:linear-gradient(180deg,#162035,#111828);border:1px solid rgba(59,130,246,0.3);border-radius:var(--rs);z-index:400;max-height:160px;overflow-y:auto;display:none;box-shadow:0 8px 24px rgba(0,0,0,.6)"></div>
+      </div>
+      <div class="voice-interim" id="followupInterim"></div>
+      <button class="btn btn-voice" id="voiceBtn-followup" style="margin-top:6px" onclick="toggleVoiceInput('followup','voiceBtn-followup','followupInterim')">🎙️ إملاء صوتي</button>
+    </div>
+  </div>
+
+  <!-- GENERAL NOTES -->
+  <div class="sec" id="sec-generalnotes">
+    <div class="sec-head"><div class="sec-title">NOTES · ملاحظات عامة</div></div>
+    <div style="padding:10px 12px">
+      <textarea id="generalNotes" placeholder="ملاحظات الشيفت..." oninput="autoSave()"></textarea>
+      <div class="voice-interim" id="generalNotesInterim"></div>
+      <button class="btn btn-voice" id="voiceBtn-generalNotes" style="margin-top:6px" onclick="toggleVoiceInput('generalNotes','voiceBtn-generalNotes','generalNotesInterim')">🎙️ إملاء صوتي</button>
+    </div>
+  </div>
+
+  <!-- ACTION BAR -->
+  <div class="abg">
+    <button class="btn btn-s" onclick="openReport()">📤 تقرير</button>
+    <button class="btn btn-w" onclick="syncData()">🔄 مزامنة</button>
+    <button class="btn btn-n" onclick="archiveShift()">📋 أرشفة</button>
+  </div>
+
+</div>
+
+<!-- ══ TAB: SHORTAGES ══ -->
+<div id="short" class="view">
+  <div class="sec">
+    <div class="sec-head"><div class="sec-title">SHORTAGES · النواقص</div></div>
+    <div style="padding:10px 12px 6px;display:flex;gap:8px">
+      <select id="shortFilter" style="flex:1;margin:0" onchange="renderShort()">
+        <option value="all">جميع النواقص</option>
+        <option value="waiting">في الانتظار</option>
+        <option value="reported">تم التبليغ</option>
+      </select>
+      <select id="shortSort" style="flex:1;margin:0" onchange="renderShort()">
+        <option value="time">حسب الإدخال</option>
+        <option value="section">حسب القسم</option>
+      </select>
+      <button onclick="renderShort()" class="btn btn-w" style="width:auto;padding:10px 16px;margin:0">🔄</button>
+    </div>
+  </div>
+  <div id="shortContainer"></div>
+</div>
+
+<!-- ══ TAB: PRODUCTS ══ -->
+<div id="prods" class="view">
+  <div class="sec">
+    <div class="sec-head"><div class="sec-title">ADD · إضافة منتج</div></div>
+    <div style="padding:10px 12px">
+      <div class="irow" style="flex-wrap:wrap">
+        <input type="text" id="npName" placeholder="اسم المنتج" style="margin:0">
+        <input type="text" id="npCompany" placeholder="الشركة" style="margin:0;flex:.7">
+      </div>
+      <div class="irow" style="flex-wrap:wrap;margin-top:7px">
+        <input type="text" id="npSection" placeholder="القسم: ألبان / منظفات..." style="margin:0">
+      </div>
+      <div class="irow" style="flex-wrap:wrap;margin-top:7px">
+        <input type="date" id="npExpiry" style="margin:0" title="تاريخ الصلاحية القريب">
+      </div>
+      <div class="bcrow">
+        <input type="tel" id="npBarcode" placeholder="الباركود — اضغط 📷 للمسح" style="margin:0" inputmode="numeric">
+        <button class="scanbtn" onclick="openScanner('db-add')">📷</button>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:7px">💡 مسح باركود موجود يملأ الحقول تلقائياً</div>
+      <select id="npStatus" style="margin:0" onchange="document.getElementById('npBlockedRow').style.display=this.value==='blocked'?'block':'none'">
+        <option value="available">✅ متاح</option>
+        <option value="out-of-stock">⚠️ ناقص</option>
+        <option value="not-listed">❌ غير مدرج</option>
+        <option value="blocked">🚫 مغلق</option>
+      </select>
+      <div id="npBlockedRow" style="display:none;margin-top:5px">
+        <input type="date" id="npBlockedDate">
+      </div>
+      <button class="btn btn-p" style="margin-top:9px" onclick="addToDB()">💾 إضافة</button>
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sec-head"><div class="sec-title">SEARCH · بحث</div></div>
+    <div style="padding:10px 12px">
+      <div class="bcrow" style="margin-bottom:6px">
+        <input type="tel" id="bcSearch" placeholder="ابحث بالباركود..." style="margin:0" inputmode="numeric" oninput="searchByBC(this.value)">
+        <button class="scanbtn" onclick="openScanner('db-search')">📷</button>
+      </div>
+      <input type="text" id="prodSearch" placeholder="ابحث باسم المنتج أو الشركة..." oninput="renderProds()">
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px">
+        <button class="stag ta on" id="fAll" onclick="setProdFilter('all',this)">الكل</button>
+        <button class="stag ta" onclick="setProdFilter('available',this)">متاح</button>
+        <button class="stag to" onclick="setProdFilter('out-of-stock',this)">ناقص</button>
+        <button class="stag tb" onclick="setProdFilter('blocked',this)">مغلق</button>
+        <button class="stag tn" onclick="setProdFilter('not-listed',this)">غير مدرج</button>
+      </div>
+    </div>
+  </div>
+  <div id="prodsContainer"></div>
+</div>
+
+<!-- ══ TAB: CHECKS ══ -->
+<div id="checks" class="view">
+  <div class="sec">
+    <div class="sec-head"><div class="sec-title">ADD · إضافة مهمة</div></div>
+    <div style="padding:10px 12px">
+      <div class="irow">
+        <input type="text" id="newCheckLbl" placeholder="اسم المهمة" style="margin:0">
+        <input type="text" id="newCheckNote" placeholder="ملاحظة" style="margin:0">
+        <button class="addbtn" onclick="addCheck()" style="flex-shrink:0">+ إضافة</button>
+      </div>
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sec-head"><div class="sec-title">TASKS · المهام</div></div>
+    <div id="checkList" style="padding:10px 12px"></div>
+    <div style="padding:0 12px 12px">
+      <div class="divider"></div>
+      <button class="btn btn-n" onclick="resetChecks()">🔄 إعادة تعيين</button>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- ══ TAB: ADMIN ══ -->
+<div id="admin" class="view">
+  <div class="sec">
+    <div class="sec-head"><div class="sec-title">ADMIN · لوحة الإدارة الذكية</div></div>
+    <div style="padding:10px 12px">
+      <div class="admin-grid">
+        <div class="admin-card">
+          <h3>مؤشرات الشيفت</h3>
+          <div id="adminKpis"></div>
+        </div>
+        <div class="admin-card">
+          <h3>الربط السحابي المجاني</h3>
+          <input id="supabaseUrl" placeholder="Supabase Project URL" style="margin-bottom:7px">
+          <input id="supabaseKey" placeholder="Supabase anon key" style="margin-bottom:7px">
+          <button class="btn btn-w" onclick="saveCloudSettings()">💾 حفظ الإعدادات</button>
+          <button class="btn btn-s" onclick="syncToSupabase()">☁️ مزامنة تجريبية</button>
+        </div>
+      </div>
+      <div class="admin-grid" style="margin-top:8px">
+        <div class="admin-card">
+          <h3>OpenRouter API مجاني للتحليل</h3>
+          <input id="openRouterKey" placeholder="OpenRouter API Key" style="margin-bottom:7px">
+          <input id="openRouterModel" placeholder="deepseek/deepseek-r1:free" style="margin-bottom:7px">
+          <button class="btn btn-w" onclick="saveAISettings()">💾 حفظ</button>
+          <button class="btn btn-p" onclick="generateSmartAnalysis()">🧠 تحليل الشيفت</button>
+        </div>
+        <div class="admin-card">
+          <h3>PWA / Offline</h3>
+          <div id="pwaStatus" style="font-size:12px;color:var(--muted);line-height:1.8"></div>
+          <button class="btn btn-n" onclick="exportBK()">💾 نسخة احتياطية</button>
+        </div>
+      </div>
+      <div class="admin-card" style="margin-top:8px">
+        <h3>تحليل ذكي بدون بيانات شخصية</h3>
+        <div id="aiAnalysis" class="ai-box">اضغط "تحليل الشيفت" لإنشاء ملخص إداري. سيتم حذف أسماء العملاء وأرقام الهواتف قبل أي طلب API.</div>
+      </div>
+      <div class="admin-card" style="margin-top:8px">
+        <h3>تتبع الصلاحيات القريبة</h3>
+        <div id="expiryList"></div>
+      </div>
+      <div class="admin-card" style="margin-top:8px">
+        <h3>سجل النشاط</h3>
+        <div id="activityLogBox" style="font-size:11px;color:var(--muted);line-height:1.8;max-height:160px;overflow:auto"></div>
+      </div>
+
+      <div class="enterprise-card">
+        <h3>هوية الفرع والمؤسسة</h3>
+        <div class="irow" style="flex-wrap:wrap">
+          <input id="branchNameSetting" placeholder="اسم الفرع" style="margin:0">
+          <input id="branchCodeSetting" placeholder="كود الفرع" style="margin:0;flex:.55">
+        </div>
+        <div class="irow" style="flex-wrap:wrap;margin-top:7px">
+          <input id="managerWhatsAppSetting" placeholder="واتساب المدير 2010..." style="margin:0">
+          <input id="companyNameSetting" placeholder="اسم الشركة" style="margin:0;flex:.7">
+        </div>
+        <button class="btn btn-w" style="margin-top:8px" onclick="saveEnterpriseSettings()">💾 حفظ هوية الفرع</button>
+      </div>
+      <div class="enterprise-card">
+        <h3>المستخدمون والصلاحيات RBAC</h3>
+        <div class="irow" style="flex-wrap:wrap">
+          <input id="newUserName" placeholder="اسم الموظف" style="margin:0">
+          <select id="newUserRole" style="margin:0;flex:.7">
+            <option value="staff">موظف</option>
+            <option value="supervisor">مشرف</option>
+            <option value="manager">مدير</option>
+          </select>
+        </div>
+        <button class="btn btn-p" style="margin-top:8px" onclick="addEnterpriseUser()">➕ إضافة مستخدم</button>
+        <div id="usersList" style="margin-top:8px"></div>
+      </div>
+      <div class="enterprise-card">
+        <h3>تنبيهات المخاطر التشغيلية</h3>
+        <div id="riskPanel"></div>
+      </div>
+      <div class="enterprise-card">
+        <h3>الحوكمة والنسخ الاحتياطي</h3>
+        <div class="admin-grid">
+          <button class="btn btn-s" onclick="exportAuditCSV()">📜 تصدير Audit CSV</button>
+          <button class="btn btn-n" onclick="exportEnterpriseBackup()">🧳 نسخة Enterprise</button>
+        </div>
+        <input class="file-input" type="file" id="restoreFile" accept="application/json" onchange="restoreEnterpriseBackup(this.files[0])" style="margin-top:8px">
+      </div>
+      <div class="enterprise-card" style="margin-top:8px">
+        <h3>SQL جاهز لـ Supabase</h3>
+        <div id="supabaseSql" class="sql-box"></div>
+        <button class="btn btn-w" style="margin-top:8px" onclick="copySupabaseSQL()">📋 نسخ SQL</button>
+      </div>
+
+      <!-- ANALYTICS DASHBOARD -->
+      <div class="analytics-section">
+        <div class="chart-card">
+          <h3>📊 KPIs الشيفت الحالي</h3>
+          <div class="kpi-grid" id="liveKpiGrid"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div>
+              <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">توزيع الأوردرات</div>
+              <div class="chart-wrap-sm"><canvas id="ordersDonutChart"></canvas></div>
+            </div>
+            <div>
+              <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">أسباب الإلغاء الأعلى</div>
+              <div class="chart-wrap-sm"><canvas id="cancelReasonsChart"></canvas></div>
+            </div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>📈 اتجاه آخر 7 أيام — من الأرشيف</h3>
+          <div class="chart-wrap"><canvas id="trendLineChart"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>🖥️ سعة التخزين المحلي</h3>
+          <div id="storageInfo" style="font-size:11px;color:var(--muted);margin-bottom:5px"></div>
+          <div class="storage-bar-wrap"><div class="storage-bar storage-ok" id="storageBarFill" style="width:0%"></div></div>
+          <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:7px">
+            <button class="btn btn-s" onclick="printShiftReport()">🖨️ طباعة / PDF</button>
+            <button class="btn btn-n" onclick="clearStorageCache()">🧹 تنظيف الكاش</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<!-- ══ TAB: ARCHIVE ══ -->
+<div id="arch" class="view">
+  <div class="as4" id="archStats"></div>
+  <div class="exbg">
+    <button onclick="exPro()" class="exbtn" style="background:linear-gradient(180deg,#5b21b6,#4c1d95)">📊 احترافي</button>
+    <button onclick="exOrders()" class="exbtn" style="background:linear-gradient(180deg,#14532d,#0f3d22)">📦 أوردرات</button>
+    <button onclick="exShort()" class="exbtn" style="background:linear-gradient(180deg,#78350f,#5a280a)">⚠️ نواقص</button>
+    <button onclick="exCan()" class="exbtn" style="background:linear-gradient(180deg,#7f1d1d,#5f1616)">🚫 ملغيات</button>
+    <button onclick="exSum()" class="exbtn" style="background:linear-gradient(180deg,#1e3a5f,#162d4a)">📈 ملخص</button>
+  </div>
+  <input type="text" id="archSearch" onkeyup="filterArch()" placeholder="🔍 بحث في الأرشيف...">
+  <div class="sec">
+    <div class="tw">
+      <table class="at">
+        <thead><tr><th>التاريخ</th><th>الوردية</th><th>فرع</th><th>طلبات</th><th>انستا</th><th>الإجمالي</th><th>ملغيات</th><th>السبب</th><th>إجراءات</th></tr></thead>
+        <tbody id="archBody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+    <button class="btn btn-p" style="flex:1" onclick="exportBK()">💾 نسخة احتياطية</button>
+    <button class="btn btn-d" style="flex:1" onclick="clearArch()">🗑️ مسح الأرشيف</button>
+  </div>
+</div>
+
+</div>
+
+
+
+<!-- AI STORE VETERAN ASSISTANT -->
+<button class="ai-fab" onclick="toggleStoreAssistant()" title="مساعد خبرة المحلات">🧠</button>
+<div class="ai-dock" id="aiDock">
+  <div class="ai-head">
+    <div>
+      <div class="ai-title">مساعد العمليات الذكي</div>
+      <div class="ai-sub">خبرة تشغيل محلات · نواقص · ملغيات · تجميع · صلاحيات</div>
+    </div>
+    <button class="mclose" onclick="toggleStoreAssistant(false)">✕</button>
+  </div>
+  <div class="ai-body" id="aiMessages"></div>
+  <div class="ai-chips">
+    <button class="ai-chip" onclick="askAssistantQuick('حلل الشيفت الحالي واعطني أهم 3 قرارات الآن')">حلل الشيفت</button>
+    <button class="ai-chip" onclick="askAssistantQuick('ما المنتجات أو الأقسام التي تحتاج متابعة عاجلة؟')">متابعة عاجلة</button>
+    <button class="ai-chip" onclick="askAssistantQuick('رتب لي طريقة التجميع حسب الأقسام وقلل الحركة')">ترتيب التجميع</button>
+    <button class="ai-chip" onclick="askAssistantQuick('لماذا تزيد الملغيات؟ وما التصرف العملي؟')">أسباب الملغيات</button>
+    <button class="ai-chip" onclick="askAssistantQuick('ما خطة إغلاق الشيفت قبل الأرشفة؟')">إغلاق الشيفت</button>
+  </div>
+  <div class="ai-note">المساعد لا يرسل أسماء العملاء أو أرقامهم للـ API. عند عدم وجود OpenRouter Key يعمل بتحليل محلي داخل المتصفح.</div>
+  <div class="ai-compose">
+    <input id="aiInput" placeholder="اسأل: ماذا أفعل الآن؟ ما سبب المشكلة؟ كيف أرتب التجميع؟" onkeydown="if(event.key==='Enter')sendAssistantMessage()">
+    <button class="ai-send" onclick="sendAssistantMessage()">↵</button>
+  </div>
+</div>
+<!-- REPORT MODAL -->
+<div class="moverlay" id="reportModal">
+  <div class="mbox">
+    <div class="mt"><span>📤 تقرير واتساب</span><button class="mclose" onclick="closeReport()">✕</button></div>
+    <div class="rg">
+      <div>
+        <h4>نوع الوردية:</h4>
+        <select id="rShift"><option value="auto">🔄 تلقائي</option><option value="صباحي">☀️ صباحي</option><option value="ليلي">🌙 ليلي</option><option value="أوفر نايت">🌃 أوفر نايت</option></select>
+        <h4 style="margin-top:10px">تواصل مع الدعم:</h4>
+        <textarea id="supportNotes" rows="2" placeholder="ملاحظات الدعم..."></textarea>
+        <h4 style="margin-top:10px">تضمين في التقرير:</h4>
+        <div style="display:flex;flex-direction:column;gap:6px;font-size:12px">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="i1" checked style="width:auto;margin:0"> أوردرات الشيفت</label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="i2" checked style="width:auto;margin:0"> الملغيات</label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="i3" checked style="width:auto;margin:0"> نواقص الفرع</label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="i4" checked style="width:auto;margin:0"> نواقص العملاء</label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="i5" checked style="width:auto;margin:0"> المنتجات المغلقة</label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="i6" checked style="width:auto;margin:0"> المراجعات المنجزة</label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="i7" checked style="width:auto;margin:0"> متابعة العملاء</label>
+        </div>
+        <button class="btn btn-p" style="margin-top:10px" onclick="buildReport()">👁️ معاينة</button>
+      </div>
+      <div>
+        <h4>معاينة وتعديل:</h4>
+        <textarea class="rprev" id="rPrev" style="width:100%;height:250px;resize:vertical;outline:none;line-height:1.6;" placeholder="اضغط معاينة لرؤية التقرير..."></textarea>
+        <button class="btn btn-p" style="margin-top:8px;background:linear-gradient(180deg,#6366f1,#4f46e5);border-color:rgba(99,102,241,0.4);" onclick="improveReportWithAI()">🧠 تنقيح التقرير بالـ AI</button>
+        <div style="display:flex; gap:8px; margin-top:8px;">
+          <button class="btn btn-s" style="flex:1;" onclick="copyReport()">📋 نسخ</button>
+          <button class="btn btn-wa" style="flex:1;" onclick="sendWhatsAppReport()">🟢 إرسال واتساب</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+
+<script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+<script src="zxing.min.js"></script>
+<script src="app.js"></script>
+
+<!-- ══ GLOBAL SEARCH SPOTLIGHT ══ -->
+<div id="gsOverlay">
+  <div id="gsBox">
+    <input id="gsInp" type="text" placeholder="🔍  ابحث في المنتجات، العملاء، الإلغاءات، الأرشيف..." autocomplete="off">
+    <div id="gsResults"></div>
+    <div id="gsHint">
+      <span><span class="gs-hint-key">↑↓</span> تنقل</span>
+      <span><span class="gs-hint-key">Enter</span> فتح</span>
+      <span><span class="gs-hint-key">Esc</span> إغلاق</span>
+      <span style="margin-right:auto"><span class="gs-hint-key">/</span> بحث سريع</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ EXPIRY FLOAT BADGE ══ -->
+<div id="expiryFloatBadge"></div>
+
+<!-- ══ KEYBOARD SHORTCUTS HINT ══ -->
+<div id="kbHint">
+  <div style="font-size:10px;color:#d8bd69;font-weight:700;margin-bottom:4px;letter-spacing:1px">SHORTCUTS · اختصارات</div>
+  <div class="kb-row"><span class="kb-k">B</span> + أوردر فرع</div>
+  <div class="kb-row"><span class="kb-k">T</span> + أوردر طلبات</div>
+  <div class="kb-row"><span class="kb-k">I</span> + انستا شوب</div>
+  <div class="kb-row"><span class="kb-k">R</span> فتح التقرير</div>
+  <div class="kb-row"><span class="kb-k">/</span> بحث عالمي</div>
+  <div class="kb-row"><span class="kb-k">Esc</span> إغلاق</div>
+  <div class="kb-row"><span class="kb-k">?</span> إخفاء هذه القائمة</div>
+</div>
+
+<!-- ══ PIN MANAGER OVERLAY ══ -->
+<div id="pinOverlay">
+  <div class="pin-box">
+    <div class="pin-icon">🔐</div>
+    <div class="pin-title">لوحة الإدارة</div>
+    <div class="pin-sub">أدخل PIN المدير للمتابعة</div>
+    <div class="pin-dots">
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+    </div>
+    <div class="pin-pad">
+      <button class="pin-key" onclick="pinKey('1')">1</button>
+      <button class="pin-key" onclick="pinKey('2')">2</button>
+      <button class="pin-key" onclick="pinKey('3')">3</button>
+      <button class="pin-key" onclick="pinKey('4')">4</button>
+      <button class="pin-key" onclick="pinKey('5')">5</button>
+      <button class="pin-key" onclick="pinKey('6')">6</button>
+      <button class="pin-key" onclick="pinKey('7')">7</button>
+      <button class="pin-key" onclick="pinKey('8')">8</button>
+      <button class="pin-key" onclick="pinKey('9')">9</button>
+      <button class="pin-key clear" onclick="pinDel()">⌫ مسح</button>
+      <button class="pin-key" onclick="pinKey('0')">0</button>
+      <button class="pin-key clear" onclick="document.getElementById('pinOverlay').classList.remove('on')">إلغاء</button>
+    </div>
+    <div class="pin-bypass" onclick="bypassPin()">تجاوز القفل (بدون حماية)</div>
+  </div>
+</div>
+
+</body>
+</html>
